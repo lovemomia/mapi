@@ -89,8 +89,8 @@ public class AbstractV1Api extends AbstractApi {
         public Object apply(Object data) {
             JSONObject productJson = (JSONObject) data;
             productJson.put("url", buildUrl(productJson.getLong("id")));
-            productJson.put("thumb", ImageFile.url(productJson.getString("thumb")));
-            if (productJson.containsKey("cover")) productJson.put("cover", ImageFile.url(productJson.getString("cover")));
+            productJson.put("thumb", ImageFile.smallUrl(productJson.getString("thumb")));
+            if (productJson.containsKey("cover")) productJson.put("cover", ImageFile.middleUrl(productJson.getString("cover")));
             if (productJson.containsKey("imgs")) productJson.put("imgs", processImgs(productJson.getJSONArray("imgs")));
             if (productJson.containsKey("content")) productJson.put("content", processContent(productJson.getJSONArray("content")));
 
@@ -143,7 +143,7 @@ public class AbstractV1Api extends AbstractApi {
         @Override
         public Object apply(Object data) {
             JSONObject orderDetailJson = (JSONObject) data;
-            orderDetailJson.put("cover", ImageFile.url(orderDetailJson.getString("cover")));
+            orderDetailJson.put("cover", ImageFile.middleUrl(orderDetailJson.getString("cover")));
 
             return data;
         }

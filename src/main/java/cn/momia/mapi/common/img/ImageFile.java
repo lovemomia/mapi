@@ -10,12 +10,27 @@ public class ImageFile {
         ImageFile.domain = domain;
     }
 
+    public static String smallUrl(String path) {
+        return url(path, "s");
+    }
+
+    public static String middleUrl(String path) {
+        return url(path, "m");
+    }
+
     public static String url(String path) {
+        return url(path, "l");
+    }
+
+    public static String url(String path, String size) {
         if (path == null || path.length() == 0) return "";
         if (path.startsWith("http://")) return path;
         if (!path.startsWith("/")) path = "/" + path;
 
-        return domain + path;
+        int indexOfDot = path.lastIndexOf(".");
+        if (indexOfDot > 0) return domain + path.substring(0, indexOfDot) + "_" + size + path.substring(indexOfDot);
+
+        return domain + path + "_" + size;
     }
 
     public static List<String> urls(List<String> paths) {
