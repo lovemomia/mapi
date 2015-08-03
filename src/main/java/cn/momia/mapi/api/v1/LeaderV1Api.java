@@ -40,7 +40,7 @@ public class LeaderV1Api extends AbstractV1Api {
 
             statusJson.put("products", ledProductsResponse.getData());
         } else if (status == Status.NOTEXIST || status == Status.AUDITING) {
-            statusJson.put("desc", "");
+            statusJson.put("desc", JSON.parseObject(Configuration.getString("Leader.Desc")));
         }
 
         return ResponseMessage.SUCCESS(statusJson);
