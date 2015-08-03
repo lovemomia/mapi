@@ -3,10 +3,6 @@ package cn.momia.mapi.api.v1;
 import cn.momia.mapi.common.http.MomiaHttpParamBuilder;
 import cn.momia.mapi.common.http.MomiaHttpRequest;
 import cn.momia.mapi.web.response.ResponseMessage;
-import cn.momia.mapi.api.v1.dto.deal.AlipayPrepayDto;
-import cn.momia.mapi.api.v1.dto.deal.WechatpayPrepayDto;
-import com.alibaba.fastjson.JSONObject;
-import com.google.common.base.Function;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -37,12 +33,7 @@ public class PaymentV1Api extends AbstractV1Api {
         if (coupon != null && coupon > 0) builder.add("coupon", coupon);
         MomiaHttpRequest request = MomiaHttpRequest.POST(url("payment/prepay/alipay"), builder.build());
 
-        return executeRequest(request, new Function<Object, Object>() {
-            @Override
-            public Object apply(Object data) {
-                return new AlipayPrepayDto((JSONObject) data);
-            }
-        });
+        return executeRequest(request);
     }
 
     @RequestMapping(value = "/prepay/wechatpay", method = RequestMethod.POST)
@@ -71,12 +62,7 @@ public class PaymentV1Api extends AbstractV1Api {
         if (!StringUtils.isBlank(code)) builder.add("code", code);
         MomiaHttpRequest request = MomiaHttpRequest.POST(url("payment/prepay/wechatpay"), builder.build());
 
-        return executeRequest(request, new Function<Object, Object>() {
-            @Override
-            public Object apply(Object data) {
-                return new WechatpayPrepayDto((JSONObject) data, tradeType);
-            }
-        });
+        return executeRequest(request);
     }
 
     @RequestMapping(value = "/prepay/free", method = RequestMethod.POST)
