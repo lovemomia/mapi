@@ -56,16 +56,16 @@ public class AbstractV1Api extends AbstractApi {
         public Object apply(Object data) {
             JSONObject feedJson = (JSONObject) data;
             feedJson.put("avatar", ImageFile.url(feedJson.getString("avatar")));
-            if (feedJson.containsKey("imgs")) feedJson.put("imgs", processImgs(feedJson.getJSONArray("imgs")));
+            if (feedJson.containsKey("imgs")) feedJson.put("imgs", processFeedImgs(feedJson.getJSONArray("imgs")));
 
             return data;
         }
     };
 
-    private static List<String> processImgs(JSONArray imgsJson) {
+    private static List<String> processFeedImgs(JSONArray imgsJson) {
         List<String> imgs = new ArrayList<String>();
         for (int i = 0; i < imgsJson.size(); i++) {
-            imgs.add(ImageFile.url(imgsJson.getString(i)));
+            imgs.add(ImageFile.middleUrl(imgsJson.getString(i)));
         }
 
         return imgs;
@@ -91,7 +91,7 @@ public class AbstractV1Api extends AbstractApi {
             productJson.put("url", buildUrl(productJson.getLong("id")));
             productJson.put("thumb", ImageFile.smallUrl(productJson.getString("thumb")));
             if (productJson.containsKey("cover")) productJson.put("cover", ImageFile.middleUrl(productJson.getString("cover")));
-            if (productJson.containsKey("imgs")) productJson.put("imgs", processImgs(productJson.getJSONArray("imgs")));
+            if (productJson.containsKey("imgs")) productJson.put("imgs", processProductImgs(productJson.getJSONArray("imgs")));
             if (productJson.containsKey("content")) productJson.put("content", processContent(productJson.getJSONArray("content")));
 
             return data;
@@ -102,6 +102,15 @@ public class AbstractV1Api extends AbstractApi {
         return Configuration.getString("Product.Url") + "?id=" + id;
     }
 
+    private static List<String> processProductImgs(JSONArray imgsJson) {
+        List<String> imgs = new ArrayList<String>();
+        for (int i = 0; i < imgsJson.size(); i++) {
+            imgs.add(ImageFile.largeUrl(imgsJson.getString(i)));
+        }
+
+        return imgs;
+    }
+
     private static JSONArray processContent(JSONArray contentJson) {
         for (int i = 0; i < contentJson.size(); i++) {
             JSONObject contentBlockJson = contentJson.getJSONObject(i);
@@ -109,7 +118,7 @@ public class AbstractV1Api extends AbstractApi {
             for (int j = 0; j < bodyJson.size(); j++) {
                 JSONObject bodyBlockJson = bodyJson.getJSONObject(j);
                 String img = bodyBlockJson.getString("img");
-                if (!StringUtils.isBlank(img)) bodyBlockJson.put("img", ImageFile.url(img));
+                if (!StringUtils.isBlank(img)) bodyBlockJson.put("img", ImageFile.largeUrl(img));
             }
         }
 
