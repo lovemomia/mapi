@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+    <Logger>
+        <Level>INFO</Level>
+    </Logger>
+
+    <Validation>
+        <Key>578890d82212ae548d883bc7a201cdf4</Key>
+    </Validation>
+
+    <Image>
+        <Domain>http://s.momia.cn</Domain>
+    </Image>
+
+    <Service>
+        <Base>http://localhost:7070</Base>
+    </Service>
+
+    <AppConf>
+        <ShowLeader>true</ShowLeader>
+    </AppConf>
+
+    <PageSize>
+        <Banner>3</Banner>
+        <Product>20</Product>
+        <ProductCustomer>6</ProductCustomer>
+        <PlaymateSku>20</PlaymateSku>
+        <Coupon>20</Coupon>
+        <Favorite>20</Favorite>
+        <Order>20</Order>
+        <Feed>
+            <List>20</List>
+            <Detail>
+                <Star>5</Star>
+                <Comment>3</Comment>
+            </Detail>
+            <Comment>20</Comment>
+        </Feed>
+        <Leader>
+            <Product>20</Product>
+        </Leader>
+    </PageSize>
+
+    <Product>
+        <Url>http://m.momia.cn/actsDetail.html</Url>
+    </Product>
+
+</Configuration>
