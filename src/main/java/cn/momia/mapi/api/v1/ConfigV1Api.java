@@ -15,7 +15,7 @@ public class ConfigV1Api {
     @RequestMapping(method = RequestMethod.GET)
     public ResponseMessage getConfig() {
         Map<String, Object> config = new HashMap<String, Object>();
-        config.put("showLeader", Configuration.getBoolean("App.ShowLeader"));
+        config.put("showLeader", Configuration.getBoolean("AppConf.ShowLeader"));
 
         return ResponseMessage.SUCCESS(config);
     }
