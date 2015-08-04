@@ -19,9 +19,8 @@ import java.util.List;
 @RequestMapping("/v1/home")
 public class HomeV1Api extends AbstractV1Api {
     @RequestMapping(method = RequestMethod.GET)
-    public ResponseMessage home(@RequestParam(value = "pageindex") final int pageIndex,
-                                @RequestParam(value = "city") int cityId) {
-        if (pageIndex < 0 || cityId < 0) return ResponseMessage.BAD_REQUEST;
+    public ResponseMessage home(@RequestParam(value = "city") int cityId, @RequestParam(value = "pageindex") final int pageIndex) {
+        if (cityId < 0 || pageIndex < 0) return ResponseMessage.BAD_REQUEST;
 
         int pageSize = Configuration.getInt("PageSize.Product");
         final int start = pageIndex * pageSize;

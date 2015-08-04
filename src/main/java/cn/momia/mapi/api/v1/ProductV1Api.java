@@ -23,6 +23,8 @@ import java.util.List;
 public class ProductV1Api extends AbstractV1Api {
     @RequestMapping(value = "/weekend", method = RequestMethod.GET)
     public ResponseMessage getProductsByWeekend(@RequestParam(value = "city") int cityId, @RequestParam int start) {
+        if (cityId < 0 || start < 0) return ResponseMessage.BAD_REQUEST;
+
         MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder()
                 .add("city", cityId)
                 .add("start", start)
@@ -34,6 +36,8 @@ public class ProductV1Api extends AbstractV1Api {
 
     @RequestMapping(value = "/month", method = RequestMethod.GET)
     public ResponseMessage getProductsByMonth(@RequestParam(value = "city") int cityId, @RequestParam int month) {
+        if (cityId < 0 || month <= 0 || month > 12) return ResponseMessage.BAD_REQUEST;
+
         MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder()
                 .add("city", cityId)
                 .add("month", month);
@@ -54,6 +58,8 @@ public class ProductV1Api extends AbstractV1Api {
 
     @RequestMapping(value = "/leader", method = RequestMethod.GET)
     public ResponseMessage getProductsNeedLeader(@RequestParam(value = "city") int cityId, @RequestParam int start) {
+        if (cityId < 0 || start < 0) return ResponseMessage.BAD_REQUEST;
+
         MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder()
                 .add("city", cityId)
                 .add("start", start)
@@ -65,10 +71,10 @@ public class ProductV1Api extends AbstractV1Api {
 
 
     @RequestMapping(value = "/sku/leader", method = RequestMethod.GET)
-    public ResponseMessage getProductSkusNeedLeader(@RequestParam(value = "pid") long productId) {
-        if (productId <= 0) return ResponseMessage.BAD_REQUEST;
+    public ResponseMessage getProductSkusNeedLeader(@RequestParam(value = "pid") long id) {
+        if (id <= 0) return ResponseMessage.BAD_REQUEST;
 
-        List<MomiaHttpRequest> requests = buildRequests(productId);
+        List<MomiaHttpRequest> requests = buildRequests(id);
 
         return executeRequests(requests, new Function<MomiaHttpResponseCollector, Object>() {
             @Override
@@ -156,7 +162,7 @@ public class ProductV1Api extends AbstractV1Api {
     }
 
     @RequestMapping(value = "/order", method = RequestMethod.GET)
-    public ResponseMessage getProductOrder(@RequestParam String utoken, @RequestParam long id) {
+    public ResponseMessage placeOrder(@RequestParam String utoken, @RequestParam long id) {
         if(StringUtils.isBlank(utoken) || id <= 0) return ResponseMessage.BAD_REQUEST;
         
         final List<MomiaHttpRequest> requests = buildProductOrderRequests(id, utoken);
@@ -194,6 +200,8 @@ public class ProductV1Api extends AbstractV1Api {
 
     @RequestMapping(value = "/playmate", method = RequestMethod.GET)
     public ResponseMessage getProductPlaymates(@RequestParam long id) {
+        if (id <= 0) return ResponseMessage.BAD_REQUEST;
+
         MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder()
                 .add("start", 0)
                 .add("count", Configuration.getInt("PageSize.PlaymateSku"));
@@ -219,6 +227,8 @@ public class ProductV1Api extends AbstractV1Api {
 
     @RequestMapping(value = "/favor", method = RequestMethod.POST)
     public ResponseMessage favor(@RequestParam String utoken, @RequestParam long id){
+        if (StringUtils.isBlank(utoken) || id <= 0) return ResponseMessage.BAD_REQUEST;
+
         MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder().add("utoken", utoken);
         MomiaHttpRequest request = MomiaHttpRequest.POST(url("product", id, "favor"), builder.build());
 
@@ -227,6 +237,8 @@ public class ProductV1Api extends AbstractV1Api {
 
     @RequestMapping(value = "/unfavor", method = RequestMethod.POST)
     public ResponseMessage unFavor(@RequestParam String utoken, @RequestParam long id){
+        if (StringUtils.isBlank(utoken) || id <= 0) return ResponseMessage.BAD_REQUEST;
+
         MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder().add("utoken", utoken);
         MomiaHttpRequest request = MomiaHttpRequest.POST(url("product", id, "unfavor"), builder.build());
 
