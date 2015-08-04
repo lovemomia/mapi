@@ -30,6 +30,8 @@ public class CallbackV1Api extends AbstractV1Api {
             LOGGER.error("ali pay callback error", e);
         }
 
+        LOGGER.error("ali pay: callback failure");
+
         return "fail";
     }
 
@@ -53,6 +55,8 @@ public class CallbackV1Api extends AbstractV1Api {
         } catch (Exception e) {
             LOGGER.error("wechat pay callback error", e);
         }
+
+        LOGGER.error("wechat pay: callback failure");
 
         return new Xml("FAIL", "ERROR");
     }
