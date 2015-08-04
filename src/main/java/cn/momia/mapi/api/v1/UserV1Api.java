@@ -3,11 +3,8 @@ package cn.momia.mapi.api.v1;
 import cn.momia.mapi.common.config.Configuration;
 import cn.momia.mapi.common.http.MomiaHttpParamBuilder;
 import cn.momia.mapi.common.http.MomiaHttpRequest;
-import cn.momia.mapi.common.img.ImageFile;
 import cn.momia.mapi.web.response.ResponseMessage;
 import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.google.common.base.Function;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -152,7 +149,6 @@ public class UserV1Api extends AbstractV1Api {
 
         return executeRequest(MomiaHttpRequest.GET(url("user"), new MomiaHttpParamBuilder().add("utoken", utoken).build()), userFunc);
     }
-
 
     @RequestMapping(value = "/child/sex", method = RequestMethod.POST)
     public ResponseMessage updateChildBySex(@RequestParam String utoken,
