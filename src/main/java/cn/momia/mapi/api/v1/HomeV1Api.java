@@ -5,7 +5,6 @@ import cn.momia.mapi.common.http.MomiaHttpParamBuilder;
 import cn.momia.mapi.common.http.MomiaHttpRequest;
 import cn.momia.mapi.common.http.MomiaHttpResponseCollector;
 import cn.momia.mapi.web.response.ResponseMessage;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Function;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -65,7 +64,7 @@ public class HomeV1Api extends AbstractV1Api {
     private JSONObject buildHomeResponse(MomiaHttpResponseCollector collector, int start, int count, int pageIndex) {
         JSONObject homeJson = new JSONObject();
 
-        if (pageIndex == 0) homeJson.put("banners", (JSONArray) collector.getResponse("banners"));
+        if (pageIndex == 0) homeJson.put("banners", collector.getResponse("banners"));
 
         JSONObject productsPackJson = (JSONObject) pagedProductsFunc.apply(collector.getResponse("products"));
         homeJson.put("products", productsPackJson.getJSONArray("list"));
