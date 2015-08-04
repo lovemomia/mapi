@@ -5,8 +5,6 @@ import cn.momia.mapi.common.http.MomiaHttpParamBuilder;
 import cn.momia.mapi.common.http.MomiaHttpRequest;
 import cn.momia.mapi.common.http.MomiaHttpResponseCollector;
 import cn.momia.mapi.web.response.ResponseMessage;
-import cn.momia.mapi.api.v1.dto.base.Dto;
-import cn.momia.mapi.api.v1.dto.home.HomeDto;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Function;
@@ -24,7 +22,7 @@ public class HomeV1Api extends AbstractV1Api {
     @RequestMapping(method = RequestMethod.GET)
     public ResponseMessage home(@RequestParam(value = "pageindex") final int pageIndex,
                                 @RequestParam(value = "city") int cityId) {
-        if (pageIndex < 0 || cityId < 0) return ResponseMessage.SUCCESS(HomeDto.EMPTY);
+        if (pageIndex < 0 || cityId < 0) return ResponseMessage.BAD_REQUEST;
 
         int pageSize = Configuration.getInt("PageSize.Product");
         final int start = pageIndex * pageSize;
@@ -34,7 +32,7 @@ public class HomeV1Api extends AbstractV1Api {
         return executeRequests(requests, new Function<MomiaHttpResponseCollector, Object>() {
             @Override
             public Object apply(MomiaHttpResponseCollector collector) {
-                return buildHomeDto(collector, start, count, pageIndex);
+                return buildHomeResponse(collector, start, count, pageIndex);
             }
         });
     }
@@ -64,17 +62,17 @@ public class HomeV1Api extends AbstractV1Api {
         return MomiaHttpRequest.GET("products", true, url("product"), builder.build());
     }
 
-    private Dto buildHomeDto(MomiaHttpResponseCollector collector, int start, int count, int pageIndex) {
-        HomeDto homeDto = new HomeDto();
+    private JSONObject buildHomeResponse(MomiaHttpResponseCollector collector, int start, int count, int pageIndex) {
+        JSONObject homeJson = new JSONObject();
 
-        if (pageIndex == 0) homeDto.setBanners((JSONArray) collector.getResponse("banners"));
+        if (pageIndex == 0) homeJson.put("banners", (JSONArray) collector.getResponse("banners"));
 
         JSONObject productsPackJson = (JSONObject) pagedProductsFunc.apply(collector.getResponse("products"));
-        homeDto.setProducts(productsPackJson.getJSONArray("list"));
+        homeJson.put("products", productsPackJson.getJSONArray("list"));
 
         long totalCount = productsPackJson.getLong("totalCount");
-        if (start + count < totalCount) homeDto.setNextpage(pageIndex + 1);
+        if (start + count < totalCount) homeJson.put("nextpage", pageIndex + 1);
 
-        return homeDto;
+        return homeJson;
     }
 }
