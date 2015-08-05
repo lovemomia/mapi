@@ -23,8 +23,13 @@ public class FeedV1Api extends AbstractV1Api {
     public ResponseMessage getFeeds(@RequestParam String utoken, @RequestParam int start) {
         if (StringUtils.isBlank(utoken) || start < 0) return ResponseMessage.BAD_REQUEST;
 
-        // TODO
-        return null;
+        MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder()
+                .add("utoken", utoken)
+                .add("start", start)
+                .add("count", Configuration.getInt("PageSize.Feed.List"));
+        MomiaHttpRequest request = MomiaHttpRequest.GET(url("feed"), builder.build());
+
+        return executeRequest(request, pagedFeedsFunc);
     }
 
     @RequestMapping(value = "/detail", method = RequestMethod.GET)
