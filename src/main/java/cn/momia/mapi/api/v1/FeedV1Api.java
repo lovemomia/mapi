@@ -33,10 +33,10 @@ public class FeedV1Api extends AbstractV1Api {
     }
 
     @RequestMapping(value = "/detail", method = RequestMethod.GET)
-    public ResponseMessage feedDetail(@RequestParam(value = "fid") long feedId, @RequestParam(value = "pid") long productId) {
-        if (feedId <= 0 || productId <= 0) return ResponseMessage.BAD_REQUEST;
+    public ResponseMessage feedDetail(@RequestParam long id, @RequestParam(value = "pid") long productId) {
+        if (id <= 0 || productId <= 0) return ResponseMessage.BAD_REQUEST;
 
-        List<MomiaHttpRequest> requests = buildFeedDetailRequests(feedId, productId);
+        List<MomiaHttpRequest> requests = buildFeedDetailRequests(id, productId);
 
         return executeRequests(requests, new Function<MomiaHttpResponseCollector, Object>() {
             @Override
@@ -124,57 +124,57 @@ public class FeedV1Api extends AbstractV1Api {
     }
 
     @RequestMapping(value = "/comment", method = RequestMethod.GET)
-    public ResponseMessage getComments(@RequestParam(value = "fid") long feedId, @RequestParam int start) {
-        if (feedId <= 0 || start < 0) return ResponseMessage.BAD_REQUEST;
+    public ResponseMessage getComments(@RequestParam long id, @RequestParam int start) {
+        if (id <= 0 || start < 0) return ResponseMessage.BAD_REQUEST;
 
         MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder()
                 .add("start", 0)
                 .add("count", Configuration.getInt("PageSize.Feed.Comment"));
-        MomiaHttpRequest request = MomiaHttpRequest.GET(url("feed", feedId, "comment"), builder.build());
+        MomiaHttpRequest request = MomiaHttpRequest.GET(url("feed", id, "comment"), builder.build());
 
         return executeRequest(request, pagedFeedCommentsFunc);
     }
 
     @RequestMapping(value = "/comment/add", method = RequestMethod.POST)
-    public ResponseMessage addComment(@RequestParam String utoken, @RequestParam(value = "fid") long feedId, @RequestParam String content) {
-        if (StringUtils.isBlank(utoken) || feedId <= 0 || StringUtils.isBlank(content)) return ResponseMessage.BAD_REQUEST;
+    public ResponseMessage addComment(@RequestParam String utoken, @RequestParam long id, @RequestParam String content) {
+        if (StringUtils.isBlank(utoken) || id <= 0 || StringUtils.isBlank(content)) return ResponseMessage.BAD_REQUEST;
 
         MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder()
                 .add("utoken", utoken)
                 .add("content", content);
-        MomiaHttpRequest request = MomiaHttpRequest.POST(url("feed", feedId, "comment"), builder.build());
+        MomiaHttpRequest request = MomiaHttpRequest.POST(url("feed", id, "comment"), builder.build());
 
         return executeRequest(request);
     }
 
     @RequestMapping(value = "/comment/delete", method = RequestMethod.POST)
-    public ResponseMessage deleteComment(@RequestParam String utoken, @RequestParam(value = "fid") long feedId, @RequestParam(value = "cmid") long commentId) {
-        if (StringUtils.isBlank(utoken) || feedId <= 0 || commentId <= 0) return ResponseMessage.BAD_REQUEST;
+    public ResponseMessage deleteComment(@RequestParam String utoken, @RequestParam long id, @RequestParam(value = "cmid") long commentId) {
+        if (StringUtils.isBlank(utoken) || id <= 0 || commentId <= 0) return ResponseMessage.BAD_REQUEST;
 
         MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder()
                 .add("utoken", utoken)
                 .add("cmid", commentId);
-        MomiaHttpRequest request = MomiaHttpRequest.DELETE(url("feed", feedId, "comment"), builder.build());
+        MomiaHttpRequest request = MomiaHttpRequest.DELETE(url("feed", id, "comment"), builder.build());
 
         return executeRequest(request);
     }
 
     @RequestMapping(value = "/star", method = RequestMethod.POST)
-    public ResponseMessage star(@RequestParam String utoken, @RequestParam(value = "fid") long feedId) {
-        if (StringUtils.isBlank(utoken) || feedId <= 0) return ResponseMessage.BAD_REQUEST;
+    public ResponseMessage star(@RequestParam String utoken, @RequestParam long id) {
+        if (StringUtils.isBlank(utoken) || id <= 0) return ResponseMessage.BAD_REQUEST;
 
         MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder().add("utoken", utoken);
-        MomiaHttpRequest request = MomiaHttpRequest.POST(url("feed", feedId, "star"), builder.build());
+        MomiaHttpRequest request = MomiaHttpRequest.POST(url("feed", id, "star"), builder.build());
 
         return executeRequest(request);
     }
 
     @RequestMapping(value = "/unstar", method = RequestMethod.POST)
-    public ResponseMessage unstar(@RequestParam String utoken, @RequestParam(value = "fid") long feedId) {
-        if (StringUtils.isBlank(utoken) || feedId <= 0) return ResponseMessage.BAD_REQUEST;
+    public ResponseMessage unstar(@RequestParam String utoken, @RequestParam long id) {
+        if (StringUtils.isBlank(utoken) || id <= 0) return ResponseMessage.BAD_REQUEST;
 
         MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder().add("utoken", utoken);
-        MomiaHttpRequest request = MomiaHttpRequest.DELETE(url("feed", feedId, "unstar"), builder.build());
+        MomiaHttpRequest request = MomiaHttpRequest.DELETE(url("feed", id, "unstar"), builder.build());
 
         return executeRequest(request);
     }
@@ -192,11 +192,11 @@ public class FeedV1Api extends AbstractV1Api {
     }
 
     @RequestMapping(value = "/feed/delete", method = RequestMethod.POST)
-    public ResponseMessage deleteFeed(@RequestParam String utoken, @RequestParam(value = "fid") long feedId) {
-        if (StringUtils.isBlank(utoken) || feedId <= 0) return ResponseMessage.BAD_REQUEST;
+    public ResponseMessage deleteFeed(@RequestParam String utoken, @RequestParam long id) {
+        if (StringUtils.isBlank(utoken) || id <= 0) return ResponseMessage.BAD_REQUEST;
 
         MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder().add("utoken", utoken);
-        MomiaHttpRequest request = MomiaHttpRequest.DELETE(url("feed", feedId), builder.build());
+        MomiaHttpRequest request = MomiaHttpRequest.DELETE(url("feed", id), builder.build());
 
         return executeRequest(request);
     }
