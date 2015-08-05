@@ -129,7 +129,7 @@ public class FeedV1Api extends AbstractV1Api {
 
         MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder()
                 .add("start", 0)
-                .add("count", Configuration.getInt("PageSize.Feed.Detail.Comment"));
+                .add("count", Configuration.getInt("PageSize.Feed.Comment"));
         MomiaHttpRequest request = MomiaHttpRequest.GET(url("feed", feedId, "comment"), builder.build());
 
         return executeRequest(request, pagedFeedCommentsFunc);
