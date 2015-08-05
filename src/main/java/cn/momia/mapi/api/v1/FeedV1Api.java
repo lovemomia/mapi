@@ -33,10 +33,10 @@ public class FeedV1Api extends AbstractV1Api {
     }
 
     @RequestMapping(value = "/detail", method = RequestMethod.GET)
-    public ResponseMessage feedDetail(@RequestParam long id, @RequestParam(value = "pid") long productId) {
+    public ResponseMessage feedDetail(@RequestParam(defaultValue = "") String utoken, @RequestParam long id, @RequestParam(value = "pid") long productId) {
         if (id <= 0 || productId <= 0) return ResponseMessage.BAD_REQUEST;
 
-        List<MomiaHttpRequest> requests = buildFeedDetailRequests(id, productId);
+        List<MomiaHttpRequest> requests = buildFeedDetailRequests(utoken, id, productId);
 
         return executeRequests(requests, new Function<MomiaHttpResponseCollector, Object>() {
             @Override
@@ -52,9 +52,9 @@ public class FeedV1Api extends AbstractV1Api {
         });
     }
 
-    private List<MomiaHttpRequest> buildFeedDetailRequests(long feedId, long productId) {
+    private List<MomiaHttpRequest> buildFeedDetailRequests(String utoken, long feedId, long productId) {
         List<MomiaHttpRequest> requests = new ArrayList<MomiaHttpRequest>();
-        requests.add(buildFeedRequest(feedId));
+        requests.add(buildFeedRequest(utoken, feedId));
         requests.add(buildProductRequest(productId));
         requests.add(buildStaredUsersRequest(feedId));
         requests.add(buildFeedCommentsRequests(feedId));
@@ -62,8 +62,10 @@ public class FeedV1Api extends AbstractV1Api {
         return requests;
     }
 
-    private MomiaHttpRequest buildFeedRequest(long feedId) {
-        return MomiaHttpRequest.GET("feed", true, url("feed", feedId));
+    private MomiaHttpRequest buildFeedRequest(String utoken, long feedId) {
+        MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder().add("utoken", utoken);
+
+        return MomiaHttpRequest.GET("feed", true, url("feed", feedId), builder.build());
     }
 
     private MomiaHttpRequest buildProductRequest(long productId) {
@@ -89,10 +91,13 @@ public class FeedV1Api extends AbstractV1Api {
     }
 
     @RequestMapping(value = "/topic", method = RequestMethod.GET)
-    public ResponseMessage feedTopic(@RequestParam(value = "pid") long productId, @RequestParam(value = "tid") long topicId, @RequestParam final int start) {
+    public ResponseMessage feedTopic(@RequestParam(defaultValue = "") String utoken,
+                                     @RequestParam(value = "pid") long productId,
+                                     @RequestParam(value = "tid") long topicId,
+                                     @RequestParam final int start) {
         if (topicId <= 0 || productId <= 0 || start < 0) return ResponseMessage.BAD_REQUEST;
 
-        List<MomiaHttpRequest> requests = buildFeedTopicRequests(productId, topicId, start);
+        List<MomiaHttpRequest> requests = buildFeedTopicRequests(utoken, productId, topicId, start);
 
         return executeRequests(requests, new Function<MomiaHttpResponseCollector, Object>() {
             @Override
@@ -106,16 +111,17 @@ public class FeedV1Api extends AbstractV1Api {
         });
     }
 
-    private List<MomiaHttpRequest> buildFeedTopicRequests(long productId, long topicId, int start) {
+    private List<MomiaHttpRequest> buildFeedTopicRequests(String utoken, long productId, long topicId, int start) {
         List<MomiaHttpRequest> requests = new ArrayList<MomiaHttpRequest>();
         if (start == 0) requests.add(buildProductRequest(productId));
-        requests.add(buildFeedsRequest(topicId, start));
+        requests.add(buildFeedsRequest(utoken, topicId, start));
 
         return requests;
     }
 
-    private MomiaHttpRequest buildFeedsRequest(long topicId, int start) {
+    private MomiaHttpRequest buildFeedsRequest(String utoken, long topicId, int start) {
         MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder()
+                .add("utoken", utoken)
                 .add("tid", topicId)
                 .add("start", start)
                 .add("count", Configuration.getInt("PageSize.Feed.List"));
