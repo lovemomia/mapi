@@ -122,5 +122,17 @@ public class FeedV1Api extends AbstractV1Api {
 
         return MomiaHttpRequest.GET("feeds", true, url("feed/topic"), builder.build());
     }
+
+    @RequestMapping(value = "/comment", method = RequestMethod.GET)
+    public ResponseMessage getComments(@RequestParam(value = "fid") long feedId, @RequestParam int start) {
+        if (feedId <= 0 || start < 0) return ResponseMessage.BAD_REQUEST;
+
+        MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder()
+                .add("start", 0)
+                .add("count", Configuration.getInt("PageSize.Feed.Detail.Comment"));
+        MomiaHttpRequest request = MomiaHttpRequest.GET(url("feed", feedId, "comment"), builder.build());
+
+        return executeRequest(request, pagedFeedCommentsFunc);
+    }
 }
 
