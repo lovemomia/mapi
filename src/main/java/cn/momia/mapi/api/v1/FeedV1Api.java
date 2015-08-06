@@ -185,7 +185,7 @@ public class FeedV1Api extends AbstractV1Api {
         return executeRequest(request);
     }
 
-    @RequestMapping(value = "/feed/add", method = RequestMethod.POST)
+    @RequestMapping(value = "/add", method = RequestMethod.POST)
     public ResponseMessage addFeed(@RequestParam String utoken, @RequestParam String feed) {
         if (StringUtils.isBlank(utoken) || StringUtils.isBlank(feed)) return ResponseMessage.BAD_REQUEST;
 
@@ -197,7 +197,7 @@ public class FeedV1Api extends AbstractV1Api {
         return executeRequest(request);
     }
 
-    @RequestMapping(value = "/feed/delete", method = RequestMethod.POST)
+    @RequestMapping(value = "/delete", method = RequestMethod.POST)
     public ResponseMessage deleteFeed(@RequestParam String utoken, @RequestParam long id) {
         if (StringUtils.isBlank(utoken) || id <= 0) return ResponseMessage.BAD_REQUEST;
 
