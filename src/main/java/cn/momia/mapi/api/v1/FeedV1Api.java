@@ -43,7 +43,7 @@ public class FeedV1Api extends AbstractV1Api {
         if (baseFeedJson == null) return ResponseMessage.BAD_REQUEST;
 
         baseFeedJson.put("userId", userId);
-        MomiaHttpRequest request = MomiaHttpRequest.POST(url("feed"), baseFeedJson.toString());
+        MomiaHttpRequest request = MomiaHttpRequest.POST(url("feed"), feedJson.toString());
 
         return executeRequest(request);
     }
