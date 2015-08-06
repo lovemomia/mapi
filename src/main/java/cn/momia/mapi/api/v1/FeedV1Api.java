@@ -5,6 +5,7 @@ import cn.momia.mapi.common.http.MomiaHttpParamBuilder;
 import cn.momia.mapi.common.http.MomiaHttpRequest;
 import cn.momia.mapi.common.http.MomiaHttpResponseCollector;
 import cn.momia.mapi.web.response.ResponseMessage;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Function;
 import org.apache.commons.lang3.StringUtils;
@@ -36,10 +37,13 @@ public class FeedV1Api extends AbstractV1Api {
     public ResponseMessage addFeed(@RequestParam String utoken, @RequestParam String feed) {
         if (StringUtils.isBlank(utoken) || StringUtils.isBlank(feed)) return ResponseMessage.BAD_REQUEST;
 
-        MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder()
-                .add("utoken", utoken)
-                .add("feed", feed);
-        MomiaHttpRequest request = MomiaHttpRequest.POST(url("feed"), builder.build());
+        long userId = getUserId(utoken);
+        JSONObject feedJson = JSON.parseObject(feed);
+        JSONObject baseFeedJson = feedJson.getJSONObject("baseFeed");
+        if (baseFeedJson == null) return ResponseMessage.BAD_REQUEST;
+
+        baseFeedJson.put("userId", userId);
+        MomiaHttpRequest request = MomiaHttpRequest.POST(url("feed"), baseFeedJson.toString());
 
         return executeRequest(request);
     }
