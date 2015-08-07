@@ -116,7 +116,7 @@ public class ProductV1Api extends AbstractV1Api {
             @Override
             public Object apply(MomiaHttpResponseCollector collector) {
                 JSONObject productJson = (JSONObject) productFunc.apply(collector.getResponse("product"));
-                
+
                 productJson.put("customers", processAvatars((JSONObject) collector.getResponse("customers")));
 
                 boolean opened = productJson.getBoolean("opened");
@@ -159,6 +159,15 @@ public class ProductV1Api extends AbstractV1Api {
         }
 
         return customersJson;
+    }
+
+    @RequestMapping(value = "detail", method = RequestMethod.GET)
+    public ResponseMessage getProductDetail(@RequestParam long id) {
+        if (id <= 0) return ResponseMessage.BAD_REQUEST;
+
+        MomiaHttpRequest request = MomiaHttpRequest.GET(url("product", id, "detail"));
+
+        return executeRequest(request);
     }
 
     @RequestMapping(value = "/order", method = RequestMethod.GET)
