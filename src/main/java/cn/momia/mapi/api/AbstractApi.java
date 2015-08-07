@@ -47,7 +47,7 @@ public abstract class AbstractApi {
         if (collector.isNotLogin()) return ResponseMessage.TOKEN_EXPIRED;
         if (!collector.isSuccessful()) {
             LOGGER.error("fail to execute requests: {}, exceptions: {}", requests, collector.getExceptions());
-            return ResponseMessage.FAILED;
+            return ResponseMessage.FAILED(collector.getErrmsg());
         }
 
         return ResponseMessage.SUCCESS(buildResponseData.apply(collector));

@@ -9,6 +9,7 @@ import java.util.Map;
 public class MomiaHttpResponseCollector {
     private boolean successful;
     private boolean notLogin;
+    private String errmsg;
     private List<Throwable> exceptions = new ArrayList<Throwable>();
     private Map<String, Object> responses = new HashMap<String, Object>();
 
@@ -26,6 +27,14 @@ public class MomiaHttpResponseCollector {
 
     public void setNotLogin(boolean notLogin) {
         this.notLogin = notLogin;
+    }
+
+    public String getErrmsg() {
+        return errmsg;
+    }
+
+    public void setErrmsg(String errmsg) {
+        this.errmsg = errmsg;
     }
 
     public void addException(Throwable throwable) {

@@ -71,7 +71,10 @@ public class MomiaHttpRequestExecutor {
                         ResponseMessage responseMessage = buildResponseMessage(response);
                         if (!responseMessage.successful()) {
                             if (responseMessage.tokenExpired()) collector.setNotLogin(true);
-                            if (request.isRequired()) throw new RuntimeException("fail to execute request: " + request);
+                            if (request.isRequired()) {
+                                collector.setErrmsg(responseMessage.getErrmsg());
+                                throw new RuntimeException("fail to execute request: " + request);
+                            }
                             return;
                         }
 
