@@ -18,7 +18,7 @@ public class AuthV1Api extends AbstractV1Api {
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthV1Api.class);
 
     @RequestMapping(value = "/send", method = RequestMethod.POST)
-    public ResponseMessage send(@RequestParam String mobile, @RequestParam String type)  {
+    public ResponseMessage send(@RequestParam String mobile, @RequestParam(defaultValue = "login") String type)  {
         if (MobileUtil.isInvalidMobile(mobile) || isInvalidType(type)) return ResponseMessage.BAD_REQUEST;
 
         MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder()
