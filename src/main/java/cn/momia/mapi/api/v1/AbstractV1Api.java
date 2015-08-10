@@ -170,6 +170,22 @@ public class AbstractV1Api extends AbstractApi {
         }
     };
 
+    protected Function<Object, Object> topicFunc = new Function<Object, Object>() {
+        @Override
+        public Object apply(Object data) {
+            JSONObject topicJson = (JSONObject) data;
+            topicJson.put("cover", ImageFile.largeUrl(topicJson.getString("cover")));
+
+            JSONArray groupedProductsJson = topicJson.getJSONArray("groups");
+            for (int i = 0; i < groupedProductsJson.size(); i++) {
+                JSONObject productsJson = groupedProductsJson.getJSONObject(i);
+                productsFunc.apply(productsJson.get("products"));
+            }
+
+            return topicJson;
+        }
+    };
+
     protected long getUserId(String utoken) {
         MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder().add("utoken", utoken);
         MomiaHttpRequest request = MomiaHttpRequest.GET(url("user"), builder.build());
