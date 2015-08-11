@@ -49,7 +49,7 @@ public class ResponseMessage implements Serializable {
 
     private int errno = ErrorCode.FAILED;
     private String errmsg;
-    private Object data = "";
+    private Object data;
     private long time = new Date().getTime();
 
     private ResponseMessage() {
