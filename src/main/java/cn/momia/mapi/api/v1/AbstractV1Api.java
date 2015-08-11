@@ -90,7 +90,7 @@ public class AbstractV1Api extends AbstractApi {
             JSONObject productJson = (JSONObject) data;
             productJson.put("url", buildUrl(productJson.getLong("id")));
             productJson.put("thumb", ImageFile.smallUrl(productJson.getString("thumb")));
-            if (productJson.containsKey("cover")) productJson.put("cover", ImageFile.middleUrl(productJson.getString("cover")));
+            if (productJson.containsKey("cover")) productJson.put("cover", ImageFile.largeUrl(productJson.getString("cover")));
             if (productJson.containsKey("imgs")) productJson.put("imgs", processProductImgs(productJson.getJSONArray("imgs")));
             if (productJson.containsKey("content")) productJson.put("content", processContent(productJson.getJSONArray("content")));
 
