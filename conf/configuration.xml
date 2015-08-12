@@ -42,6 +42,7 @@
     </PageSize>
 
     <Product>
+        <StockAlert>10</StockAlert>
         <Url>http://m.momia.cn/actsDetail.html</Url>
     </Product>
 

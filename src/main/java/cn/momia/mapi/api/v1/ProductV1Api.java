@@ -117,7 +117,7 @@ public class ProductV1Api extends AbstractV1Api {
             public Object apply(MomiaHttpResponseCollector collector) {
                 JSONObject productJson = (JSONObject) productFunc.apply(collector.getResponse("product"));
 
-                productJson.put("customers", processAvatars((JSONObject) collector.getResponse("customers")));
+                productJson.put("customers", processCustomers((JSONObject) collector.getResponse("customers"), productJson.getInteger("stock")));
 
                 boolean opened = productJson.getBoolean("opened");
                 if (!opened) productJson.put("soldOut", true);
@@ -149,8 +149,10 @@ public class ProductV1Api extends AbstractV1Api {
         return MomiaHttpRequest.GET("customers", false, url("product", productId, "customer"), builder.build());
     }
 
-    private JSONObject processAvatars(JSONObject customersJson) {
+    private JSONObject processCustomers(JSONObject customersJson, int stock) {
         if (customersJson != null) {
+            if (stock > 0 && stock <= Configuration.getInt("Product.StockAlert"))
+                customersJson.put("text", customersJson.getString("text") + "（紧剩" + stock + "个名额）");
             JSONArray avatarsJson = customersJson.getJSONArray("avatars");
             if (avatarsJson != null) {
                 for (int i = 0; i < avatarsJson.size(); i++) {
