@@ -152,7 +152,7 @@ public class ProductV1Api extends AbstractV1Api {
     private JSONObject processCustomers(JSONObject customersJson, int stock) {
         if (customersJson != null) {
             if (stock > 0 && stock <= Configuration.getInt("Product.StockAlert"))
-                customersJson.put("text", customersJson.getString("text") + "（紧剩" + stock + "个名额）");
+                customersJson.put("text", customersJson.getString("text") + "（仅剩" + stock + "个名额）");
             JSONArray avatarsJson = customersJson.getJSONArray("avatars");
             if (avatarsJson != null) {
                 for (int i = 0; i < avatarsJson.size(); i++) {
