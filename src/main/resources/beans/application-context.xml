@@ -26,7 +26,10 @@
 
     <bean id="requestExecutor" class="cn.momia.mapi.common.http.MomiaHttpRequestExecutor" />
 
-    <bean id="commonServiceApi" class="cn.momia.service.common.api.CommonServiceApi" init-method="init">
+    <bean id="srviceApi" class="cn.momia.service.api.ServiceApi" abstract="true">
         <property name="service" value="${Service.Base}" />
     </bean>
+
+    <bean id="commonServiceApi" class="cn.momia.service.common.api.CommonServiceApi" parent="srviceApi" init-method="init" />
+    <bean id="userServiceApi" class="cn.momia.service.user.api.UserServiceApi" parent="srviceApi" init-method="init" />
 </beans>
