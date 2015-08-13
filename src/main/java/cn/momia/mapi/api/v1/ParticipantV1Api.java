@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/v1/participant")
 public class ParticipantV1Api extends AbstractV1Api {
-    @Autowired UserServiceApi userServiceApi;
+    @Autowired private UserServiceApi userServiceApi;
 
     @RequestMapping(method = RequestMethod.POST)
     public ResponseMessage add(@RequestParam String utoken, @RequestParam String participant) {

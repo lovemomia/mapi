@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/v1/region")
 public class RegionV1Api extends AbstractV1Api {
-    @Autowired CommonServiceApi commonServiceApi;
+    @Autowired private CommonServiceApi commonServiceApi;
 
     @RequestMapping(method = RequestMethod.GET)
     public ResponseMessage getAllRegions() {

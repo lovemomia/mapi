@@ -7,6 +7,7 @@ import cn.momia.mapi.common.http.MomiaHttpRequest;
 import cn.momia.mapi.common.img.ImageFile;
 import cn.momia.mapi.web.response.ResponseMessage;
 import cn.momia.mapi.api.AbstractApi;
+import cn.momia.service.user.api.user.User;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Function;
@@ -16,6 +17,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AbstractV1Api extends AbstractApi {
+    protected User processUser(User user) {
+        String avatar = user.getAvatar();
+        if (!StringUtils.isBlank(avatar)) user.setAvatar(ImageFile.url(avatar));
+
+        return user;
+    }
+
     protected Function<Object, Object> userFunc = new Function<Object, Object>() {
         @Override
         public Object apply(Object data) {

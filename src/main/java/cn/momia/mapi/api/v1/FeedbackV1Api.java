@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/v1/feedback")
 public class FeedbackV1Api extends AbstractV1Api {
-    @Autowired CommonServiceApi commonServiceApi;
+    @Autowired private CommonServiceApi commonServiceApi;
 
     @RequestMapping(method = RequestMethod.POST)
     public ResponseMessage addFeedback(@RequestParam String content, @RequestParam String email) {

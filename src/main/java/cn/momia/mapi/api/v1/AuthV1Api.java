@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthV1Api extends AbstractV1Api {
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthV1Api.class);
 
-    @Autowired CommonServiceApi commonServiceApi;
+    @Autowired private CommonServiceApi commonServiceApi;
 
     @RequestMapping(value = "/send", method = RequestMethod.POST)
     public ResponseMessage send(@RequestParam String mobile, @RequestParam(defaultValue = "login") String type)  {

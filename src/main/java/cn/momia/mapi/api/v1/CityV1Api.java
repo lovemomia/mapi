@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/v1/city")
 public class CityV1Api extends AbstractV1Api {
-    @Autowired CommonServiceApi commonServiceApi;
+    @Autowired private CommonServiceApi commonServiceApi;
 
     @RequestMapping(method = RequestMethod.GET)
     public ResponseMessage getAllCities() {
