@@ -4,9 +4,11 @@ import cn.momia.mapi.common.http.MomiaHttpParamBuilder;
 import cn.momia.mapi.common.http.MomiaHttpRequest;
 import cn.momia.mapi.web.response.ResponseMessage;
 import cn.momia.mapi.common.util.MobileUtil;
+import cn.momia.service.common.api.CommonServiceApi;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -17,20 +19,15 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthV1Api extends AbstractV1Api {
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthV1Api.class);
 
+    @Autowired CommonServiceApi commonServiceApi;
+
     @RequestMapping(value = "/send", method = RequestMethod.POST)
     public ResponseMessage send(@RequestParam String mobile, @RequestParam(defaultValue = "login") String type)  {
-        if (MobileUtil.isInvalidMobile(mobile) || isInvalidType(type)) return ResponseMessage.BAD_REQUEST;
+        if (MobileUtil.isInvalidMobile(mobile)) return ResponseMessage.BAD_REQUEST;
 
-        MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder()
-                .add("mobile", mobile)
-                .add("type", type);
-        MomiaHttpRequest request = MomiaHttpRequest.POST(url("auth/send"), builder.build());
+        commonServiceApi.SMS.send(mobile, type);
 
-        return executeRequest(request);
-    }
-
-    boolean isInvalidType(String type) {
-        return !"login".equals(type) && !"register".equals(type);
+        return ResponseMessage.SUCCESS;
     }
 
     @RequestMapping(value = "/register", method = RequestMethod.POST)

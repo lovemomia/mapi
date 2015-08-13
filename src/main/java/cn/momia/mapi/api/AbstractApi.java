@@ -7,6 +7,7 @@ import cn.momia.mapi.common.http.MomiaHttpRequest;
 import cn.momia.mapi.common.http.MomiaHttpRequestExecutor;
 import cn.momia.mapi.common.http.MomiaHttpResponseCollector;
 import cn.momia.mapi.web.response.ResponseMessage;
+import cn.momia.service.api.exception.MomiaException;
 import com.google.common.base.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +28,6 @@ public abstract class AbstractApi {
         for (Object path : paths) urlBuilder.append("/").append(path);
 
         return urlBuilder.toString();
-
     }
 
     protected ResponseMessage executeRequest(MomiaHttpRequest request) {
@@ -57,7 +57,7 @@ public abstract class AbstractApi {
     public ResponseMessage exception(Exception exception) {
         LOGGER.error("exception!!", exception);
 
-        if(exception instanceof MomiaFailedException) {
+        if (exception instanceof MomiaFailedException || exception instanceof MomiaException) {
             return ResponseMessage.FAILED(exception.getMessage());
         } else if (exception instanceof MomiaExpiredException) {
             return ResponseMessage.TOKEN_EXPIRED;
