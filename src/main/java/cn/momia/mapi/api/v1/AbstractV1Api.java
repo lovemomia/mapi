@@ -9,6 +9,8 @@ import cn.momia.mapi.web.response.ResponseMessage;
 import cn.momia.mapi.api.AbstractApi;
 import cn.momia.service.deal.api.order.Order;
 import cn.momia.service.deal.api.order.PagedOrders;
+import cn.momia.service.deal.api.order.Playmate;
+import cn.momia.service.deal.api.order.SkuPlaymates;
 import cn.momia.service.product.api.product.PagedProducts;
 import cn.momia.service.product.api.product.Product;
 import cn.momia.service.product.api.product.ProductGroup;
@@ -133,6 +135,15 @@ public class AbstractV1Api extends AbstractApi {
         return order;
     }
 
+    protected List<SkuPlaymates> processPlaymates(List<SkuPlaymates> playmates) {
+        for (SkuPlaymates skuPlaymates : playmates) {
+            for (Playmate playmate : skuPlaymates.getPlaymates()) {
+                playmate.setAvatar(ImageFile.url(playmate.getAvatar()));
+            }
+        }
+
+        return playmates;
+    }
 
     protected Function<Object, Object> userFunc = new Function<Object, Object>() {
         @Override

@@ -1,10 +1,7 @@
 package cn.momia.mapi.api.v1;
 
 import cn.momia.mapi.common.config.Configuration;
-import cn.momia.mapi.common.http.MomiaHttpParamBuilder;
 import cn.momia.mapi.common.http.MomiaHttpRequest;
-import cn.momia.mapi.common.http.MomiaHttpResponseCollector;
-import cn.momia.mapi.common.img.ImageFile;
 import cn.momia.mapi.web.response.ResponseMessage;
 import cn.momia.service.deal.api.DealServiceApi;
 import cn.momia.service.product.api.ProductServiceApi;
@@ -13,9 +10,7 @@ import cn.momia.service.product.api.sku.Sku;
 import cn.momia.service.user.api.UserServiceApi;
 import cn.momia.service.user.api.user.User;
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.google.common.base.Function;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -113,65 +107,19 @@ public class ProductV1Api extends AbstractV1Api {
     @RequestMapping(value = "/order", method = RequestMethod.GET)
     public ResponseMessage placeOrder(@RequestParam String utoken, @RequestParam long id) {
         if(StringUtils.isBlank(utoken) || id <= 0) return ResponseMessage.BAD_REQUEST;
-        
-        final List<MomiaHttpRequest> requests = buildProductOrderRequests(id, utoken);
 
-        return executeRequests(requests, new Function<MomiaHttpResponseCollector, Object>() {
-            @Override
-            public Object apply(MomiaHttpResponseCollector collector) {
-                JSONObject placeOrderJson = new JSONObject();
-                placeOrderJson.put("contacts", collector.getResponse("contacts"));
-                placeOrderJson.put("skus", collector.getResponse("skus"));
+        JSONObject placeOrderJson = new JSONObject();
+        placeOrderJson.put("contacts", userServiceApi.USER.getContacts(utoken));
+        placeOrderJson.put("skus", productServiceApi.SKU.list(id));
 
-                return placeOrderJson;
-            }
-        });
-    }
-
-    private List<MomiaHttpRequest> buildProductOrderRequests(long productId, String utoken) {
-        List<MomiaHttpRequest> requests = new ArrayList<MomiaHttpRequest>();
-        requests.add(buildContactsRequest(utoken));
-        requests.add(buildProductSkusRequest(productId));
-
-        return requests;
-    }
-
-    private MomiaHttpRequest buildContactsRequest(String utoken) {
-        MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder().add("utoken", utoken);
-        MomiaHttpRequest request = MomiaHttpRequest.GET("contacts", true, url("user/contacts"), builder.build());
-
-        return request;
-    }
-
-    private MomiaHttpRequest buildProductSkusRequest(long productId) {
-        return MomiaHttpRequest.GET("skus", true, url("product", productId, "sku"));
+        return ResponseMessage.SUCCESS(placeOrderJson);
     }
 
     @RequestMapping(value = "/playmate", method = RequestMethod.GET)
     public ResponseMessage listPlaymates(@RequestParam long id) {
         if (id <= 0) return ResponseMessage.BAD_REQUEST;
 
-        MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder()
-                .add("start", 0)
-                .add("count", Configuration.getInt("PageSize.PlaymateSku"));
-        MomiaHttpRequest request = MomiaHttpRequest.GET(url("product", id, "playmate"), builder.build());
-
-        return executeRequest(request, new Function<Object, Object>() {
-            @Override
-            public Object apply(Object data) {
-                JSONArray skusPlaymatesJson = (JSONArray) data;
-                for (int i = 0; i < skusPlaymatesJson.size(); i++) {
-                    JSONObject skuPlaymatesJson = skusPlaymatesJson.getJSONObject(i);
-                    JSONArray playmatesJson = skuPlaymatesJson.getJSONArray("playmates");
-                    for (int j = 0; j < playmatesJson.size(); j++) {
-                        JSONObject playmateJson = playmatesJson.getJSONObject(j);
-                        playmateJson.put("avatar", ImageFile.url(playmateJson.getString("avatar")));
-                    }
-                }
-
-                return data;
-            }
-        });
+        return ResponseMessage.SUCCESS(processPlaymates(dealServiceApi.ORDER.listPlaymates(id, Configuration.getInt("PageSize.PlaymateSku"))));
     }
 
     @RequestMapping(value = "/favor", method = RequestMethod.POST)
