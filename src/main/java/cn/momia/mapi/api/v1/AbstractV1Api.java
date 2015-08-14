@@ -11,8 +11,9 @@ import cn.momia.service.deal.api.order.Order;
 import cn.momia.service.deal.api.order.PagedOrders;
 import cn.momia.service.product.api.product.PagedProducts;
 import cn.momia.service.product.api.product.Product;
+import cn.momia.service.product.api.product.ProductGroup;
 import cn.momia.service.product.api.topic.Banner;
-import cn.momia.service.product.api.topic.Group;
+import cn.momia.service.product.api.topic.TopicGroup;
 import cn.momia.service.product.api.topic.Topic;
 import cn.momia.service.user.api.user.User;
 import com.alibaba.fastjson.JSONArray;
@@ -48,8 +49,8 @@ public class AbstractV1Api extends AbstractApi {
     protected Topic processTopic(Topic topic) {
         topic.setCover(ImageFile.largeUrl(topic.getCover()));
 
-        for (Group group : topic.getGroups()) {
-            processProducts(group.getProducts());
+        for (TopicGroup topicGroup : topic.getGroups()) {
+            processProducts(topicGroup.getProducts());
         }
 
         return topic;
@@ -64,7 +65,7 @@ public class AbstractV1Api extends AbstractApi {
         return product;
     }
 
-    private List<Product> processProducts(List<Product> products) {
+    protected List<Product> processProducts(List<Product> products) {
         for (Product product : products) {
             processProduct(product);
         }
@@ -74,6 +75,14 @@ public class AbstractV1Api extends AbstractApi {
 
     protected PagedProducts processPagedProducts(PagedProducts products) {
         processProducts(products.getList());
+
+        return products;
+    }
+
+    protected List<ProductGroup> processGroupedProducts(List<ProductGroup> products) {
+        for (ProductGroup productGroup : products) {
+            processProducts(productGroup.getProducts());
+        }
 
         return products;
     }

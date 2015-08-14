@@ -29,42 +29,21 @@ public class ProductV1Api extends AbstractV1Api {
     @Autowired private UserServiceApi userServiceApi;
 
     @RequestMapping(value = "/weekend", method = RequestMethod.GET)
-    public ResponseMessage getProductsByWeekend(@RequestParam(value = "city") int cityId, @RequestParam int start) {
+    public ResponseMessage listByWeekend(@RequestParam(value = "city") int cityId, @RequestParam int start) {
         if (cityId < 0 || start < 0) return ResponseMessage.BAD_REQUEST;
 
-        MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder()
-                .add("city", cityId)
-                .add("start", start)
-                .add("count", Configuration.getInt("PageSize.Product"));
-        MomiaHttpRequest request = MomiaHttpRequest.GET(url("product/weekend"), builder.build());
-
-        return executeRequest(request, pagedProductsFunc);
+        return ResponseMessage.SUCCESS(processPagedProducts(productServiceApi.PRODUCT.listByWeekend(cityId, start, Configuration.getInt("PageSize.Product"))));
     }
 
     @RequestMapping(value = "/month", method = RequestMethod.GET)
-    public ResponseMessage getProductsByMonth(@RequestParam(value = "city") int cityId, @RequestParam int month) {
+    public ResponseMessage listByMonth(@RequestParam(value = "city") int cityId, @RequestParam int month) {
         if (cityId < 0 || month <= 0 || month > 12) return ResponseMessage.BAD_REQUEST;
 
-        MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder()
-                .add("city", cityId)
-                .add("month", month);
-        MomiaHttpRequest request = MomiaHttpRequest.GET(url("product/month"), builder.build());
-
-        return executeRequest(request, new Function<Object, Object>() {
-            @Override
-            public Object apply(Object data) {
-                JSONArray groupedProductsJson = (JSONArray) data;
-                for (int i = 0; i < groupedProductsJson.size(); i++) {
-                    productsFunc.apply(groupedProductsJson.getJSONObject(i).getJSONArray("products"));
-                }
-
-                return data;
-            }
-        });
+        return ResponseMessage.SUCCESS(processGroupedProducts(productServiceApi.PRODUCT.listByMonth(cityId, month)));
     }
 
     @RequestMapping(value = "/leader", method = RequestMethod.GET)
-    public ResponseMessage getProductsNeedLeader(@RequestParam(value = "city") int cityId, @RequestParam int start) {
+    public ResponseMessage listNeedLeader(@RequestParam(value = "city") int cityId, @RequestParam int start) {
         if (cityId < 0 || start < 0) return ResponseMessage.BAD_REQUEST;
 
         MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder()
@@ -78,7 +57,7 @@ public class ProductV1Api extends AbstractV1Api {
 
 
     @RequestMapping(value = "/sku/leader", method = RequestMethod.GET)
-    public ResponseMessage getProductSkusNeedLeader(@RequestParam(value = "pid") long id) {
+    public ResponseMessage listSkusNeedLeader(@RequestParam(value = "pid") long id) {
         if (id <= 0) return ResponseMessage.BAD_REQUEST;
 
         List<MomiaHttpRequest> requests = buildRequests(id);
@@ -114,7 +93,7 @@ public class ProductV1Api extends AbstractV1Api {
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public ResponseMessage getProduct(@RequestParam(defaultValue = "") String utoken, @RequestParam long id) {
+    public ResponseMessage get(@RequestParam(defaultValue = "") String utoken, @RequestParam long id) {
         if (id <= 0) return ResponseMessage.BAD_REQUEST;
 
         List<MomiaHttpRequest> requests = buildProductRequests(utoken, id);
@@ -172,8 +151,8 @@ public class ProductV1Api extends AbstractV1Api {
         return customersJson;
     }
 
-    @RequestMapping(value = "detail", method = RequestMethod.GET)
-    public ResponseMessage getProductDetail(@RequestParam long id) {
+    @RequestMapping(value = "/detail", method = RequestMethod.GET)
+    public ResponseMessage getDetail(@RequestParam long id) {
         if (id <= 0) return ResponseMessage.BAD_REQUEST;
 
         MomiaHttpRequest request = MomiaHttpRequest.GET(url("product", id, "detail"));
@@ -219,7 +198,7 @@ public class ProductV1Api extends AbstractV1Api {
     }
 
     @RequestMapping(value = "/playmate", method = RequestMethod.GET)
-    public ResponseMessage getProductPlaymates(@RequestParam long id) {
+    public ResponseMessage listPlaymates(@RequestParam long id) {
         if (id <= 0) return ResponseMessage.BAD_REQUEST;
 
         MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder()
