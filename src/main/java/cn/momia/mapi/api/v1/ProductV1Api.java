@@ -6,10 +6,14 @@ import cn.momia.mapi.common.http.MomiaHttpRequest;
 import cn.momia.mapi.common.http.MomiaHttpResponseCollector;
 import cn.momia.mapi.common.img.ImageFile;
 import cn.momia.mapi.web.response.ResponseMessage;
+import cn.momia.service.product.api.ProductServiceApi;
+import cn.momia.service.user.api.UserServiceApi;
+import cn.momia.service.user.api.user.User;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Function;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -21,6 +25,9 @@ import java.util.List;
 @RestController
 @RequestMapping("/v1/product")
 public class ProductV1Api extends AbstractV1Api {
+    @Autowired private ProductServiceApi productServiceApi;
+    @Autowired private UserServiceApi userServiceApi;
+
     @RequestMapping(value = "/weekend", method = RequestMethod.GET)
     public ResponseMessage getProductsByWeekend(@RequestParam(value = "city") int cityId, @RequestParam int start) {
         if (cityId < 0 || start < 0) return ResponseMessage.BAD_REQUEST;
@@ -242,19 +249,19 @@ public class ProductV1Api extends AbstractV1Api {
     public ResponseMessage favor(@RequestParam String utoken, @RequestParam long id){
         if (StringUtils.isBlank(utoken) || id <= 0) return ResponseMessage.BAD_REQUEST;
 
-        MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder().add("utoken", utoken);
-        MomiaHttpRequest request = MomiaHttpRequest.POST(url("product", id, "favor"), builder.build());
+        User user = userServiceApi.USER.get(utoken);
+        productServiceApi.PRODUCT.favor(user.getId(), id);
 
-        return executeRequest(request);
+        return ResponseMessage.SUCCESS;
     }
 
     @RequestMapping(value = "/unfavor", method = RequestMethod.POST)
     public ResponseMessage unFavor(@RequestParam String utoken, @RequestParam long id){
         if (StringUtils.isBlank(utoken) || id <= 0) return ResponseMessage.BAD_REQUEST;
 
-        MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder().add("utoken", utoken);
-        MomiaHttpRequest request = MomiaHttpRequest.POST(url("product", id, "unfavor"), builder.build());
+        User user = userServiceApi.USER.get(utoken);
+        productServiceApi.PRODUCT.unfavor(user.getId(), id);
 
-        return executeRequest(request);
+        return ResponseMessage.SUCCESS;
     }
 }
