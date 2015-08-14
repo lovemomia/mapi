@@ -7,6 +7,8 @@ import cn.momia.mapi.common.http.MomiaHttpRequest;
 import cn.momia.mapi.common.img.ImageFile;
 import cn.momia.mapi.web.response.ResponseMessage;
 import cn.momia.mapi.api.AbstractApi;
+import cn.momia.service.deal.api.order.Order;
+import cn.momia.service.deal.api.order.PagedOrders;
 import cn.momia.service.product.api.product.PagedProducts;
 import cn.momia.service.product.api.product.Product;
 import cn.momia.service.user.api.user.User;
@@ -42,6 +44,21 @@ public class AbstractV1Api extends AbstractApi {
         // TODO imgs content
         return product;
     }
+
+    protected PagedOrders processPagedOrders(PagedOrders orders) {
+        for (Order order : orders.getList()) {
+            processOrder(order);
+        }
+
+        return orders;
+    }
+
+    private Order processOrder(Order order) {
+        order.setCover(ImageFile.middleUrl(order.getCover()));
+
+        return order;
+    }
+
 
     protected Function<Object, Object> userFunc = new Function<Object, Object>() {
         @Override

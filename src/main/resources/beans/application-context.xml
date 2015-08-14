@@ -31,6 +31,7 @@
     </bean>
 
     <bean id="commonServiceApi" class="cn.momia.service.common.api.CommonServiceApi" parent="srviceApi" init-method="init" />
+    <bean id="dealServiceApi" class="cn.momia.service.deal.api.DealServiceApi" parent="srviceApi" init-method="init" />
     <bean id="productServiceApi" class="cn.momia.service.product.api.ProductServiceApi" parent="srviceApi" init-method="init" />
     <bean id="userServiceApi" class="cn.momia.service.user.api.UserServiceApi" parent="srviceApi" init-method="init" />
 </beans>

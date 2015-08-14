@@ -4,6 +4,7 @@ import cn.momia.mapi.common.config.Configuration;
 import cn.momia.mapi.common.http.MomiaHttpParamBuilder;
 import cn.momia.mapi.common.http.MomiaHttpRequest;
 import cn.momia.mapi.web.response.ResponseMessage;
+import cn.momia.service.deal.api.DealServiceApi;
 import cn.momia.service.product.api.ProductServiceApi;
 import cn.momia.service.product.api.product.PagedProducts;
 import cn.momia.service.user.api.UserServiceApi;
@@ -26,6 +27,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/v1/user")
 public class UserV1Api extends AbstractV1Api {
+    @Autowired private DealServiceApi dealServiceApi;
     @Autowired private ProductServiceApi productServiceApi;
     @Autowired private UserServiceApi userServiceApi;
 
@@ -157,25 +159,19 @@ public class UserV1Api extends AbstractV1Api {
     }
 
     @RequestMapping(value = "/order", method = RequestMethod.GET)
-    public ResponseMessage getOrdersOfUser(@RequestParam String utoken,
-                                           @RequestParam(defaultValue = "1") int status,
-                                           @RequestParam int start) {
+    public ResponseMessage listOrders(@RequestParam String utoken,
+                                      @RequestParam(defaultValue = "1") int status,
+                                      @RequestParam int start) {
         if (StringUtils.isBlank(utoken) || start < 0) return ResponseMessage.BAD_REQUEST;
 
-        MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder()
-                .add("utoken", utoken)
-                .add("status", status < 0 ? 1 : status)
-                .add("start", start)
-                .add("count", Configuration.getInt("PageSize.Order"));
-        MomiaHttpRequest request = MomiaHttpRequest.GET(url("order/user"), builder.build());
-
-        return executeRequest(request, pagedOrdersFunc);
+        User user = userServiceApi.USER.get(utoken);
+        return ResponseMessage.SUCCESS(processPagedOrders(dealServiceApi.ORDER.listOrders(user.getId(), status < 0 ? 1 : status, start, Configuration.getInt("PageSize.Order"))));
     }
 
     @RequestMapping(value = "/order/detail", method = RequestMethod.GET)
-    public ResponseMessage getOrderDetailOfUser(@RequestParam String utoken,
-                                                @RequestParam(value = "oid") long orderId,
-                                                @RequestParam(value = "pid") long productId) {
+    public ResponseMessage getOrderDetail(@RequestParam String utoken,
+                                          @RequestParam(value = "oid") long orderId,
+                                          @RequestParam(value = "pid") long productId) {
         if (StringUtils.isBlank(utoken) || orderId <= 0 || productId <= 0) return ResponseMessage.BAD_REQUEST;
 
         MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder()
@@ -187,10 +183,10 @@ public class UserV1Api extends AbstractV1Api {
     }
 
     @RequestMapping(value = "/coupon", method = RequestMethod.GET)
-    public ResponseMessage getCouponsOfUser(@RequestParam String utoken,
-                                            @RequestParam(value = "oid", defaultValue = "0") long orderId,
-                                            @RequestParam(defaultValue = "0") int status,
-                                            @RequestParam int start) {
+    public ResponseMessage listCoupons(@RequestParam String utoken,
+                                       @RequestParam(value = "oid", defaultValue = "0") long orderId,
+                                       @RequestParam(defaultValue = "0") int status,
+                                       @RequestParam int start) {
         if (StringUtils.isBlank(utoken) || orderId < 0 || status < 0 || start < 0) return ResponseMessage.BAD_REQUEST;
 
         MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder()
