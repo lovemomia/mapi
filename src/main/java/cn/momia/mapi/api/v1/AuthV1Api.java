@@ -40,6 +40,7 @@ public class AuthV1Api extends AbstractV1Api {
                 StringUtils.isBlank(password) ||
                 StringUtils.isBlank(code)) return ResponseMessage.BAD_REQUEST;
 
+        // TODO 发红包
         return ResponseMessage.SUCCESS(processUser(userServiceApi.USER.register(nickName, mobile, password, code)));
     }
 
