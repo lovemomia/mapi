@@ -1,10 +1,11 @@
 package cn.momia.mapi.api.v1;
 
 import cn.momia.mapi.common.config.Configuration;
-import cn.momia.mapi.common.http.MomiaHttpParamBuilder;
-import cn.momia.mapi.common.http.MomiaHttpRequest;
 import cn.momia.mapi.web.response.ResponseMessage;
 import cn.momia.service.deal.api.DealServiceApi;
+import cn.momia.service.deal.api.coupon.PagedCoupons;
+import cn.momia.service.deal.api.order.Order;
+import cn.momia.service.deal.api.order.PagedOrders;
 import cn.momia.service.product.api.ProductServiceApi;
 import cn.momia.service.product.api.product.PagedProducts;
 import cn.momia.service.user.api.UserServiceApi;
@@ -165,7 +166,9 @@ public class UserV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken) || start < 0) return ResponseMessage.BAD_REQUEST;
 
         User user = userServiceApi.USER.get(utoken);
-        return ResponseMessage.SUCCESS(processPagedOrders(dealServiceApi.ORDER.listOrders(user.getId(), status < 0 ? 1 : status, start, Configuration.getInt("PageSize.Order"))));
+        PagedOrders orders = processPagedOrders(dealServiceApi.ORDER.listOrders(user.getId(), status < 0 ? 1 : status, start, Configuration.getInt("PageSize.Order")));
+
+        return ResponseMessage.SUCCESS(orders);
     }
 
     @RequestMapping(value = "/order/detail", method = RequestMethod.GET)
@@ -175,7 +178,9 @@ public class UserV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken) || orderId <= 0 || productId <= 0) return ResponseMessage.BAD_REQUEST;
 
         User user = userServiceApi.USER.get(utoken);
-        return ResponseMessage.SUCCESS(processOrder(dealServiceApi.ORDER.get(user.getId(), orderId, productId)));
+        Order order = processOrder(dealServiceApi.ORDER.get(user.getId(), orderId, productId));
+
+        return ResponseMessage.SUCCESS(order);
     }
 
     @RequestMapping(value = "/coupon", method = RequestMethod.GET)
@@ -185,15 +190,10 @@ public class UserV1Api extends AbstractV1Api {
                                        @RequestParam int start) {
         if (StringUtils.isBlank(utoken) || orderId < 0 || status < 0 || start < 0) return ResponseMessage.BAD_REQUEST;
 
-        MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder()
-                .add("utoken", utoken)
-                .add("oid", orderId)
-                .add("status", status)
-                .add("start", start)
-                .add("count", Configuration.getInt("PageSize.Coupon"));
-        MomiaHttpRequest request = MomiaHttpRequest.GET(url("coupon/user"), builder.build());
+        User user = userServiceApi.USER.get(utoken);
+        PagedCoupons coupons = dealServiceApi.COUPON.listCoupons(user.getId(), orderId, status, start, Configuration.getInt("PageSize.Coupon"));
 
-        return executeRequest(request);
+        return ResponseMessage.SUCCESS(coupons);
     }
 
     @RequestMapping(value = "/favorite", method = RequestMethod.GET)
