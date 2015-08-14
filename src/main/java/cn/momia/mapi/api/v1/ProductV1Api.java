@@ -46,15 +46,8 @@ public class ProductV1Api extends AbstractV1Api {
     public ResponseMessage listNeedLeader(@RequestParam(value = "city") int cityId, @RequestParam int start) {
         if (cityId < 0 || start < 0) return ResponseMessage.BAD_REQUEST;
 
-        MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder()
-                .add("city", cityId)
-                .add("start", start)
-                .add("count", Configuration.getInt("PageSize.Product"));
-        MomiaHttpRequest request = MomiaHttpRequest.GET(url("product/leader"), builder.build());
-
-        return executeRequest(request, pagedProductsFunc);
+        return ResponseMessage.SUCCESS(processPagedProducts(productServiceApi.PRODUCT.listNeedLeader(cityId, start, Configuration.getInt("PageSize.Product"))));
     }
-
 
     @RequestMapping(value = "/sku/leader", method = RequestMethod.GET)
     public ResponseMessage listSkusNeedLeader(@RequestParam(value = "pid") long id) {
