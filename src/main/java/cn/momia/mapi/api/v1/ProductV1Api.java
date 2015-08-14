@@ -7,6 +7,8 @@ import cn.momia.mapi.common.http.MomiaHttpResponseCollector;
 import cn.momia.mapi.common.img.ImageFile;
 import cn.momia.mapi.web.response.ResponseMessage;
 import cn.momia.service.product.api.ProductServiceApi;
+import cn.momia.service.product.api.product.Product;
+import cn.momia.service.product.api.sku.Sku;
 import cn.momia.service.user.api.UserServiceApi;
 import cn.momia.service.user.api.user.User;
 import com.alibaba.fastjson.JSONArray;
@@ -53,36 +55,14 @@ public class ProductV1Api extends AbstractV1Api {
     public ResponseMessage listSkusNeedLeader(@RequestParam(value = "pid") long id) {
         if (id <= 0) return ResponseMessage.BAD_REQUEST;
 
-        List<MomiaHttpRequest> requests = buildRequests(id);
+        Product product = productServiceApi.PRODUCT.get(id, false);
+        List<Sku> skus = productServiceApi.SKU.listWithLeader(id);
 
-        return executeRequests(requests, new Function<MomiaHttpResponseCollector, Object>() {
-            @Override
-            public Object apply(MomiaHttpResponseCollector collector) {
-                JSONObject productSkusJson = new JSONObject();
-                productSkusJson.put("product", productFunc.apply(collector.getResponse("product")));
-                productSkusJson.put("skus", collector.getResponse("skus"));
+        JSONObject productSkusJson = new JSONObject();
+        productSkusJson.put("product", processProduct(product));
+        productSkusJson.put("skus", skus);
 
-                return productSkusJson;
-            }
-        });
-    }
-
-    private List<MomiaHttpRequest> buildRequests(long productId) {
-        List<MomiaHttpRequest> requests = new ArrayList<MomiaHttpRequest>();
-        requests.add(buildProductRequest(productId));
-        requests.add(buildNeedLeaderSkusRequest(productId));
-
-        return requests;
-    }
-
-    private MomiaHttpRequest buildProductRequest(long productId) {
-        MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder().add("full", false);
-
-        return MomiaHttpRequest.GET("product", true, url("product", productId), builder.build());
-    }
-
-    private MomiaHttpRequest buildNeedLeaderSkusRequest(long productId) {
-        return MomiaHttpRequest.GET("skus", true, url("product", productId, "sku/leader"));
+        return ResponseMessage.SUCCESS(productSkusJson);
     }
 
     @RequestMapping(method = RequestMethod.GET)
