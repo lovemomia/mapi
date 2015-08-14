@@ -32,6 +32,14 @@ public class AbstractV1Api extends AbstractApi {
         return user;
     }
 
+    protected List<String> processAvatars(List<String> avatars) {
+        for (int i = 0; i < avatars.size(); i++) {
+            avatars.set(i, ImageFile.url(avatars.get(i)));
+        }
+
+        return avatars;
+    }
+
     protected List<Banner> processBanners(List<Banner> banners) {
         for (Banner banner : banners) {
             processBanner(banner);
@@ -61,8 +69,32 @@ public class AbstractV1Api extends AbstractApi {
         product.setThumb(ImageFile.smallUrl(product.getThumb()));
 
         if (!StringUtils.isBlank(product.getCover())) product.setCover(ImageFile.largeUrl(product.getCover()));
+        if (product.getImgs() != null) processImgs(product.getImgs());
+        if (product.getContent() != null) processContent(product.getContent());
         // TODO imgs content
         return product;
+    }
+
+    private List<String> processImgs(List<String> imgs) {
+        for (int i = 0; i < imgs.size(); i++) {
+            imgs.set(i, ImageFile.largeUrl(imgs.get(i)));
+        }
+
+        return imgs;
+    }
+
+    private static JSONArray processContent(JSONArray contentJson) {
+        for (int i = 0; i < contentJson.size(); i++) {
+            JSONObject contentBlockJson = contentJson.getJSONObject(i);
+            JSONArray bodyJson = contentBlockJson.getJSONArray("body");
+            for (int j = 0; j < bodyJson.size(); j++) {
+                JSONObject bodyBlockJson = bodyJson.getJSONObject(j);
+                String img = bodyBlockJson.getString("img");
+                if (!StringUtils.isBlank(img)) bodyBlockJson.put("img", ImageFile.largeUrl(img));
+            }
+        }
+
+        return contentJson;
     }
 
     protected List<Product> processProducts(List<Product> products) {
@@ -195,20 +227,6 @@ public class AbstractV1Api extends AbstractApi {
         }
 
         return imgs;
-    }
-
-    private static JSONArray processContent(JSONArray contentJson) {
-        for (int i = 0; i < contentJson.size(); i++) {
-            JSONObject contentBlockJson = contentJson.getJSONObject(i);
-            JSONArray bodyJson = contentBlockJson.getJSONArray("body");
-            for (int j = 0; j < bodyJson.size(); j++) {
-                JSONObject bodyBlockJson = bodyJson.getJSONObject(j);
-                String img = bodyBlockJson.getString("img");
-                if (!StringUtils.isBlank(img)) bodyBlockJson.put("img", ImageFile.largeUrl(img));
-            }
-        }
-
-        return contentJson;
     }
 
     protected Function<Object, Object> productsFunc = new Function<Object, Object>() {

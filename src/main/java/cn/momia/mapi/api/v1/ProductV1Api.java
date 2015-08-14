@@ -6,15 +6,19 @@ import cn.momia.mapi.common.http.MomiaHttpRequest;
 import cn.momia.mapi.common.http.MomiaHttpResponseCollector;
 import cn.momia.mapi.common.img.ImageFile;
 import cn.momia.mapi.web.response.ResponseMessage;
+import cn.momia.service.deal.api.DealServiceApi;
 import cn.momia.service.product.api.ProductServiceApi;
 import cn.momia.service.product.api.product.Product;
 import cn.momia.service.product.api.sku.Sku;
 import cn.momia.service.user.api.UserServiceApi;
 import cn.momia.service.user.api.user.User;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Function;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -27,6 +31,9 @@ import java.util.List;
 @RestController
 @RequestMapping("/v1/product")
 public class ProductV1Api extends AbstractV1Api {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProductV1Api.class);
+
+    @Autowired private DealServiceApi dealServiceApi;
     @Autowired private ProductServiceApi productServiceApi;
     @Autowired private UserServiceApi userServiceApi;
 
@@ -69,57 +76,27 @@ public class ProductV1Api extends AbstractV1Api {
     public ResponseMessage get(@RequestParam(defaultValue = "") String utoken, @RequestParam long id) {
         if (id <= 0) return ResponseMessage.BAD_REQUEST;
 
-        List<MomiaHttpRequest> requests = buildProductRequests(utoken, id);
+        Product product = processProduct(productServiceApi.PRODUCT.get(id, true));
+        if (!product.isOpened()) product.setSoldOut(true);
 
-        return executeRequests(requests, new Function<MomiaHttpResponseCollector, Object>() {
-            @Override
-            public Object apply(MomiaHttpResponseCollector collector) {
-                JSONObject productJson = (JSONObject) productFunc.apply(collector.getResponse("product"));
+        JSONObject productJson = JSON.parseObject(JSON.toJSONString(product));
+        try {
+            List<String> avatars = dealServiceApi.ORDER.listCustomerAvatars(id, Configuration.getInt("PageSize.ProductCustomer"));
+            productJson.put("customers", buildCustomers(avatars, product.getStock()));
 
-                productJson.put("customers", processCustomers((JSONObject) collector.getResponse("customers"), productJson.getInteger("stock")));
-
-                boolean opened = productJson.getBoolean("opened");
-                if (!opened) productJson.put("soldOut", true);
-
-                return productJson;
-            }
-        });
-    }
-
-    private List<MomiaHttpRequest> buildProductRequests(String utoken, long productId) {
-        List<MomiaHttpRequest> requests = new ArrayList<MomiaHttpRequest>();
-        requests.add(buildProductRequest(utoken, productId));
-        requests.add(buildProductCustomersRequest(productId));
-
-        return requests;
-    }
-
-    private MomiaHttpRequest buildProductRequest(String utoken, long productId) {
-        MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder().add("utoken", utoken);
-
-        return MomiaHttpRequest.GET("product", true, url("product", productId), builder.build());
-    }
-
-    private MomiaHttpRequest buildProductCustomersRequest(long productId) {
-        MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder()
-                .add("start", 0)
-                .add("count", Configuration.getInt("PageSize.ProductCustomer"));
-
-        return MomiaHttpRequest.GET("customers", false, url("product", productId, "customer"), builder.build());
-    }
-
-    private JSONObject processCustomers(JSONObject customersJson, int stock) {
-        if (customersJson != null) {
-            if (stock > 0 && stock <= Configuration.getInt("Product.StockAlert"))
-                customersJson.put("text", customersJson.getString("text") + "（仅剩" + stock + "个名额）");
-            JSONArray avatarsJson = customersJson.getJSONArray("avatars");
-            if (avatarsJson != null) {
-                for (int i = 0; i < avatarsJson.size(); i++) {
-                    String avatar = avatarsJson.getString(i);
-                    avatarsJson.set(i, ImageFile.url(avatar));
-                }
-            }
+            long userId = StringUtils.isBlank(utoken) ? 0 : userServiceApi.USER.get(utoken).getId();
+            if (productServiceApi.PRODUCT.favored(userId, id)) productJson.put("favored", true);
+        } catch (Exception e) {
+            LOGGER.error("exception!!", e);
         }
+
+        return ResponseMessage.SUCCESS(productJson);
+    }
+
+    private JSONObject buildCustomers(List<String> avatars, int stock) {
+        JSONObject customersJson = new JSONObject();
+        customersJson.put("text", "玩伴信息" + ((stock > 0 && stock <= Configuration.getInt("Product.StockAlert")) ? "（仅剩" + stock + "个名额）" : ""));
+        customersJson.put("avatars", processAvatars(avatars));
 
         return customersJson;
     }
@@ -208,7 +185,7 @@ public class ProductV1Api extends AbstractV1Api {
     }
 
     @RequestMapping(value = "/unfavor", method = RequestMethod.POST)
-    public ResponseMessage unFavor(@RequestParam String utoken, @RequestParam long id){
+    public ResponseMessage unfavor(@RequestParam String utoken, @RequestParam long id){
         if (StringUtils.isBlank(utoken) || id <= 0) return ResponseMessage.BAD_REQUEST;
 
         User user = userServiceApi.USER.get(utoken);
