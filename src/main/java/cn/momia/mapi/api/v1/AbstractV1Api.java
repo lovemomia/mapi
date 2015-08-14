@@ -12,6 +12,8 @@ import cn.momia.service.deal.api.order.PagedOrders;
 import cn.momia.service.product.api.product.PagedProducts;
 import cn.momia.service.product.api.product.Product;
 import cn.momia.service.product.api.topic.Banner;
+import cn.momia.service.product.api.topic.Group;
+import cn.momia.service.product.api.topic.Topic;
 import cn.momia.service.user.api.user.User;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -43,21 +45,37 @@ public class AbstractV1Api extends AbstractApi {
         return banner;
     }
 
-    protected PagedProducts processPagedProducts(PagedProducts products) {
-        for (Product product : products.getList()) {
-            processProduct(product);
+    protected Topic processTopic(Topic topic) {
+        topic.setCover(ImageFile.largeUrl(topic.getCover()));
+
+        for (Group group : topic.getGroups()) {
+            processProducts(group.getProducts());
         }
 
-        return products;
+        return topic;
     }
 
-    private Product processProduct(Product product) {
+    protected Product processProduct(Product product) {
         product.setUrl(buildUrl(product.getId()));
         product.setThumb(ImageFile.smallUrl(product.getThumb()));
 
         if (!StringUtils.isBlank(product.getCover())) product.setCover(ImageFile.largeUrl(product.getCover()));
         // TODO imgs content
         return product;
+    }
+
+    private List<Product> processProducts(List<Product> products) {
+        for (Product product : products) {
+            processProduct(product);
+        }
+
+        return products;
+    }
+
+    protected PagedProducts processPagedProducts(PagedProducts products) {
+        processProducts(products.getList());
+
+        return products;
     }
 
     protected PagedOrders processPagedOrders(PagedOrders orders) {
