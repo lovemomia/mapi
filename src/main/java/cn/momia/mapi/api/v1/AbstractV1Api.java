@@ -7,6 +7,8 @@ import cn.momia.mapi.common.http.MomiaHttpRequest;
 import cn.momia.mapi.common.img.ImageFile;
 import cn.momia.mapi.web.response.ResponseMessage;
 import cn.momia.mapi.api.AbstractApi;
+import cn.momia.service.product.api.product.PagedProducts;
+import cn.momia.service.product.api.product.Product;
 import cn.momia.service.user.api.user.User;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -22,6 +24,23 @@ public class AbstractV1Api extends AbstractApi {
         if (!StringUtils.isBlank(avatar)) user.setAvatar(ImageFile.url(avatar));
 
         return user;
+    }
+
+    protected PagedProducts processPagedProducts(PagedProducts products) {
+        for (Product product : products.getList()) {
+            processProduct(product);
+        }
+
+        return products;
+    }
+
+    private Product processProduct(Product product) {
+        product.setUrl(buildUrl(product.getId()));
+        product.setThumb(ImageFile.smallUrl(product.getThumb()));
+
+        if (!StringUtils.isBlank(product.getCover())) product.setCover(ImageFile.largeUrl(product.getCover()));
+        // TODO imgs content
+        return product;
     }
 
     protected Function<Object, Object> userFunc = new Function<Object, Object>() {

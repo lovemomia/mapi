@@ -4,8 +4,11 @@ import cn.momia.mapi.common.config.Configuration;
 import cn.momia.mapi.common.http.MomiaHttpParamBuilder;
 import cn.momia.mapi.common.http.MomiaHttpRequest;
 import cn.momia.mapi.web.response.ResponseMessage;
+import cn.momia.service.product.api.ProductServiceApi;
+import cn.momia.service.product.api.product.PagedProducts;
 import cn.momia.service.user.api.UserServiceApi;
 import cn.momia.service.user.api.participant.Participant;
+import cn.momia.service.user.api.user.User;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import org.apache.commons.lang3.StringUtils;
@@ -23,6 +26,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/v1/user")
 public class UserV1Api extends AbstractV1Api {
+    @Autowired private ProductServiceApi productServiceApi;
     @Autowired private UserServiceApi userServiceApi;
 
     @RequestMapping(method = RequestMethod.GET)
@@ -204,12 +208,9 @@ public class UserV1Api extends AbstractV1Api {
     public ResponseMessage getFavoritesOfUser(@RequestParam String utoken, @RequestParam int start) {
         if (StringUtils.isBlank(utoken) || start < 0) return ResponseMessage.BAD_REQUEST;
 
-        MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder()
-                .add("utoken", utoken)
-                .add("start", start)
-                .add("count", Configuration.getInt("PageSize.Favorite"));
-        MomiaHttpRequest request = MomiaHttpRequest.GET(url("user/favorite"), builder.build());
+        User user = userServiceApi.USER.get(utoken);
+        PagedProducts favorites = productServiceApi.FAVORITE.listFavorites(user.getId(), start, Configuration.getInt("PageSize.Favorite"));
 
-        return executeRequest(request, pagedProductsFunc);
+        return ResponseMessage.SUCCESS(processPagedProducts(favorites));
     }
 }
