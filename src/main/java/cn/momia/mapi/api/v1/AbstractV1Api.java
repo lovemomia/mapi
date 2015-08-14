@@ -53,7 +53,7 @@ public class AbstractV1Api extends AbstractApi {
         return orders;
     }
 
-    private Order processOrder(Order order) {
+    protected Order processOrder(Order order) {
         order.setCover(ImageFile.middleUrl(order.getCover()));
 
         return order;
