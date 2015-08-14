@@ -11,6 +11,7 @@ import cn.momia.service.deal.api.order.Order;
 import cn.momia.service.deal.api.order.PagedOrders;
 import cn.momia.service.product.api.product.PagedProducts;
 import cn.momia.service.product.api.product.Product;
+import cn.momia.service.product.api.topic.Banner;
 import cn.momia.service.user.api.user.User;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -26,6 +27,20 @@ public class AbstractV1Api extends AbstractApi {
         if (!StringUtils.isBlank(avatar)) user.setAvatar(ImageFile.url(avatar));
 
         return user;
+    }
+
+    protected List<Banner> processBanners(List<Banner> banners) {
+        for (Banner banner : banners) {
+            processBanner(banner);
+        }
+
+        return banners;
+    }
+
+    private Banner processBanner(Banner banner) {
+        banner.setCover(ImageFile.largeUrl(banner.getCover()));
+
+        return banner;
     }
 
     protected PagedProducts processPagedProducts(PagedProducts products) {
