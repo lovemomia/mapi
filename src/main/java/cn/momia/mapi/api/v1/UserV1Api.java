@@ -174,12 +174,8 @@ public class UserV1Api extends AbstractV1Api {
                                           @RequestParam(value = "pid") long productId) {
         if (StringUtils.isBlank(utoken) || orderId <= 0 || productId <= 0) return ResponseMessage.BAD_REQUEST;
 
-        MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder()
-                .add("utoken", utoken)
-                .add("pid", productId);
-        MomiaHttpRequest request = MomiaHttpRequest.GET(url("order", orderId), builder.build());
-
-        return executeRequest(request, orderDetailFunc);
+        User user = userServiceApi.USER.get(utoken);
+        return ResponseMessage.SUCCESS(processOrder(dealServiceApi.ORDER.get(user.getId(), orderId, productId)));
     }
 
     @RequestMapping(value = "/coupon", method = RequestMethod.GET)
