@@ -149,10 +149,7 @@ public class UserV1Api extends AbstractV1Api {
     public ResponseMessage listChildren(@RequestParam String utoken) {
         if (StringUtils.isBlank(utoken)) return ResponseMessage.BAD_REQUEST;
 
-        MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder().add("utoken", utoken);
-        MomiaHttpRequest request = MomiaHttpRequest.GET(url("user/child"), builder.build());
-
-        return executeRequest(request);
+        return ResponseMessage.SUCCESS(userServiceApi.USER.listChildren(utoken));
     }
 
     @RequestMapping(value = "/order", method = RequestMethod.GET)
