@@ -12,6 +12,8 @@ import cn.momia.service.deal.api.order.Order;
 import cn.momia.service.deal.api.order.PagedOrders;
 import cn.momia.service.deal.api.order.Playmate;
 import cn.momia.service.deal.api.order.SkuPlaymates;
+import cn.momia.service.feed.api.comment.FeedComment;
+import cn.momia.service.feed.api.comment.PagedFeedComments;
 import cn.momia.service.product.api.product.PagedProducts;
 import cn.momia.service.product.api.product.Product;
 import cn.momia.service.product.api.product.ProductGroup;
@@ -148,6 +150,14 @@ public class AbstractV1Api extends AbstractApi {
         return playmates;
     }
 
+    protected PagedFeedComments processPagedFeedComments(PagedFeedComments comments) {
+        for (FeedComment feedComment : comments.getList()) {
+            feedComment.setAvatar(ImageFile.url(feedComment.getAvatar()));
+        }
+
+        return comments;
+    }
+
     protected Function<Object, Object> userFunc = new Function<Object, Object>() {
         @Override
         public Object apply(Object data) {
@@ -242,67 +252,6 @@ public class AbstractV1Api extends AbstractApi {
 
         return imgs;
     }
-
-    protected Function<Object, Object> productsFunc = new Function<Object, Object>() {
-        @Override
-        public Object apply(Object data) {
-            JSONArray productsJson = (JSONArray) data;
-            for (int i = 0; i < productsJson.size(); i++) {
-                JSONObject productJson = productsJson.getJSONObject(i);
-                productFunc.apply(productJson);
-            }
-
-            return data;
-        }
-    };
-
-    protected Function<Object, Object> pagedProductsFunc = new Function<Object, Object>() {
-        @Override
-        public Object apply(Object data) {
-            JSONArray productsJson = ((JSONObject) data).getJSONArray("list");
-            productsFunc.apply(productsJson);
-
-            return data;
-        }
-    };
-
-    protected Function<Object, Object> orderDetailFunc = new Function<Object, Object>() {
-        @Override
-        public Object apply(Object data) {
-            JSONObject orderDetailJson = (JSONObject) data;
-            orderDetailJson.put("cover", ImageFile.middleUrl(orderDetailJson.getString("cover")));
-
-            return data;
-        }
-    };
-
-    protected Function<Object, Object> pagedOrdersFunc = new Function<Object, Object>() {
-        @Override
-        public Object apply(Object data) {
-            JSONArray ordersJson = ((JSONObject) data).getJSONArray("list");
-            for (int i = 0; i < ordersJson.size(); i++) {
-                orderDetailFunc.apply(ordersJson.getJSONObject(i));
-            }
-
-            return data;
-        }
-    };
-
-    protected Function<Object, Object> topicFunc = new Function<Object, Object>() {
-        @Override
-        public Object apply(Object data) {
-            JSONObject topicJson = (JSONObject) data;
-            topicJson.put("cover", ImageFile.largeUrl(topicJson.getString("cover")));
-
-            JSONArray groupedProductsJson = topicJson.getJSONArray("groups");
-            for (int i = 0; i < groupedProductsJson.size(); i++) {
-                JSONObject productsJson = groupedProductsJson.getJSONObject(i);
-                productsFunc.apply(productsJson.get("products"));
-            }
-
-            return topicJson;
-        }
-    };
 
     protected long getUserId(String utoken) {
         MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder().add("utoken", utoken);
