@@ -5,6 +5,7 @@ import cn.momia.mapi.common.exception.MomiaExpiredException;
 import cn.momia.mapi.common.http.MomiaHttpParamBuilder;
 import cn.momia.mapi.common.http.MomiaHttpRequest;
 import cn.momia.mapi.common.img.ImageFile;
+import cn.momia.mapi.common.util.MetaUtil;
 import cn.momia.mapi.web.response.ResponseMessage;
 import cn.momia.mapi.api.AbstractApi;
 import cn.momia.service.deal.api.order.Order;
@@ -69,6 +70,8 @@ public class AbstractV1Api extends AbstractApi {
     protected Product processProduct(Product product) {
         product.setUrl(buildUrl(product.getId()));
         product.setThumb(ImageFile.smallUrl(product.getThumb()));
+
+        if (product.getRegionId() != null) product.setRegion(MetaUtil.getRegionName(product.getRegionId()));
 
         if (!StringUtils.isBlank(product.getCover())) product.setCover(ImageFile.largeUrl(product.getCover()));
         if (product.getImgs() != null) processImgs(product.getImgs());
