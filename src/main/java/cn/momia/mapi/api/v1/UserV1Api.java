@@ -99,7 +99,7 @@ public class UserV1Api extends AbstractV1Api {
     public ResponseMessage addChild(@RequestParam String utoken, @RequestParam String children) {
         if(StringUtils.isBlank(utoken) || StringUtils.isBlank(children)) return ResponseMessage.BAD_REQUEST;
 
-        long userId = getUserId(utoken);
+        long userId = userServiceApi.USER.get(utoken).getId();
         List<Participant> participants = new ArrayList<Participant>();
         JSONArray childrenJson = JSONArray.parseArray(children);
         for (int i = 0; i < childrenJson.size(); i++) {

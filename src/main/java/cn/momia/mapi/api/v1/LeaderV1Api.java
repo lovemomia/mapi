@@ -81,7 +81,7 @@ public class LeaderV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken) || StringUtils.isBlank(leader)) return ResponseMessage.BAD_REQUEST;
 
         JSONObject leaderJson = JSON.parseObject(leader);
-        leaderJson.put("userId", getUserId(utoken));
+        leaderJson.put("userId", userServiceApi.USER.get(utoken));
         userServiceApi.LEADER.add(JSON.toJavaObject(leaderJson, Leader.class));
 
         return ResponseMessage.SUCCESS;
@@ -92,7 +92,7 @@ public class LeaderV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken) || StringUtils.isBlank(leader)) return ResponseMessage.BAD_REQUEST;
 
         JSONObject leaderJson = JSON.parseObject(leader);
-        leaderJson.put("userId", getUserId(utoken));
+        leaderJson.put("userId", userServiceApi.USER.get(utoken));
         userServiceApi.LEADER.update(JSON.toJavaObject(leaderJson, Leader.class));
 
         return ResponseMessage.SUCCESS;
