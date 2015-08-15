@@ -10,6 +10,8 @@ import cn.momia.service.deal.api.order.Playmate;
 import cn.momia.service.deal.api.order.SkuPlaymates;
 import cn.momia.service.feed.api.comment.FeedComment;
 import cn.momia.service.feed.api.comment.PagedFeedComments;
+import cn.momia.service.feed.api.star.FeedStar;
+import cn.momia.service.feed.api.star.PagedFeedStars;
 import cn.momia.service.product.api.product.PagedProducts;
 import cn.momia.service.product.api.product.Product;
 import cn.momia.service.product.api.product.ProductGroup;
@@ -19,10 +21,8 @@ import cn.momia.service.product.api.topic.Topic;
 import cn.momia.service.user.api.user.User;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.google.common.base.Function;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class AbstractV1Api extends AbstractApi {
@@ -154,85 +154,15 @@ public class AbstractV1Api extends AbstractApi {
         return comments;
     }
 
-    protected Function<Object, Object> userFunc = new Function<Object, Object>() {
-        @Override
-        public Object apply(Object data) {
-            JSONObject userJson = (JSONObject) data;
-            userJson.put("avatar", ImageFile.url(userJson.getString("avatar")));
-
-            return data;
-        }
-    };
-
-    protected Function<Object, Object> pagedUsersFunc = new Function<Object, Object>() {
-        @Override
-        public Object apply(Object data) {
-            JSONArray usersJson = ((JSONObject) data).getJSONArray("list");
-            for (int i = 0; i < usersJson.size(); i++) {
-                userFunc.apply(usersJson.getJSONObject(i));
-            }
-
-            return data;
-        }
-    };
-
-    protected Function<Object, Object> pagedFeedCommentsFunc = new Function<Object, Object>() {
-        @Override
-        public Object apply(Object data) {
-            JSONArray feedCommentsJson = ((JSONObject) data).getJSONArray("list");
-            for (int i = 0; i < feedCommentsJson.size(); i++) {
-                JSONObject feedCommentJson = feedCommentsJson.getJSONObject(i);
-                feedCommentJson.put("avatar", ImageFile.url(feedCommentJson.getString("avatar")));
-            }
-
-            return data;
-        }
-    };
-
-    protected Function<Object, Object> feedFunc = new Function<Object, Object>() {
-        @Override
-        public Object apply(Object data) {
-            JSONObject feedJson = (JSONObject) data;
-            feedJson.put("avatar", ImageFile.url(feedJson.getString("avatar")));
-            if (feedJson.containsKey("imgs")) feedJson.put("imgs", processFeedImgs(feedJson.getJSONArray("imgs")));
-
-            return data;
-        }
-    };
-
-    private static List<String> processFeedImgs(JSONArray imgsJson) {
-        List<String> imgs = new ArrayList<String>();
-        for (int i = 0; i < imgsJson.size(); i++) {
-            imgs.add(ImageFile.middleUrl(imgsJson.getString(i)));
+    protected PagedFeedStars processPagedFeedStars(PagedFeedStars stars) {
+        for (FeedStar feedStar : stars.getList()) {
+            feedStar.setAvatar(ImageFile.url(feedStar.getAvatar()));
         }
 
-        return imgs;
+        return stars;
     }
-
-    protected Function<Object, Object> productFunc = new Function<Object, Object>() {
-        @Override
-        public Object apply(Object data) {
-            JSONObject productJson = (JSONObject) data;
-            productJson.put("url", buildUrl(productJson.getLong("id")));
-            productJson.put("thumb", ImageFile.smallUrl(productJson.getString("thumb")));
-            if (productJson.containsKey("cover")) productJson.put("cover", ImageFile.largeUrl(productJson.getString("cover")));
-            if (productJson.containsKey("imgs")) productJson.put("imgs", processProductImgs(productJson.getJSONArray("imgs")));
-            if (productJson.containsKey("content")) productJson.put("content", processContent(productJson.getJSONArray("content")));
-
-            return data;
-        }
-    };
 
     private String buildUrl(long id) {
         return Configuration.getString("Product.Url") + "?id=" + id;
-    }
-
-    private static List<String> processProductImgs(JSONArray imgsJson) {
-        List<String> imgs = new ArrayList<String>();
-        for (int i = 0; i < imgsJson.size(); i++) {
-            imgs.add(ImageFile.largeUrl(imgsJson.getString(i)));
-        }
-
-        return imgs;
     }
 }

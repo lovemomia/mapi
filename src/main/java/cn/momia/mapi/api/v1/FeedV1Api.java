@@ -1,22 +1,20 @@
 package cn.momia.mapi.api.v1;
 
 import cn.momia.mapi.common.config.Configuration;
-import cn.momia.mapi.common.http.MomiaHttpParamBuilder;
-import cn.momia.mapi.common.http.MomiaHttpRequest;
-import cn.momia.mapi.common.http.MomiaHttpResponseCollector;
 import cn.momia.mapi.common.img.ImageFile;
 import cn.momia.mapi.web.response.ResponseMessage;
 import cn.momia.service.feed.api.FeedServiceApi;
+import cn.momia.service.feed.api.comment.FeedComment;
 import cn.momia.service.feed.api.comment.PagedFeedComments;
 import cn.momia.service.feed.api.feed.Feed;
 import cn.momia.service.feed.api.feed.PagedFeeds;
+import cn.momia.service.feed.api.star.FeedStar;
 import cn.momia.service.product.api.ProductServiceApi;
 import cn.momia.service.product.api.product.Product;
 import cn.momia.service.user.api.UserServiceApi;
 import cn.momia.service.user.api.user.User;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.google.common.base.Function;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +24,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -110,58 +107,19 @@ public class FeedV1Api extends AbstractV1Api {
     public ResponseMessage detail(@RequestParam(defaultValue = "") String utoken, @RequestParam long id, @RequestParam(value = "pid") long productId) {
         if (id <= 0 || productId <= 0) return ResponseMessage.BAD_REQUEST;
 
-        List<MomiaHttpRequest> requests = buildFeedDetailRequests(utoken, id, productId);
+        User user = userServiceApi.USER.get(utoken);
+        Feed feed = feedServiceApi.FEED.get(user.getId(), id);
+        Product product = productServiceApi.PRODUCT.get(productId, false);
+        List<FeedStar> stars = processPagedFeedStars(feedServiceApi.FEED.listStars(id, 0, Configuration.getInt("PageSize.Feed.Detail.Star"))).getList();
+        List<FeedComment> comments = processPagedFeedComments(feedServiceApi.FEED.listComments(id, 0, Configuration.getInt("PageSize.Feed.Detail.Comment"))).getList();
 
-        return executeRequests(requests, new Function<MomiaHttpResponseCollector, Object>() {
-            @Override
-            public Object apply(MomiaHttpResponseCollector collector) {
-                JSONObject feedDetailJson = new JSONObject();
-                feedDetailJson.put("feed", feedFunc.apply(collector.getResponse("feed")));
-                feedDetailJson.put("product", productFunc.apply(collector.getResponse("product")));
-                feedDetailJson.put("staredUsers", pagedUsersFunc.apply(collector.getResponse("star")));
-                feedDetailJson.put("comments", pagedFeedCommentsFunc.apply(collector.getResponse("comments")));
+        JSONObject feedDetailJson = new JSONObject();
+        feedDetailJson.put("feed", processFeed(feed));
+        feedDetailJson.put("product", processProduct(product));
+        feedDetailJson.put("staredUsers", stars);
+        feedDetailJson.put("comments", comments);
 
-                return feedDetailJson;
-            }
-        });
-    }
-
-    private List<MomiaHttpRequest> buildFeedDetailRequests(String utoken, long feedId, long productId) {
-        List<MomiaHttpRequest> requests = new ArrayList<MomiaHttpRequest>();
-        requests.add(buildFeedRequest(utoken, feedId));
-        requests.add(buildProductRequest(productId));
-        requests.add(buildStaredUsersRequest(feedId));
-        requests.add(buildFeedCommentsRequests(feedId));
-
-        return requests;
-    }
-
-    private MomiaHttpRequest buildFeedRequest(String utoken, long feedId) {
-        MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder().add("utoken", utoken);
-
-        return MomiaHttpRequest.GET("feed", true, url("feed", feedId), builder.build());
-    }
-
-    private MomiaHttpRequest buildProductRequest(long productId) {
-        MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder().add("full", false);
-
-        return MomiaHttpRequest.GET("product", true, url("product", productId), builder.build());
-    }
-
-    private MomiaHttpRequest buildStaredUsersRequest(long feedId) {
-        MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder()
-                .add("start", 0)
-                .add("count", Configuration.getInt("PageSize.Feed.Detail.Star"));
-
-        return MomiaHttpRequest.GET("star", true, url("feed", feedId, "star"), builder.build());
-    }
-
-    private MomiaHttpRequest buildFeedCommentsRequests(long feedId) {
-        MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder()
-                .add("start", 0)
-                .add("count", Configuration.getInt("PageSize.Feed.Detail.Comment"));
-
-        return MomiaHttpRequest.GET("comments", true, url("feed", feedId, "comment"), builder.build());
+        return ResponseMessage.SUCCESS(feedDetailJson);
     }
 
     @RequestMapping(value = "/delete", method = RequestMethod.POST)

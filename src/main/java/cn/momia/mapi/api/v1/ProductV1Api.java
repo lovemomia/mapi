@@ -1,7 +1,6 @@
 package cn.momia.mapi.api.v1;
 
 import cn.momia.mapi.common.config.Configuration;
-import cn.momia.mapi.common.http.MomiaHttpRequest;
 import cn.momia.mapi.web.response.ResponseMessage;
 import cn.momia.service.deal.api.DealServiceApi;
 import cn.momia.service.product.api.ProductServiceApi;
@@ -99,9 +98,7 @@ public class ProductV1Api extends AbstractV1Api {
     public ResponseMessage getDetail(@RequestParam long id) {
         if (id <= 0) return ResponseMessage.BAD_REQUEST;
 
-        MomiaHttpRequest request = MomiaHttpRequest.GET(url("product", id, "detail"));
-
-        return executeRequest(request);
+        return ResponseMessage.SUCCESS(productServiceApi.PRODUCT.getDetail(id));
     }
 
     @RequestMapping(value = "/order", method = RequestMethod.GET)

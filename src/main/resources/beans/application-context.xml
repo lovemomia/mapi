@@ -24,8 +24,6 @@
         <property name="domain" value="${Image.Domain}" />
     </bean>
 
-    <bean id="requestExecutor" class="cn.momia.mapi.common.http.MomiaHttpRequestExecutor" />
-
     <bean id="srviceApi" class="cn.momia.service.api.ServiceApi" abstract="true">
         <property name="service" value="${Service.Base}" />
     </bean>
