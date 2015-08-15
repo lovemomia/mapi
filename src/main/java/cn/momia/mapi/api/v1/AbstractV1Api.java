@@ -1,12 +1,8 @@
 package cn.momia.mapi.api.v1;
 
 import cn.momia.mapi.common.config.Configuration;
-import cn.momia.mapi.common.exception.MomiaExpiredException;
-import cn.momia.mapi.common.http.MomiaHttpParamBuilder;
-import cn.momia.mapi.common.http.MomiaHttpRequest;
 import cn.momia.mapi.common.img.ImageFile;
 import cn.momia.mapi.common.util.MetaUtil;
-import cn.momia.mapi.web.response.ResponseMessage;
 import cn.momia.mapi.api.AbstractApi;
 import cn.momia.service.deal.api.order.Order;
 import cn.momia.service.deal.api.order.PagedOrders;
@@ -78,7 +74,7 @@ public class AbstractV1Api extends AbstractApi {
         if (!StringUtils.isBlank(product.getCover())) product.setCover(ImageFile.largeUrl(product.getCover()));
         if (product.getImgs() != null) processImgs(product.getImgs());
         if (product.getContent() != null) processContent(product.getContent());
-        // TODO imgs content
+
         return product;
     }
 
@@ -213,19 +209,6 @@ public class AbstractV1Api extends AbstractApi {
         return imgs;
     }
 
-    protected Function<Object, Object> pagedFeedsFunc = new Function<Object, Object>() {
-        @Override
-        public Object apply(Object data) {
-            JSONArray feedsJson = ((JSONObject) data).getJSONArray("list");
-            for (int i = 0; i < feedsJson.size(); i++) {
-                JSONObject feedJson = feedsJson.getJSONObject(i);
-                feedFunc.apply(feedJson);
-            }
-
-            return data;
-        }
-    };
-
     protected Function<Object, Object> productFunc = new Function<Object, Object>() {
         @Override
         public Object apply(Object data) {
@@ -251,15 +234,5 @@ public class AbstractV1Api extends AbstractApi {
         }
 
         return imgs;
-    }
-
-    protected long getUserId(String utoken) {
-        MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder().add("utoken", utoken);
-        MomiaHttpRequest request = MomiaHttpRequest.GET(url("user"), builder.build());
-
-        ResponseMessage response = executeRequest(request);
-        if (response.successful()) return ((JSONObject) response.getData()).getLong("id");
-
-        throw new MomiaExpiredException();
     }
 }

@@ -3,13 +3,17 @@ package cn.momia.mapi.common.util;
 import cn.momia.service.common.api.CommonServiceApi;
 import cn.momia.service.common.api.city.City;
 import cn.momia.service.common.api.region.Region;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class MetaUtil {
-    private static Map<Integer, City> citiesMap;
-    private static Map<Integer, Region> regionsMap;
+    private static final Logger LOGGER = LoggerFactory.getLogger(MetaUtil.class);
+
+    private static Map<Integer, City> citiesMap = new HashMap<Integer, City>();
+    private static Map<Integer, Region> regionsMap = new HashMap<Integer, Region>();
 
     private CommonServiceApi commonServiceApi;
 
@@ -18,11 +22,15 @@ public class MetaUtil {
     }
 
     public void init() {
-        citiesMap = new HashMap<Integer, City>();
-        for (City city : commonServiceApi.CITY.getAll()) citiesMap.put(city.getId(), city);
+        try {
+            citiesMap = new HashMap<Integer, City>();
+            for (City city : commonServiceApi.CITY.getAll()) citiesMap.put(city.getId(), city);
 
-        regionsMap = new HashMap<Integer, Region>();
-        for (Region region : commonServiceApi.REGION.getAll()) regionsMap.put(region.getId(), region);
+            regionsMap = new HashMap<Integer, Region>();
+            for (Region region : commonServiceApi.REGION.getAll()) regionsMap.put(region.getId(), region);
+        } catch (Exception e) {
+            LOGGER.error("fail to init meta util");
+        }
     }
 
     public static String getCityName(int cityId) {
