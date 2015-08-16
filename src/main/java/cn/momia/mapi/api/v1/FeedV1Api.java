@@ -45,25 +45,6 @@ public class FeedV1Api extends AbstractV1Api {
         return ResponseMessage.SUCCESS(processPagedFeeds(feeds));
     }
 
-    private PagedFeeds processPagedFeeds(PagedFeeds feeds) {
-        for (Feed feed : feeds.getList()) {
-            processFeed(feed);
-        }
-
-        return feeds;
-    }
-
-    private Feed processFeed(Feed feed) {
-        feed.setAvatar(ImageFile.url(feed.getAvatar()));
-        if (feed.getImgs() != null) {
-            for (int i = 0; i < feed.getImgs().size(); i++) {
-                feed.getImgs().set(i, ImageFile.middleUrl(feed.getImgs().get(i)));
-            }
-        }
-
-        return feed;
-    }
-
     @RequestMapping(value = "/topic", method = RequestMethod.GET)
     public ResponseMessage topic(@RequestParam(defaultValue = "") String utoken,
                                  @RequestParam(value = "pid") long productId,
@@ -97,7 +78,7 @@ public class FeedV1Api extends AbstractV1Api {
         JSONObject feedJson = JSON.parseObject(feed);
         JSONObject baseFeedJson = feedJson.getJSONObject("baseFeed");
         if (baseFeedJson == null) return ResponseMessage.BAD_REQUEST;
-        baseFeedJson.put("userId", userServiceApi.USER.get(utoken));
+        baseFeedJson.put("userId", userServiceApi.USER.get(utoken).getId());
         feedServiceApi.add(feedJson);
 
         return ResponseMessage.SUCCESS;

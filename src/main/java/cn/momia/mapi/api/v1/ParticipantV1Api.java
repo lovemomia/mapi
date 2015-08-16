@@ -22,7 +22,7 @@ public class ParticipantV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken) || StringUtils.isBlank(participant)) return ResponseMessage.BAD_REQUEST;
 
         JSONObject paticipantJson = JSON.parseObject(participant);
-        paticipantJson.put("userId", userServiceApi.USER.get(utoken));
+        paticipantJson.put("userId", userServiceApi.USER.get(utoken).getId());
         userServiceApi.PARTICIPANT.add(JSON.toJavaObject(paticipantJson, Participant.class));
 
         return ResponseMessage.SUCCESS;
@@ -36,11 +36,11 @@ public class ParticipantV1Api extends AbstractV1Api {
     }
 
     @RequestMapping(value = "/update", method = RequestMethod.POST)
-    public ResponseMessage updateParticipant(@RequestParam String utoken, @RequestParam String participant) {
+    public ResponseMessage update(@RequestParam String utoken, @RequestParam String participant) {
         if (StringUtils.isBlank(utoken) || StringUtils.isBlank(participant)) return ResponseMessage.BAD_REQUEST;
 
         JSONObject paticipantJson = JSON.parseObject(participant);
-        paticipantJson.put("userId", userServiceApi.USER.get(utoken));
+        paticipantJson.put("userId", userServiceApi.USER.get(utoken).getId());
         userServiceApi.PARTICIPANT.update(JSON.toJavaObject(paticipantJson, Participant.class));
 
         return ResponseMessage.SUCCESS;

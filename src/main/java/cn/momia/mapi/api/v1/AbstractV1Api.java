@@ -1,5 +1,7 @@
 package cn.momia.mapi.api.v1;
 
+import cn.momia.api.feed.Feed;
+import cn.momia.api.feed.PagedFeeds;
 import cn.momia.mapi.common.config.Configuration;
 import cn.momia.mapi.common.img.ImageFile;
 import cn.momia.mapi.common.util.MetaUtil;
@@ -144,6 +146,25 @@ public class AbstractV1Api extends AbstractApi {
         }
 
         return playmates;
+    }
+
+    protected PagedFeeds processPagedFeeds(PagedFeeds feeds) {
+        for (Feed feed : feeds.getList()) {
+            processFeed(feed);
+        }
+
+        return feeds;
+    }
+
+    protected Feed processFeed(Feed feed) {
+        feed.setAvatar(ImageFile.url(feed.getAvatar()));
+        if (feed.getImgs() != null) {
+            for (int i = 0; i < feed.getImgs().size(); i++) {
+                feed.getImgs().set(i, ImageFile.middleUrl(feed.getImgs().get(i)));
+            }
+        }
+
+        return feed;
     }
 
     protected PagedFeedComments processPagedFeedComments(PagedFeedComments comments) {

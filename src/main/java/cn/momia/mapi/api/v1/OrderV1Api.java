@@ -24,7 +24,7 @@ public class OrderV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken) || StringUtils.isBlank(order)) return ResponseMessage.BAD_REQUEST;
 
         JSONObject orderJson = JSON.parseObject(order);
-        orderJson.put("customerId", userServiceApi.USER.get(utoken));
+        orderJson.put("customerId", userServiceApi.USER.get(utoken).getId());
         dealServiceApi.ORDER.add(orderJson);
 
         return ResponseMessage.SUCCESS;
