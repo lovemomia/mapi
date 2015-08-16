@@ -28,19 +28,63 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.List;
 
 public class AbstractV1Api extends AbstractApi {
-    protected User processUser(User user) {
-        String avatar = user.getAvatar();
-        if (!StringUtils.isBlank(avatar)) user.setAvatar(ImageFile.url(avatar));
-
-        return user;
-    }
-
-    protected List<String> processAvatars(List<String> avatars) {
-        for (int i = 0; i < avatars.size(); i++) {
-            avatars.set(i, ImageFile.url(avatars.get(i)));
+    protected PagedOrders processPagedOrders(PagedOrders orders) {
+        for (Order order : orders.getList()) {
+            processOrder(order);
         }
 
-        return avatars;
+        return orders;
+    }
+
+    protected Order processOrder(Order order) {
+        order.setCover(ImageFile.middleUrl(order.getCover()));
+
+        return order;
+    }
+
+    protected List<SkuPlaymates> processPlaymates(List<SkuPlaymates> playmates) {
+        for (SkuPlaymates skuPlaymates : playmates) {
+            for (Playmate playmate : skuPlaymates.getPlaymates()) {
+                playmate.setAvatar(ImageFile.url(playmate.getAvatar()));
+            }
+        }
+
+        return playmates;
+    }
+
+    protected PagedFeeds processPagedFeeds(PagedFeeds feeds) {
+        for (Feed feed : feeds.getList()) {
+            processFeed(feed);
+        }
+
+        return feeds;
+    }
+
+    protected Feed processFeed(Feed feed) {
+        feed.setAvatar(ImageFile.url(feed.getAvatar()));
+        if (feed.getImgs() != null) {
+            for (int i = 0; i < feed.getImgs().size(); i++) {
+                feed.getImgs().set(i, ImageFile.middleUrl(feed.getImgs().get(i)));
+            }
+        }
+
+        return feed;
+    }
+
+    protected PagedFeedComments processPagedFeedComments(PagedFeedComments comments) {
+        for (FeedComment feedComment : comments.getList()) {
+            feedComment.setAvatar(ImageFile.url(feedComment.getAvatar()));
+        }
+
+        return comments;
+    }
+
+    protected PagedFeedStars processPagedFeedStars(PagedFeedStars stars) {
+        for (FeedStar feedStar : stars.getList()) {
+            feedStar.setAvatar(ImageFile.url(feedStar.getAvatar()));
+        }
+
+        return stars;
     }
 
     protected List<Banner> processBanners(List<Banner> banners) {
@@ -124,63 +168,19 @@ public class AbstractV1Api extends AbstractApi {
         return products;
     }
 
-    protected PagedOrders processPagedOrders(PagedOrders orders) {
-        for (Order order : orders.getList()) {
-            processOrder(order);
-        }
+    protected User processUser(User user) {
+        String avatar = user.getAvatar();
+        if (!StringUtils.isBlank(avatar)) user.setAvatar(ImageFile.url(avatar));
 
-        return orders;
+        return user;
     }
 
-    protected Order processOrder(Order order) {
-        order.setCover(ImageFile.middleUrl(order.getCover()));
-
-        return order;
-    }
-
-    protected List<SkuPlaymates> processPlaymates(List<SkuPlaymates> playmates) {
-        for (SkuPlaymates skuPlaymates : playmates) {
-            for (Playmate playmate : skuPlaymates.getPlaymates()) {
-                playmate.setAvatar(ImageFile.url(playmate.getAvatar()));
-            }
+    protected List<String> processAvatars(List<String> avatars) {
+        for (int i = 0; i < avatars.size(); i++) {
+            avatars.set(i, ImageFile.url(avatars.get(i)));
         }
 
-        return playmates;
-    }
-
-    protected PagedFeeds processPagedFeeds(PagedFeeds feeds) {
-        for (Feed feed : feeds.getList()) {
-            processFeed(feed);
-        }
-
-        return feeds;
-    }
-
-    protected Feed processFeed(Feed feed) {
-        feed.setAvatar(ImageFile.url(feed.getAvatar()));
-        if (feed.getImgs() != null) {
-            for (int i = 0; i < feed.getImgs().size(); i++) {
-                feed.getImgs().set(i, ImageFile.middleUrl(feed.getImgs().get(i)));
-            }
-        }
-
-        return feed;
-    }
-
-    protected PagedFeedComments processPagedFeedComments(PagedFeedComments comments) {
-        for (FeedComment feedComment : comments.getList()) {
-            feedComment.setAvatar(ImageFile.url(feedComment.getAvatar()));
-        }
-
-        return comments;
-    }
-
-    protected PagedFeedStars processPagedFeedStars(PagedFeedStars stars) {
-        for (FeedStar feedStar : stars.getList()) {
-            feedStar.setAvatar(ImageFile.url(feedStar.getAvatar()));
-        }
-
-        return stars;
+        return avatars;
     }
 
     private String buildUrl(long id) {
