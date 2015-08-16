@@ -1,8 +1,8 @@
 package cn.momia.mapi.common.util;
 
-import cn.momia.service.common.api.CommonServiceApi;
-import cn.momia.service.common.api.city.City;
-import cn.momia.service.common.api.region.Region;
+import cn.momia.api.common.CommonServiceApi;
+import cn.momia.api.common.city.City;
+import cn.momia.api.common.region.Region;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

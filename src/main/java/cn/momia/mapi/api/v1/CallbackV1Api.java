@@ -2,7 +2,7 @@ package cn.momia.mapi.api.v1;
 
 import cn.momia.mapi.api.v1.misc.Xml;
 import cn.momia.mapi.common.util.XmlUtil;
-import cn.momia.service.deal.api.DealServiceApi;
+import cn.momia.api.deal.DealServiceApi;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

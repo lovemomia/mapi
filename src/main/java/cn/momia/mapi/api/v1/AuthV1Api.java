@@ -2,8 +2,8 @@ package cn.momia.mapi.api.v1;
 
 import cn.momia.mapi.web.response.ResponseMessage;
 import cn.momia.mapi.common.util.MobileUtil;
-import cn.momia.service.common.api.CommonServiceApi;
-import cn.momia.service.user.api.UserServiceApi;
+import cn.momia.api.common.CommonServiceApi;
+import cn.momia.api.user.UserServiceApi;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

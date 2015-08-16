@@ -1,10 +1,10 @@
 package cn.momia.mapi.api.v1;
 
 import cn.momia.mapi.web.response.ResponseMessage;
-import cn.momia.service.deal.api.DealServiceApi;
-import cn.momia.service.product.api.ProductServiceApi;
-import cn.momia.service.user.api.UserServiceApi;
-import cn.momia.service.user.api.user.User;
+import cn.momia.api.deal.DealServiceApi;
+import cn.momia.api.product.ProductServiceApi;
+import cn.momia.api.user.UserServiceApi;
+import cn.momia.api.user.User;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;

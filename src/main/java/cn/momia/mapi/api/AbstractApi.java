@@ -3,7 +3,7 @@ package cn.momia.mapi.api;
 import cn.momia.mapi.common.exception.MomiaExpiredException;
 import cn.momia.mapi.common.exception.MomiaFailedException;
 import cn.momia.mapi.web.response.ResponseMessage;
-import cn.momia.service.api.exception.MomiaException;
+import cn.momia.api.base.exception.MomiaException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.MissingServletRequestParameterException;

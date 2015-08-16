@@ -1,9 +1,9 @@
 package cn.momia.mapi.api.v1;
 
 import cn.momia.mapi.web.response.ResponseMessage;
-import cn.momia.service.deal.api.DealServiceApi;
-import cn.momia.service.user.api.UserServiceApi;
-import cn.momia.service.user.api.user.User;
+import cn.momia.api.deal.DealServiceApi;
+import cn.momia.api.user.UserServiceApi;
+import cn.momia.api.user.User;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
