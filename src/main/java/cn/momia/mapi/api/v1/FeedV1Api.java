@@ -53,7 +53,7 @@ public class FeedV1Api extends AbstractV1Api {
         if (topicId <= 0 || productId <= 0 || start < 0) return ResponseMessage.BAD_REQUEST;
 
         Product product = null;
-        if (start == 0) product = processProduct(productServiceApi.PRODUCT.get(productId, false));
+        if (start == 0) product = processProduct(productServiceApi.PRODUCT.get(productId, Product.Type.BASE));
 
         long userId = 0;
         try {
@@ -90,7 +90,7 @@ public class FeedV1Api extends AbstractV1Api {
 
         User user = userServiceApi.USER.get(utoken);
         Feed feed = feedServiceApi.FEED.get(user.getId(), id);
-        Product product = productServiceApi.PRODUCT.get(productId, false);
+        Product product = productServiceApi.PRODUCT.get(productId, Product.Type.BASE);
         List<FeedStar> stars = processPagedFeedStars(feedServiceApi.FEED.listStars(id, 0, Configuration.getInt("PageSize.Feed.Detail.Star"))).getList();
         List<FeedComment> comments = processPagedFeedComments(feedServiceApi.FEED.listComments(id, 0, Configuration.getInt("PageSize.Feed.Detail.Comment"))).getList();
 

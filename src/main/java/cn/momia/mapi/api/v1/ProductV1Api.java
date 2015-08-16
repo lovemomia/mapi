@@ -55,7 +55,7 @@ public class ProductV1Api extends AbstractV1Api {
     public ResponseMessage listSkusNeedLeader(@RequestParam(value = "pid") long id) {
         if (id <= 0) return ResponseMessage.BAD_REQUEST;
 
-        Product product = productServiceApi.PRODUCT.get(id, false);
+        Product product = productServiceApi.PRODUCT.get(id, Product.Type.BASE);
         List<Sku> skus = productServiceApi.SKU.listWithLeader(id);
 
         JSONObject productSkusJson = new JSONObject();
@@ -69,7 +69,7 @@ public class ProductV1Api extends AbstractV1Api {
     public ResponseMessage get(@RequestParam(defaultValue = "") String utoken, @RequestParam long id) {
         if (id <= 0) return ResponseMessage.BAD_REQUEST;
 
-        Product product = processProduct(productServiceApi.PRODUCT.get(id, true));
+        Product product = processProduct(productServiceApi.PRODUCT.get(id, Product.Type.FULL));
         if (!product.isOpened()) product.setSoldOut(true);
 
         JSONObject productJson = JSON.parseObject(JSON.toJSONString(product));

@@ -1,5 +1,6 @@
 package cn.momia.mapi.api.v1;
 
+import cn.momia.api.product.Product;
 import cn.momia.mapi.web.response.ResponseMessage;
 import cn.momia.api.deal.DealServiceApi;
 import cn.momia.api.product.ProductServiceApi;
@@ -69,7 +70,7 @@ public class PaymentV1Api extends AbstractV1Api {
         User user = userServiceApi.USER.get(utoken);
         dealServiceApi.PAYMENT.prepayFree(user.getId(), orderId, productId, skuId, coupon);
 
-        return ResponseMessage.SUCCESS(processProduct(productServiceApi.PRODUCT.get(productId, false)));
+        return ResponseMessage.SUCCESS(processProduct(productServiceApi.PRODUCT.get(productId, Product.Type.MINI)));
     }
 
     @RequestMapping(value = "/check", method = RequestMethod.POST)
@@ -85,6 +86,6 @@ public class PaymentV1Api extends AbstractV1Api {
         User user = userServiceApi.USER.get(utoken);
         dealServiceApi.PAYMENT.check(user.getId(), orderId, productId, skuId);
 
-        return ResponseMessage.SUCCESS(processProduct(productServiceApi.PRODUCT.get(productId, false)));
+        return ResponseMessage.SUCCESS(processProduct(productServiceApi.PRODUCT.get(productId, Product.Type.MINI)));
     }
 }
