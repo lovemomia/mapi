@@ -25,9 +25,8 @@ public class OrderV1Api extends AbstractV1Api {
 
         JSONObject orderJson = JSON.parseObject(order);
         orderJson.put("customerId", userServiceApi.USER.get(utoken).getId());
-        dealServiceApi.ORDER.add(orderJson);
 
-        return ResponseMessage.SUCCESS;
+        return ResponseMessage.SUCCESS(processOrder(dealServiceApi.ORDER.add(orderJson)));
     }
 
     @RequestMapping(value = "/delete", method = RequestMethod.POST)
