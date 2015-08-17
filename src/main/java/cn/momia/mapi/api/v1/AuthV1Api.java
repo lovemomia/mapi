@@ -23,7 +23,7 @@ public class AuthV1Api extends AbstractV1Api {
 
     @RequestMapping(value = "/send", method = RequestMethod.POST)
     public ResponseMessage send(@RequestParam String mobile, @RequestParam(defaultValue = "login") String type)  {
-        if (MobileUtil.isInvalidMobile(mobile)) return ResponseMessage.BAD_REQUEST;
+        if (MobileUtil.isInvalidMobile(mobile)) return ResponseMessage.FAILED("无效的手机号码，请检查输入");
 
         commonServiceApi.SMS.send(mobile, type);
 
@@ -35,10 +35,10 @@ public class AuthV1Api extends AbstractV1Api {
                                     @RequestParam String mobile,
                                     @RequestParam String password,
                                     @RequestParam String code) {
+        if (MobileUtil.isInvalidMobile(mobile)) return ResponseMessage.FAILED("无效的手机号码，请检查输入");
         if (StringUtils.isBlank(nickName) ||
-                MobileUtil.isInvalidMobile(mobile) ||
                 StringUtils.isBlank(password) ||
-                StringUtils.isBlank(code)) return ResponseMessage.BAD_REQUEST;
+                StringUtils.isBlank(code)) return ResponseMessage.FAILED("昵称、密码和验证码都不能为空");
 
         // TODO 发红包
         return ResponseMessage.SUCCESS(processUser(userServiceApi.USER.register(nickName, mobile, password, code)));
@@ -48,7 +48,8 @@ public class AuthV1Api extends AbstractV1Api {
     public ResponseMessage login(@RequestParam String mobile, @RequestParam String password) {
         LOGGER.info("login by password: {}", mobile);
 
-        if (MobileUtil.isInvalidMobile(mobile) || StringUtils.isBlank(password)) return ResponseMessage.BAD_REQUEST;
+        if (MobileUtil.isInvalidMobile(mobile)) return ResponseMessage.FAILED("无效的手机号码，请检查输入");
+        if (StringUtils.isBlank(password)) return ResponseMessage.FAILED("密码不能为空");
 
         return ResponseMessage.SUCCESS(processUser(userServiceApi.USER.login(mobile, password)));
     }
@@ -57,14 +58,16 @@ public class AuthV1Api extends AbstractV1Api {
     public ResponseMessage loginByCode(@RequestParam String mobile, @RequestParam String code) {
         LOGGER.info("login by code: {}", mobile);
 
-        if (MobileUtil.isInvalidMobile(mobile) || StringUtils.isBlank(code)) return ResponseMessage.BAD_REQUEST;
+        if (MobileUtil.isInvalidMobile(mobile)) return ResponseMessage.FAILED("无效的手机号码，请检查输入");
+        if (StringUtils.isBlank(code)) return ResponseMessage.FAILED("验证码不能为空");
 
         return ResponseMessage.SUCCESS(processUser(userServiceApi.USER.loginByCode(mobile, code)));
     }
 
     @RequestMapping(value = "/password", method = RequestMethod.POST)
     public ResponseMessage updatePassword(@RequestParam String mobile, @RequestParam String password, @RequestParam String code) {
-        if (MobileUtil.isInvalidMobile(mobile) || StringUtils.isBlank(password) || StringUtils.isBlank(code)) return ResponseMessage.BAD_REQUEST;
+        if (MobileUtil.isInvalidMobile(mobile)) return ResponseMessage.FAILED("无效的手机号码，请检查输入");
+        if (StringUtils.isBlank(password) || StringUtils.isBlank(code)) return ResponseMessage.FAILED("密码和验证码都不能为空");
 
         return ResponseMessage.SUCCESS(processUser(userServiceApi.USER.updatePassword(mobile, password, code)));
     }
