@@ -6,7 +6,6 @@ import cn.momia.api.product.ProductServiceApi;
 import cn.momia.api.product.PagedProducts;
 import cn.momia.api.product.topic.Banner;
 import com.alibaba.fastjson.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -17,8 +16,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/v1/home")
 public class HomeV1Api extends AbstractV1Api {
-    @Autowired private ProductServiceApi productServiceApi;
-
     @RequestMapping(method = RequestMethod.GET)
     public ResponseMessage home(@RequestParam(value = "city") int cityId, @RequestParam(value = "pageindex") final int pageIndex) {
         if (cityId < 0 || pageIndex < 0) return ResponseMessage.BAD_REQUEST;
@@ -28,8 +25,8 @@ public class HomeV1Api extends AbstractV1Api {
         final int count = pageSize;
 
         List<Banner> banners = null;
-        if (start== 0) banners = productServiceApi.TOPIC.listBanners(cityId, Configuration.getInt("PageSize.Banner"));
-        PagedProducts products = productServiceApi.PRODUCT.list(cityId, start, count);
+        if (start== 0) banners = ProductServiceApi.TOPIC.listBanners(cityId, Configuration.getInt("PageSize.Banner"));
+        PagedProducts products = ProductServiceApi.PRODUCT.list(cityId, start, count);
 
         return ResponseMessage.SUCCESS(buildHomeResponse(banners, products, start, count, pageIndex));
     }

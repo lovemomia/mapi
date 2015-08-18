@@ -10,7 +10,6 @@ import cn.momia.api.user.User;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -26,16 +25,13 @@ public class LeaderV1Api extends AbstractV1Api {
         public static final int REJECTED = 3;
     }
 
-    @Autowired private UserServiceApi userServiceApi;
-    @Autowired private ProductServiceApi productServiceApi;
-
     @RequestMapping(value = "/status", method = RequestMethod.GET)
     public ResponseMessage getStatus(@RequestParam String utoken) {
         if (StringUtils.isBlank(utoken)) return ResponseMessage.BAD_REQUEST;
 
         JSONObject statusJson = new JSONObject();
 
-        LeaderStatus leaderStatus = userServiceApi.LEADER.getStatus(utoken);
+        LeaderStatus leaderStatus = UserServiceApi.LEADER.getStatus(utoken);
         statusJson.put("status", leaderStatus.getStatus());
         statusJson.put("msg", leaderStatus.getMsg());
 
@@ -60,18 +56,18 @@ public class LeaderV1Api extends AbstractV1Api {
     public ResponseMessage getLedProducts(@RequestParam String utoken, @RequestParam int start) {
         if (StringUtils.isBlank(utoken) || start < 0) return ResponseMessage.BAD_REQUEST;
 
-        User user = userServiceApi.USER.get(utoken);
-        return ResponseMessage.SUCCESS(processPagedProducts(productServiceApi.SKU.getLedProducts(user.getId(), start, Configuration.getInt("PageSize.Leader.Product"))));
+        User user = UserServiceApi.USER.get(utoken);
+        return ResponseMessage.SUCCESS(processPagedProducts(ProductServiceApi.SKU.getLedProducts(user.getId(), start, Configuration.getInt("PageSize.Leader.Product"))));
     }
 
     @RequestMapping(value = "/apply", method = RequestMethod.POST)
     public ResponseMessage apply(@RequestParam String utoken, @RequestParam(value = "pid") long productId, @RequestParam(value = "sid") long skuId) {
         if (StringUtils.isBlank(utoken) || productId <= 0 || skuId <= 0) return ResponseMessage.BAD_REQUEST;
 
-        Leader leader = userServiceApi.LEADER.get(utoken);
+        Leader leader = UserServiceApi.LEADER.get(utoken);
         if (leader.getStatus() != Status.PASSED) return ResponseMessage.FAILED("您注册成为领队的请求还没通过审核，暂时不能当领队");
 
-        productServiceApi.SKU.applyLeader(leader.getUserId(), productId, skuId);
+        ProductServiceApi.SKU.applyLeader(leader.getUserId(), productId, skuId);
 
         return ResponseMessage.SUCCESS;
     }
@@ -81,8 +77,8 @@ public class LeaderV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken) || StringUtils.isBlank(leader)) return ResponseMessage.BAD_REQUEST;
 
         JSONObject leaderJson = JSON.parseObject(leader);
-        leaderJson.put("userId", userServiceApi.USER.get(utoken).getId());
-        userServiceApi.LEADER.add(JSON.toJavaObject(leaderJson, Leader.class));
+        leaderJson.put("userId", UserServiceApi.USER.get(utoken).getId());
+        UserServiceApi.LEADER.add(JSON.toJavaObject(leaderJson, Leader.class));
 
         return ResponseMessage.SUCCESS;
     }
@@ -92,8 +88,8 @@ public class LeaderV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken) || StringUtils.isBlank(leader)) return ResponseMessage.BAD_REQUEST;
 
         JSONObject leaderJson = JSON.parseObject(leader);
-        leaderJson.put("userId", userServiceApi.USER.get(utoken).getId());
-        userServiceApi.LEADER.update(JSON.toJavaObject(leaderJson, Leader.class));
+        leaderJson.put("userId", UserServiceApi.USER.get(utoken).getId());
+        UserServiceApi.LEADER.update(JSON.toJavaObject(leaderJson, Leader.class));
 
         return ResponseMessage.SUCCESS;
     }
@@ -102,7 +98,7 @@ public class LeaderV1Api extends AbstractV1Api {
     public ResponseMessage delete(@RequestParam String utoken) {
         if (StringUtils.isBlank(utoken)) return ResponseMessage.BAD_REQUEST;
 
-        userServiceApi.LEADER.delete(utoken);
+        UserServiceApi.LEADER.delete(utoken);
 
         return ResponseMessage.SUCCESS;
     }

@@ -14,7 +14,6 @@ import cn.momia.api.user.User;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -28,78 +27,74 @@ import java.util.List;
 @RestController
 @RequestMapping("/v1/user")
 public class UserV1Api extends AbstractV1Api {
-    @Autowired private DealServiceApi dealServiceApi;
-    @Autowired private ProductServiceApi productServiceApi;
-    @Autowired private UserServiceApi userServiceApi;
-
     @RequestMapping(method = RequestMethod.GET)
     public ResponseMessage getUser(@RequestParam String utoken) {
         if (StringUtils.isBlank(utoken)) return ResponseMessage.BAD_REQUEST;
 
-        return ResponseMessage.SUCCESS(processUser(userServiceApi.USER.get(utoken)));
+        return ResponseMessage.SUCCESS(processUser(UserServiceApi.USER.get(utoken)));
     }
 
     @RequestMapping(value = "/nickname", method = RequestMethod.POST)
     public ResponseMessage updateNickName(@RequestParam String utoken, @RequestParam(value = "nickname") String nickName) {
         if(StringUtils.isBlank(utoken) || StringUtils.isBlank(nickName)) return ResponseMessage.BAD_REQUEST;
 
-        return ResponseMessage.SUCCESS(processUser(userServiceApi.USER.updateNickName(utoken, nickName)));
+        return ResponseMessage.SUCCESS(processUser(UserServiceApi.USER.updateNickName(utoken, nickName)));
     }
 
     @RequestMapping(value = "/avatar", method = RequestMethod.POST)
     public ResponseMessage updateAvatar(@RequestParam String utoken, @RequestParam String avatar) {
         if(StringUtils.isBlank(utoken) || StringUtils.isBlank(avatar)) return ResponseMessage.BAD_REQUEST;
 
-        return ResponseMessage.SUCCESS(processUser(userServiceApi.USER.updateAvatar(utoken, avatar)));
+        return ResponseMessage.SUCCESS(processUser(UserServiceApi.USER.updateAvatar(utoken, avatar)));
     }
 
     @RequestMapping(value = "/name", method = RequestMethod.POST)
     public ResponseMessage updateName(@RequestParam String utoken, @RequestParam String name) {
         if(StringUtils.isBlank(utoken) || StringUtils.isBlank(name)) return ResponseMessage.BAD_REQUEST;
 
-        return ResponseMessage.SUCCESS(processUser(userServiceApi.USER.updateName(utoken, name)));
+        return ResponseMessage.SUCCESS(processUser(UserServiceApi.USER.updateName(utoken, name)));
     }
 
     @RequestMapping(value = "/sex", method = RequestMethod.POST)
     public ResponseMessage updateSex(@RequestParam String utoken, @RequestParam String sex) {
         if(StringUtils.isBlank(utoken) || StringUtils.isBlank(sex)) return ResponseMessage.BAD_REQUEST;
 
-        return ResponseMessage.SUCCESS(processUser(userServiceApi.USER.updateSex(utoken, sex)));
+        return ResponseMessage.SUCCESS(processUser(UserServiceApi.USER.updateSex(utoken, sex)));
     }
 
     @RequestMapping(value = "/birthday", method = RequestMethod.POST)
     public ResponseMessage updateBirthday(@RequestParam String utoken, @RequestParam @DateTimeFormat(pattern="yyyy-MM-dd") Date birthday) {
         if(StringUtils.isBlank(utoken)) return ResponseMessage.BAD_REQUEST;
 
-        return ResponseMessage.SUCCESS(processUser(userServiceApi.USER.updateBirthday(utoken, birthday)));
+        return ResponseMessage.SUCCESS(processUser(UserServiceApi.USER.updateBirthday(utoken, birthday)));
     }
 
     @RequestMapping(value = "/city", method = RequestMethod.POST)
     public ResponseMessage updateCity(@RequestParam String utoken, @RequestParam(value = "city") int cityId) {
         if(StringUtils.isBlank(utoken) || cityId <= 0) return ResponseMessage.BAD_REQUEST;
 
-        return ResponseMessage.SUCCESS(processUser(userServiceApi.USER.updateCity(utoken, cityId)));
+        return ResponseMessage.SUCCESS(processUser(UserServiceApi.USER.updateCity(utoken, cityId)));
     }
 
     @RequestMapping(value = "/region", method = RequestMethod.POST)
     public ResponseMessage updateRegion(@RequestParam String utoken, @RequestParam(value = "region") int regionId) {
         if(StringUtils.isBlank(utoken) || regionId <= 0) return ResponseMessage.BAD_REQUEST;
 
-        return ResponseMessage.SUCCESS(processUser(userServiceApi.USER.updateRegion(utoken, regionId)));
+        return ResponseMessage.SUCCESS(processUser(UserServiceApi.USER.updateRegion(utoken, regionId)));
     }
 
     @RequestMapping(value = "/address", method = RequestMethod.POST)
     public ResponseMessage updateAddress(@RequestParam String utoken, @RequestParam String address) {
         if(StringUtils.isBlank(utoken) || StringUtils.isBlank(address)) return ResponseMessage.BAD_REQUEST;
 
-        return ResponseMessage.SUCCESS(processUser(userServiceApi.USER.updateAddress(utoken, address)));
+        return ResponseMessage.SUCCESS(processUser(UserServiceApi.USER.updateAddress(utoken, address)));
     }
 
     @RequestMapping(value = "/child", method = RequestMethod.POST)
     public ResponseMessage addChild(@RequestParam String utoken, @RequestParam String children) {
         if(StringUtils.isBlank(utoken) || StringUtils.isBlank(children)) return ResponseMessage.BAD_REQUEST;
 
-        long userId = userServiceApi.USER.get(utoken).getId();
+        long userId = UserServiceApi.USER.get(utoken).getId();
         List<Participant> participants = new ArrayList<Participant>();
         JSONArray childrenJson = JSONArray.parseArray(children);
         for (int i = 0; i < childrenJson.size(); i++) {
@@ -108,14 +103,14 @@ public class UserV1Api extends AbstractV1Api {
             participants.add(participant);
         }
 
-        return ResponseMessage.SUCCESS(processUser(userServiceApi.USER.addChildren(participants)));
+        return ResponseMessage.SUCCESS(processUser(UserServiceApi.USER.addChildren(participants)));
     }
 
     @RequestMapping(value = "/child", method = RequestMethod.GET)
     public ResponseMessage getChild(@RequestParam String utoken, @RequestParam(value = "cid") long childId) {
         if(StringUtils.isBlank(utoken) || childId <= 0) return ResponseMessage.BAD_REQUEST;
 
-        return ResponseMessage.SUCCESS(userServiceApi.USER.getChild(utoken, childId));
+        return ResponseMessage.SUCCESS(UserServiceApi.USER.getChild(utoken, childId));
     }
 
     @RequestMapping(value = "/child/name", method = RequestMethod.POST)
@@ -124,7 +119,7 @@ public class UserV1Api extends AbstractV1Api {
                                            @RequestParam String name) {
         if (StringUtils.isBlank(utoken) || childId <= 0 || StringUtils.isBlank(name)) return ResponseMessage.BAD_REQUEST;
 
-        return ResponseMessage.SUCCESS(processUser(userServiceApi.USER.updateChildName(utoken, childId, name)));
+        return ResponseMessage.SUCCESS(processUser(UserServiceApi.USER.updateChildName(utoken, childId, name)));
     }
 
     @RequestMapping(value = "/child/sex", method = RequestMethod.POST)
@@ -133,7 +128,7 @@ public class UserV1Api extends AbstractV1Api {
                                           @RequestParam String sex) {
         if (StringUtils.isBlank(utoken) || childId <= 0 || StringUtils.isBlank(sex)) return ResponseMessage.BAD_REQUEST;
 
-        return ResponseMessage.SUCCESS(processUser(userServiceApi.USER.updateChildSex(utoken, childId, sex)));
+        return ResponseMessage.SUCCESS(processUser(UserServiceApi.USER.updateChildSex(utoken, childId, sex)));
     }
 
     @RequestMapping(value = "/child/birthday", method = RequestMethod.POST)
@@ -142,21 +137,21 @@ public class UserV1Api extends AbstractV1Api {
                                                @RequestParam @DateTimeFormat(pattern="yyyy-MM-dd") Date birthday) {
         if (StringUtils.isBlank(utoken) || childId <= 0) return ResponseMessage.BAD_REQUEST;
 
-        return ResponseMessage.SUCCESS(processUser(userServiceApi.USER.updateChildBirthday(utoken, childId, birthday)));
+        return ResponseMessage.SUCCESS(processUser(UserServiceApi.USER.updateChildBirthday(utoken, childId, birthday)));
     }
 
     @RequestMapping(value = "/child/delete", method = RequestMethod.POST)
     public ResponseMessage deleteChild(@RequestParam String utoken, @RequestParam(value = "cid") long childId) {
         if(StringUtils.isBlank(utoken) || childId <= 0) return ResponseMessage.BAD_REQUEST;
 
-        return ResponseMessage.SUCCESS(processUser(userServiceApi.USER.deleteChild(utoken, childId)));
+        return ResponseMessage.SUCCESS(processUser(UserServiceApi.USER.deleteChild(utoken, childId)));
     }
 
     @RequestMapping(value = "/child/list", method = RequestMethod.GET)
     public ResponseMessage listChildren(@RequestParam String utoken) {
         if (StringUtils.isBlank(utoken)) return ResponseMessage.BAD_REQUEST;
 
-        return ResponseMessage.SUCCESS(userServiceApi.USER.listChildren(utoken));
+        return ResponseMessage.SUCCESS(UserServiceApi.USER.listChildren(utoken));
     }
 
     @RequestMapping(value = "/order", method = RequestMethod.GET)
@@ -165,8 +160,8 @@ public class UserV1Api extends AbstractV1Api {
                                       @RequestParam int start) {
         if (StringUtils.isBlank(utoken) || start < 0) return ResponseMessage.BAD_REQUEST;
 
-        User user = userServiceApi.USER.get(utoken);
-        PagedOrders orders = processPagedOrders(dealServiceApi.ORDER.listOrders(user.getId(), status < 0 ? 1 : status, start, Configuration.getInt("PageSize.Order")));
+        User user = UserServiceApi.USER.get(utoken);
+        PagedOrders orders = processPagedOrders(DealServiceApi.ORDER.listOrders(user.getId(), status < 0 ? 1 : status, start, Configuration.getInt("PageSize.Order")));
 
         return ResponseMessage.SUCCESS(orders);
     }
@@ -177,8 +172,8 @@ public class UserV1Api extends AbstractV1Api {
                                           @RequestParam(value = "pid") long productId) {
         if (StringUtils.isBlank(utoken) || orderId <= 0 || productId <= 0) return ResponseMessage.BAD_REQUEST;
 
-        User user = userServiceApi.USER.get(utoken);
-        Order order = processOrder(dealServiceApi.ORDER.get(user.getId(), orderId, productId));
+        User user = UserServiceApi.USER.get(utoken);
+        Order order = processOrder(DealServiceApi.ORDER.get(user.getId(), orderId, productId));
 
         return ResponseMessage.SUCCESS(order);
     }
@@ -190,8 +185,8 @@ public class UserV1Api extends AbstractV1Api {
                                        @RequestParam int start) {
         if (StringUtils.isBlank(utoken) || orderId < 0 || status < 0 || start < 0) return ResponseMessage.BAD_REQUEST;
 
-        User user = userServiceApi.USER.get(utoken);
-        PagedCoupons coupons = dealServiceApi.COUPON.listCoupons(user.getId(), orderId, status, start, Configuration.getInt("PageSize.Coupon"));
+        User user = UserServiceApi.USER.get(utoken);
+        PagedCoupons coupons = DealServiceApi.COUPON.listCoupons(user.getId(), orderId, status, start, Configuration.getInt("PageSize.Coupon"));
 
         return ResponseMessage.SUCCESS(coupons);
     }
@@ -200,8 +195,8 @@ public class UserV1Api extends AbstractV1Api {
     public ResponseMessage getFavoritesOfUser(@RequestParam String utoken, @RequestParam int start) {
         if (StringUtils.isBlank(utoken) || start < 0) return ResponseMessage.BAD_REQUEST;
 
-        User user = userServiceApi.USER.get(utoken);
-        PagedProducts favorites = productServiceApi.FAVORITE.listFavorites(user.getId(), start, Configuration.getInt("PageSize.Favorite"));
+        User user = UserServiceApi.USER.get(utoken);
+        PagedProducts favorites = ProductServiceApi.FAVORITE.listFavorites(user.getId(), start, Configuration.getInt("PageSize.Favorite"));
 
         return ResponseMessage.SUCCESS(processPagedProducts(favorites));
     }
