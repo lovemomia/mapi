@@ -126,6 +126,33 @@
             <version>5.1.35</version>
         </dependency>
 
+        <!-- Momia Api -->
+        <dependency>
+            <groupId>cn.momia</groupId>
+            <artifactId>duola-api-common</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>cn.momia</groupId>
+            <artifactId>duola-api-deal</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>cn.momia</groupId>
+            <artifactId>duola-api-feed</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>cn.momia</groupId>
+            <artifactId>duola-api-product</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>cn.momia</groupId>
+            <artifactId>duola-api-user</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
         <!-- Logger -->
         <dependency>
             <groupId>org.slf4j</groupId>

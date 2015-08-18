@@ -29,7 +29,7 @@ public class ImageFile {
     }
 
     public static String url(String path, String size) {
-        if (path == null || path.length() == 0) return "";
+        if (StringUtils.isBlank(path)) return "";
         if (path.startsWith("http://")) return path;
         if (!path.startsWith("/")) path = "/" + path;
 

@@ -1,9 +1,13 @@
 package cn.momia.mapi.api.v1;
 
-import cn.momia.mapi.common.http.MomiaHttpParamBuilder;
-import cn.momia.mapi.common.http.MomiaHttpRequest;
+import cn.momia.api.product.Product;
 import cn.momia.mapi.web.response.ResponseMessage;
+import cn.momia.api.deal.DealServiceApi;
+import cn.momia.api.product.ProductServiceApi;
+import cn.momia.api.user.UserServiceApi;
+import cn.momia.api.user.User;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -12,6 +16,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/v1/payment")
 public class PaymentV1Api extends AbstractV1Api {
+    @Autowired private DealServiceApi dealServiceApi;
+    @Autowired private ProductServiceApi productServiceApi;
+    @Autowired private UserServiceApi userServiceApi;
+
     @RequestMapping(value = "/prepay/alipay", method = RequestMethod.POST)
     public ResponseMessage prepayAlipay(@RequestParam String utoken,
                                         @RequestParam(value = "oid") long orderId,
@@ -24,16 +32,8 @@ public class PaymentV1Api extends AbstractV1Api {
                 productId <= 0 ||
                 skuId <= 0) return ResponseMessage.BAD_REQUEST;
 
-        MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder()
-                .add("utoken", utoken)
-                .add("oid", orderId)
-                .add("pid", productId)
-                .add("sid", skuId)
-                .add("type", type);
-        if (coupon != null && coupon > 0) builder.add("coupon", coupon);
-        MomiaHttpRequest request = MomiaHttpRequest.POST(url("payment/prepay/alipay"), builder.build());
-
-        return executeRequest(request);
+        User user = userServiceApi.USER.get(utoken);
+        return ResponseMessage.SUCCESS(dealServiceApi.PAYMENT.prepayAlipay(user.getId(), orderId, productId, skuId, type, coupon));
     }
 
     @RequestMapping(value = "/prepay/wechatpay", method = RequestMethod.POST)
@@ -52,17 +52,8 @@ public class PaymentV1Api extends AbstractV1Api {
 
         if (tradeType.equals("JSAPI") && StringUtils.isBlank(code)) return ResponseMessage.BAD_REQUEST;
 
-        MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder()
-                .add("utoken", utoken)
-                .add("oid", orderId)
-                .add("pid", productId)
-                .add("sid", skuId)
-                .add("trade_type", tradeType);
-        if (coupon != null && coupon > 0) builder.add("coupon", coupon);
-        if (!StringUtils.isBlank(code)) builder.add("code", code);
-        MomiaHttpRequest request = MomiaHttpRequest.POST(url("payment/prepay/wechatpay"), builder.build());
-
-        return executeRequest(request);
+        User user = userServiceApi.USER.get(utoken);
+        return ResponseMessage.SUCCESS(dealServiceApi.PAYMENT.prepayWechatpay(user.getId(), orderId, productId, skuId, tradeType, coupon, code));
     }
 
     @RequestMapping(value = "/prepay/free", method = RequestMethod.POST)
@@ -76,15 +67,10 @@ public class PaymentV1Api extends AbstractV1Api {
                 productId <= 0 ||
                 skuId <= 0) return ResponseMessage.BAD_REQUEST;
 
-        MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder()
-                .add("utoken", utoken)
-                .add("oid", orderId)
-                .add("pid", productId)
-                .add("sid", skuId);
-        if (coupon != null && coupon > 0) builder.add("coupon", coupon);
-        MomiaHttpRequest request = MomiaHttpRequest.POST(url("payment/prepay/free"), builder.build());
+        User user = userServiceApi.USER.get(utoken);
+        dealServiceApi.PAYMENT.prepayFree(user.getId(), orderId, productId, skuId, coupon);
 
-        return executeRequest(request, productFunc);
+        return ResponseMessage.SUCCESS(processProduct(productServiceApi.PRODUCT.get(productId, Product.Type.MINI)));
     }
 
     @RequestMapping(value = "/check", method = RequestMethod.POST)
@@ -97,13 +83,9 @@ public class PaymentV1Api extends AbstractV1Api {
                 productId <= 0 ||
                 skuId <= 0) return ResponseMessage.BAD_REQUEST;
 
-        MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder()
-                .add("utoken", utoken)
-                .add("oid", orderId)
-                .add("pid", productId)
-                .add("sid", skuId);
-        MomiaHttpRequest request = MomiaHttpRequest.GET(url("payment/check"), builder.build());
+        User user = userServiceApi.USER.get(utoken);
+        dealServiceApi.PAYMENT.check(user.getId(), orderId, productId, skuId);
 
-        return executeRequest(request, productFunc);
+        return ResponseMessage.SUCCESS(processProduct(productServiceApi.PRODUCT.get(productId, Product.Type.MINI)));
     }
 }

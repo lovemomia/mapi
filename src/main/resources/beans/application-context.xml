@@ -24,5 +24,17 @@
         <property name="domain" value="${Image.Domain}" />
     </bean>
 
-    <bean id="requestExecutor" class="cn.momia.mapi.common.http.MomiaHttpRequestExecutor" />
+    <bean id="srviceApi" class="cn.momia.api.base.ServiceApi" abstract="true">
+        <property name="service" value="${Service.Base}" />
+    </bean>
+
+    <bean id="commonServiceApi" class="cn.momia.api.common.CommonServiceApi" parent="srviceApi" init-method="init" />
+    <bean id="dealServiceApi" class="cn.momia.api.deal.DealServiceApi" parent="srviceApi" init-method="init" />
+    <bean id="feedServiceApi" class="cn.momia.api.feed.FeedServiceApi" parent="srviceApi" init-method="init" />
+    <bean id="productServiceApi" class="cn.momia.api.product.ProductServiceApi" parent="srviceApi" init-method="init" />
+    <bean id="userServiceApi" class="cn.momia.api.user.UserServiceApi" parent="srviceApi" init-method="init" />
+
+    <bean class="cn.momia.mapi.common.util.MetaUtil" init-method="init">
+        <property name="commonServiceApi" ref="commonServiceApi" />
+    </bean>
 </beans>

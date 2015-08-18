@@ -1,214 +1,164 @@
 package cn.momia.mapi.api.v1;
 
 import cn.momia.mapi.common.config.Configuration;
-import cn.momia.mapi.common.http.MomiaHttpParamBuilder;
-import cn.momia.mapi.common.http.MomiaHttpRequest;
-import cn.momia.mapi.common.http.MomiaHttpResponseCollector;
+import cn.momia.mapi.common.img.ImageFile;
 import cn.momia.mapi.web.response.ResponseMessage;
+import cn.momia.api.feed.FeedServiceApi;
+import cn.momia.api.feed.comment.FeedComment;
+import cn.momia.api.feed.comment.PagedFeedComments;
+import cn.momia.api.feed.Feed;
+import cn.momia.api.feed.PagedFeeds;
+import cn.momia.api.feed.star.FeedStar;
+import cn.momia.api.product.ProductServiceApi;
+import cn.momia.api.product.Product;
+import cn.momia.api.user.UserServiceApi;
+import cn.momia.api.user.User;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.google.common.base.Function;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
 @RequestMapping("/v1/feed")
 public class FeedV1Api extends AbstractV1Api {
+    private static final Logger LOGGER = LoggerFactory.getLogger(FeedV1Api.class);
+
+    @Autowired private FeedServiceApi feedServiceApi;
+    @Autowired private ProductServiceApi productServiceApi;
+    @Autowired private UserServiceApi userServiceApi;
+
     @RequestMapping(method = RequestMethod.GET)
-    public ResponseMessage getFeeds(@RequestParam String utoken, @RequestParam int start) {
+    public ResponseMessage list(@RequestParam String utoken, @RequestParam int start) {
         if (StringUtils.isBlank(utoken) || start < 0) return ResponseMessage.BAD_REQUEST;
 
-        MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder()
-                .add("utoken", utoken)
-                .add("start", start)
-                .add("count", Configuration.getInt("PageSize.Feed.List"));
-        MomiaHttpRequest request = MomiaHttpRequest.GET(url("feed"), builder.build());
+        User user = userServiceApi.USER.get(utoken);
+        PagedFeeds feeds = feedServiceApi.FEED.list(user.getId(), start, Configuration.getInt("PageSize.Feed.List"));
 
-        return executeRequest(request, pagedFeedsFunc);
-    }
-
-    @RequestMapping(value = "/add", method = RequestMethod.POST)
-    public ResponseMessage addFeed(@RequestParam String utoken, @RequestParam String feed) {
-        if (StringUtils.isBlank(utoken) || StringUtils.isBlank(feed)) return ResponseMessage.BAD_REQUEST;
-
-        long userId = getUserId(utoken);
-        JSONObject feedJson = JSON.parseObject(feed);
-        JSONObject baseFeedJson = feedJson.getJSONObject("baseFeed");
-        if (baseFeedJson == null) return ResponseMessage.BAD_REQUEST;
-
-        baseFeedJson.put("userId", userId);
-        MomiaHttpRequest request = MomiaHttpRequest.POST(url("feed"), feedJson.toString());
-
-        return executeRequest(request);
-    }
-
-    @RequestMapping(value = "/detail", method = RequestMethod.GET)
-    public ResponseMessage feedDetail(@RequestParam(defaultValue = "") String utoken, @RequestParam long id, @RequestParam(value = "pid") long productId) {
-        if (id <= 0 || productId <= 0) return ResponseMessage.BAD_REQUEST;
-
-        List<MomiaHttpRequest> requests = buildFeedDetailRequests(utoken, id, productId);
-
-        return executeRequests(requests, new Function<MomiaHttpResponseCollector, Object>() {
-            @Override
-            public Object apply(MomiaHttpResponseCollector collector) {
-                JSONObject feedDetailJson = new JSONObject();
-                feedDetailJson.put("feed", feedFunc.apply(collector.getResponse("feed")));
-                feedDetailJson.put("product", productFunc.apply(collector.getResponse("product")));
-                feedDetailJson.put("staredUsers", pagedUsersFunc.apply(collector.getResponse("star")));
-                feedDetailJson.put("comments", pagedFeedCommentsFunc.apply(collector.getResponse("comments")));
-
-                return feedDetailJson;
-            }
-        });
-    }
-
-    private List<MomiaHttpRequest> buildFeedDetailRequests(String utoken, long feedId, long productId) {
-        List<MomiaHttpRequest> requests = new ArrayList<MomiaHttpRequest>();
-        requests.add(buildFeedRequest(utoken, feedId));
-        requests.add(buildProductRequest(productId));
-        requests.add(buildStaredUsersRequest(feedId));
-        requests.add(buildFeedCommentsRequests(feedId));
-
-        return requests;
-    }
-
-    private MomiaHttpRequest buildFeedRequest(String utoken, long feedId) {
-        MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder().add("utoken", utoken);
-
-        return MomiaHttpRequest.GET("feed", true, url("feed", feedId), builder.build());
-    }
-
-    private MomiaHttpRequest buildProductRequest(long productId) {
-        MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder().add("full", false);
-
-        return MomiaHttpRequest.GET("product", true, url("product", productId), builder.build());
-    }
-
-    private MomiaHttpRequest buildStaredUsersRequest(long feedId) {
-        MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder()
-                .add("start", 0)
-                .add("count", Configuration.getInt("PageSize.Feed.Detail.Star"));
-
-        return MomiaHttpRequest.GET("star", true, url("feed", feedId, "star"), builder.build());
-    }
-
-    private MomiaHttpRequest buildFeedCommentsRequests(long feedId) {
-        MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder()
-                .add("start", 0)
-                .add("count", Configuration.getInt("PageSize.Feed.Detail.Comment"));
-
-        return MomiaHttpRequest.GET("comments", true, url("feed", feedId, "comment"), builder.build());
-    }
-
-    @RequestMapping(value = "/delete", method = RequestMethod.POST)
-    public ResponseMessage deleteFeed(@RequestParam String utoken, @RequestParam long id) {
-        if (StringUtils.isBlank(utoken) || id <= 0) return ResponseMessage.BAD_REQUEST;
-
-        MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder().add("utoken", utoken);
-        MomiaHttpRequest request = MomiaHttpRequest.DELETE(url("feed", id), builder.build());
-
-        return executeRequest(request);
+        return ResponseMessage.SUCCESS(processPagedFeeds(feeds));
     }
 
     @RequestMapping(value = "/topic", method = RequestMethod.GET)
-    public ResponseMessage feedTopic(@RequestParam(defaultValue = "") String utoken,
-                                     @RequestParam(value = "pid") long productId,
-                                     @RequestParam(value = "tid") long topicId,
-                                     @RequestParam final int start) {
+    public ResponseMessage topic(@RequestParam(defaultValue = "") String utoken,
+                                 @RequestParam(value = "pid") long productId,
+                                 @RequestParam(value = "tid") long topicId,
+                                 @RequestParam final int start) {
         if (topicId <= 0 || productId <= 0 || start < 0) return ResponseMessage.BAD_REQUEST;
 
-        List<MomiaHttpRequest> requests = buildFeedTopicRequests(utoken, productId, topicId, start);
+        Product product = null;
+        if (start == 0) product = processProduct(productServiceApi.PRODUCT.get(productId, Product.Type.BASE));
 
-        return executeRequests(requests, new Function<MomiaHttpResponseCollector, Object>() {
-            @Override
-            public Object apply(MomiaHttpResponseCollector collector) {
-                JSONObject feedTopicJson = new JSONObject();
-                if (start == 0) feedTopicJson.put("product", productFunc.apply(collector.getResponse("product")));
-                feedTopicJson.put("feeds", pagedFeedsFunc.apply(collector.getResponse("feeds")));
+        long userId = 0;
+        try {
+            if (!StringUtils.isBlank(utoken)) userId = userServiceApi.USER.get(utoken).getId();
+        } catch (Exception e) {
+            LOGGER.error("exception!!", e);
+        }
 
-                return feedTopicJson;
-            }
-        });
+        PagedFeeds feeds = processPagedFeeds(feedServiceApi.FEED.listByTopic(userId, topicId, start, Configuration.getInt("PageSize.Feed.List")));
+
+        JSONObject feedTopicJson = new JSONObject();
+        if (start == 0) feedTopicJson.put("product", product);
+        feedTopicJson.put("feeds", feeds);
+
+        return ResponseMessage.SUCCESS(feedTopicJson);
     }
 
-    private List<MomiaHttpRequest> buildFeedTopicRequests(String utoken, long productId, long topicId, int start) {
-        List<MomiaHttpRequest> requests = new ArrayList<MomiaHttpRequest>();
-        if (start == 0) requests.add(buildProductRequest(productId));
-        requests.add(buildFeedsRequest(utoken, topicId, start));
+    @RequestMapping(value = "/add", method = RequestMethod.POST)
+    public ResponseMessage add(@RequestParam String utoken, @RequestParam String feed) {
+        if (StringUtils.isBlank(utoken) || StringUtils.isBlank(feed)) return ResponseMessage.BAD_REQUEST;
 
-        return requests;
+        JSONObject feedJson = JSON.parseObject(feed);
+        JSONObject baseFeedJson = feedJson.getJSONObject("baseFeed");
+        if (baseFeedJson == null) return ResponseMessage.BAD_REQUEST;
+        baseFeedJson.put("userId", userServiceApi.USER.get(utoken).getId());
+        feedServiceApi.add(feedJson);
+
+        return ResponseMessage.SUCCESS;
     }
 
-    private MomiaHttpRequest buildFeedsRequest(String utoken, long topicId, int start) {
-        MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder()
-                .add("utoken", utoken)
-                .add("tid", topicId)
-                .add("start", start)
-                .add("count", Configuration.getInt("PageSize.Feed.List"));
+    @RequestMapping(value = "/detail", method = RequestMethod.GET)
+    public ResponseMessage detail(@RequestParam(defaultValue = "") String utoken, @RequestParam long id, @RequestParam(value = "pid") long productId) {
+        if (id <= 0 || productId <= 0) return ResponseMessage.BAD_REQUEST;
 
-        return MomiaHttpRequest.GET("feeds", true, url("feed/topic"), builder.build());
+        User user = userServiceApi.USER.get(utoken);
+        Feed feed = feedServiceApi.FEED.get(user.getId(), id);
+        Product product = productServiceApi.PRODUCT.get(productId, Product.Type.BASE);
+        List<FeedStar> stars = processPagedFeedStars(feedServiceApi.FEED.listStars(id, 0, Configuration.getInt("PageSize.Feed.Detail.Star"))).getList();
+        List<FeedComment> comments = processPagedFeedComments(feedServiceApi.FEED.listComments(id, 0, Configuration.getInt("PageSize.Feed.Detail.Comment"))).getList();
+
+        JSONObject feedDetailJson = new JSONObject();
+        feedDetailJson.put("feed", processFeed(feed));
+        feedDetailJson.put("product", processProduct(product));
+        feedDetailJson.put("staredUsers", stars);
+        feedDetailJson.put("comments", comments);
+
+        return ResponseMessage.SUCCESS(feedDetailJson);
+    }
+
+    @RequestMapping(value = "/delete", method = RequestMethod.POST)
+    public ResponseMessage delete(@RequestParam String utoken, @RequestParam long id) {
+        if (StringUtils.isBlank(utoken) || id <= 0) return ResponseMessage.BAD_REQUEST;
+
+        User user = userServiceApi.USER.get(utoken);
+        feedServiceApi.FEED.delete(user.getId(), id);
+
+        return ResponseMessage.SUCCESS;
     }
 
     @RequestMapping(value = "/comment", method = RequestMethod.GET)
-    public ResponseMessage getComments(@RequestParam long id, @RequestParam int start) {
+    public ResponseMessage listComments(@RequestParam long id, @RequestParam int start) {
         if (id <= 0 || start < 0) return ResponseMessage.BAD_REQUEST;
 
-        MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder()
-                .add("start", 0)
-                .add("count", Configuration.getInt("PageSize.Feed.Comment"));
-        MomiaHttpRequest request = MomiaHttpRequest.GET(url("feed", id, "comment"), builder.build());
-
-        return executeRequest(request, pagedFeedCommentsFunc);
+        PagedFeedComments comments = feedServiceApi.FEED.listComments(id, start, Configuration.getInt("PageSize.Feed.Comment"));
+        return ResponseMessage.SUCCESS(processPagedFeedComments(comments));
     }
 
     @RequestMapping(value = "/comment/add", method = RequestMethod.POST)
     public ResponseMessage addComment(@RequestParam String utoken, @RequestParam long id, @RequestParam String content) {
         if (StringUtils.isBlank(utoken) || id <= 0 || StringUtils.isBlank(content)) return ResponseMessage.BAD_REQUEST;
 
-        MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder()
-                .add("utoken", utoken)
-                .add("content", content);
-        MomiaHttpRequest request = MomiaHttpRequest.POST(url("feed", id, "comment"), builder.build());
+        User user = userServiceApi.USER.get(utoken);
+        feedServiceApi.addComment(user.getId(), id, content);
 
-        return executeRequest(request);
+        return ResponseMessage.SUCCESS;
     }
 
     @RequestMapping(value = "/comment/delete", method = RequestMethod.POST)
     public ResponseMessage deleteComment(@RequestParam String utoken, @RequestParam long id, @RequestParam(value = "cmid") long commentId) {
         if (StringUtils.isBlank(utoken) || id <= 0 || commentId <= 0) return ResponseMessage.BAD_REQUEST;
 
-        MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder()
-                .add("utoken", utoken)
-                .add("cmid", commentId);
-        MomiaHttpRequest request = MomiaHttpRequest.DELETE(url("feed", id, "comment"), builder.build());
+        User user = userServiceApi.USER.get(utoken);
+        feedServiceApi.deleteComment(user.getId(), id, commentId);
 
-        return executeRequest(request);
+        return ResponseMessage.SUCCESS;
     }
 
     @RequestMapping(value = "/star", method = RequestMethod.POST)
     public ResponseMessage star(@RequestParam String utoken, @RequestParam long id) {
         if (StringUtils.isBlank(utoken) || id <= 0) return ResponseMessage.BAD_REQUEST;
 
-        MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder().add("utoken", utoken);
-        MomiaHttpRequest request = MomiaHttpRequest.POST(url("feed", id, "star"), builder.build());
+        User user = userServiceApi.USER.get(utoken);
+        feedServiceApi.FEED.star(user.getId(), id);
 
-        return executeRequest(request);
+        return ResponseMessage.SUCCESS;
     }
 
     @RequestMapping(value = "/unstar", method = RequestMethod.POST)
     public ResponseMessage unstar(@RequestParam String utoken, @RequestParam long id) {
         if (StringUtils.isBlank(utoken) || id <= 0) return ResponseMessage.BAD_REQUEST;
 
-        MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder().add("utoken", utoken);
-        MomiaHttpRequest request = MomiaHttpRequest.DELETE(url("feed", id, "unstar"), builder.build());
+        User user = userServiceApi.USER.get(utoken);
+        feedServiceApi.FEED.unstar(user.getId(), id);
 
-        return executeRequest(request);
+        return ResponseMessage.SUCCESS;
     }
 }
 

@@ -1,111 +1,132 @@
 package cn.momia.mapi.api.v1;
 
+import cn.momia.api.feed.Feed;
+import cn.momia.api.feed.PagedFeeds;
 import cn.momia.mapi.common.config.Configuration;
-import cn.momia.mapi.common.exception.MomiaExpiredException;
-import cn.momia.mapi.common.http.MomiaHttpParamBuilder;
-import cn.momia.mapi.common.http.MomiaHttpRequest;
 import cn.momia.mapi.common.img.ImageFile;
-import cn.momia.mapi.web.response.ResponseMessage;
+import cn.momia.mapi.common.util.MetaUtil;
 import cn.momia.mapi.api.AbstractApi;
+import cn.momia.api.deal.order.Order;
+import cn.momia.api.deal.order.PagedOrders;
+import cn.momia.api.deal.order.Playmate;
+import cn.momia.api.deal.order.SkuPlaymates;
+import cn.momia.api.feed.comment.FeedComment;
+import cn.momia.api.feed.comment.PagedFeedComments;
+import cn.momia.api.feed.star.FeedStar;
+import cn.momia.api.feed.star.PagedFeedStars;
+import cn.momia.api.product.PagedProducts;
+import cn.momia.api.product.Product;
+import cn.momia.api.product.ProductGroup;
+import cn.momia.api.product.topic.Banner;
+import cn.momia.api.product.topic.TopicGroup;
+import cn.momia.api.product.topic.Topic;
+import cn.momia.api.user.User;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.google.common.base.Function;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class AbstractV1Api extends AbstractApi {
-    protected Function<Object, Object> userFunc = new Function<Object, Object>() {
-        @Override
-        public Object apply(Object data) {
-            JSONObject userJson = (JSONObject) data;
-            userJson.put("avatar", ImageFile.url(userJson.getString("avatar")));
-
-            return data;
-        }
-    };
-
-    protected Function<Object, Object> pagedUsersFunc = new Function<Object, Object>() {
-        @Override
-        public Object apply(Object data) {
-            JSONArray usersJson = ((JSONObject) data).getJSONArray("list");
-            for (int i = 0; i < usersJson.size(); i++) {
-                userFunc.apply(usersJson.getJSONObject(i));
-            }
-
-            return data;
-        }
-    };
-
-    protected Function<Object, Object> pagedFeedCommentsFunc = new Function<Object, Object>() {
-        @Override
-        public Object apply(Object data) {
-            JSONArray feedCommentsJson = ((JSONObject) data).getJSONArray("list");
-            for (int i = 0; i < feedCommentsJson.size(); i++) {
-                JSONObject feedCommentJson = feedCommentsJson.getJSONObject(i);
-                feedCommentJson.put("avatar", ImageFile.url(feedCommentJson.getString("avatar")));
-            }
-
-            return data;
-        }
-    };
-
-    protected Function<Object, Object> feedFunc = new Function<Object, Object>() {
-        @Override
-        public Object apply(Object data) {
-            JSONObject feedJson = (JSONObject) data;
-            feedJson.put("avatar", ImageFile.url(feedJson.getString("avatar")));
-            if (feedJson.containsKey("imgs")) feedJson.put("imgs", processFeedImgs(feedJson.getJSONArray("imgs")));
-
-            return data;
-        }
-    };
-
-    private static List<String> processFeedImgs(JSONArray imgsJson) {
-        List<String> imgs = new ArrayList<String>();
-        for (int i = 0; i < imgsJson.size(); i++) {
-            imgs.add(ImageFile.middleUrl(imgsJson.getString(i)));
+    protected PagedOrders processPagedOrders(PagedOrders orders) {
+        for (Order order : orders.getList()) {
+            processOrder(order);
         }
 
-        return imgs;
+        return orders;
     }
 
-    protected Function<Object, Object> pagedFeedsFunc = new Function<Object, Object>() {
-        @Override
-        public Object apply(Object data) {
-            JSONArray feedsJson = ((JSONObject) data).getJSONArray("list");
-            for (int i = 0; i < feedsJson.size(); i++) {
-                JSONObject feedJson = feedsJson.getJSONObject(i);
-                feedFunc.apply(feedJson);
-            }
+    protected Order processOrder(Order order) {
+        order.setCover(ImageFile.middleUrl(order.getCover()));
 
-            return data;
-        }
-    };
-
-    protected Function<Object, Object> productFunc = new Function<Object, Object>() {
-        @Override
-        public Object apply(Object data) {
-            JSONObject productJson = (JSONObject) data;
-            productJson.put("url", buildUrl(productJson.getLong("id")));
-            productJson.put("thumb", ImageFile.smallUrl(productJson.getString("thumb")));
-            if (productJson.containsKey("cover")) productJson.put("cover", ImageFile.largeUrl(productJson.getString("cover")));
-            if (productJson.containsKey("imgs")) productJson.put("imgs", processProductImgs(productJson.getJSONArray("imgs")));
-            if (productJson.containsKey("content")) productJson.put("content", processContent(productJson.getJSONArray("content")));
-
-            return data;
-        }
-    };
-
-    private String buildUrl(long id) {
-        return Configuration.getString("Product.Url") + "?id=" + id;
+        return order;
     }
 
-    private static List<String> processProductImgs(JSONArray imgsJson) {
-        List<String> imgs = new ArrayList<String>();
-        for (int i = 0; i < imgsJson.size(); i++) {
-            imgs.add(ImageFile.largeUrl(imgsJson.getString(i)));
+    protected List<SkuPlaymates> processPlaymates(List<SkuPlaymates> playmates) {
+        for (SkuPlaymates skuPlaymates : playmates) {
+            for (Playmate playmate : skuPlaymates.getPlaymates()) {
+                playmate.setAvatar(ImageFile.url(playmate.getAvatar()));
+            }
+        }
+
+        return playmates;
+    }
+
+    protected PagedFeeds processPagedFeeds(PagedFeeds feeds) {
+        for (Feed feed : feeds.getList()) {
+            processFeed(feed);
+        }
+
+        return feeds;
+    }
+
+    protected Feed processFeed(Feed feed) {
+        feed.setAvatar(ImageFile.url(feed.getAvatar()));
+        if (feed.getImgs() != null) {
+            for (int i = 0; i < feed.getImgs().size(); i++) {
+                feed.getImgs().set(i, ImageFile.middleUrl(feed.getImgs().get(i)));
+            }
+        }
+
+        return feed;
+    }
+
+    protected PagedFeedComments processPagedFeedComments(PagedFeedComments comments) {
+        for (FeedComment feedComment : comments.getList()) {
+            feedComment.setAvatar(ImageFile.url(feedComment.getAvatar()));
+        }
+
+        return comments;
+    }
+
+    protected PagedFeedStars processPagedFeedStars(PagedFeedStars stars) {
+        for (FeedStar feedStar : stars.getList()) {
+            feedStar.setAvatar(ImageFile.url(feedStar.getAvatar()));
+        }
+
+        return stars;
+    }
+
+    protected List<Banner> processBanners(List<Banner> banners) {
+        for (Banner banner : banners) {
+            processBanner(banner);
+        }
+
+        return banners;
+    }
+
+    private Banner processBanner(Banner banner) {
+        banner.setCover(ImageFile.largeUrl(banner.getCover()));
+
+        return banner;
+    }
+
+    protected Topic processTopic(Topic topic) {
+        topic.setCover(ImageFile.largeUrl(topic.getCover()));
+
+        for (TopicGroup topicGroup : topic.getGroups()) {
+            processProducts(topicGroup.getProducts());
+        }
+
+        return topic;
+    }
+
+    protected Product processProduct(Product product) {
+        product.setUrl(buildUrl(product.getId()));
+        product.setThumb(ImageFile.smallUrl(product.getThumb()));
+
+        if (product.getRegionId() != null) product.setRegion(MetaUtil.getRegionName(product.getRegionId()));
+
+        if (!StringUtils.isBlank(product.getCover())) product.setCover(ImageFile.largeUrl(product.getCover()));
+        if (product.getImgs() != null) processImgs(product.getImgs());
+        if (product.getContent() != null) processContent(product.getContent());
+
+        return product;
+    }
+
+    private List<String> processImgs(List<String> imgs) {
+        for (int i = 0; i < imgs.size(); i++) {
+            imgs.set(i, ImageFile.largeUrl(imgs.get(i)));
         }
 
         return imgs;
@@ -125,74 +146,44 @@ public class AbstractV1Api extends AbstractApi {
         return contentJson;
     }
 
-    protected Function<Object, Object> productsFunc = new Function<Object, Object>() {
-        @Override
-        public Object apply(Object data) {
-            JSONArray productsJson = (JSONArray) data;
-            for (int i = 0; i < productsJson.size(); i++) {
-                JSONObject productJson = productsJson.getJSONObject(i);
-                productFunc.apply(productJson);
-            }
-
-            return data;
+    protected List<Product> processProducts(List<Product> products) {
+        for (Product product : products) {
+            processProduct(product);
         }
-    };
 
-    protected Function<Object, Object> pagedProductsFunc = new Function<Object, Object>() {
-        @Override
-        public Object apply(Object data) {
-            JSONArray productsJson = ((JSONObject) data).getJSONArray("list");
-            productsFunc.apply(productsJson);
+        return products;
+    }
 
-            return data;
+    protected PagedProducts processPagedProducts(PagedProducts products) {
+        processProducts(products.getList());
+
+        return products;
+    }
+
+    protected List<ProductGroup> processGroupedProducts(List<ProductGroup> products) {
+        for (ProductGroup productGroup : products) {
+            processProducts(productGroup.getProducts());
         }
-    };
 
-    protected Function<Object, Object> orderDetailFunc = new Function<Object, Object>() {
-        @Override
-        public Object apply(Object data) {
-            JSONObject orderDetailJson = (JSONObject) data;
-            orderDetailJson.put("cover", ImageFile.middleUrl(orderDetailJson.getString("cover")));
+        return products;
+    }
 
-            return data;
+    protected User processUser(User user) {
+        String avatar = user.getAvatar();
+        if (!StringUtils.isBlank(avatar)) user.setAvatar(ImageFile.url(avatar));
+
+        return user;
+    }
+
+    protected List<String> processAvatars(List<String> avatars) {
+        for (int i = 0; i < avatars.size(); i++) {
+            avatars.set(i, ImageFile.url(avatars.get(i)));
         }
-    };
 
-    protected Function<Object, Object> pagedOrdersFunc = new Function<Object, Object>() {
-        @Override
-        public Object apply(Object data) {
-            JSONArray ordersJson = ((JSONObject) data).getJSONArray("list");
-            for (int i = 0; i < ordersJson.size(); i++) {
-                orderDetailFunc.apply(ordersJson.getJSONObject(i));
-            }
+        return avatars;
+    }
 
-            return data;
-        }
-    };
-
-    protected Function<Object, Object> topicFunc = new Function<Object, Object>() {
-        @Override
-        public Object apply(Object data) {
-            JSONObject topicJson = (JSONObject) data;
-            topicJson.put("cover", ImageFile.largeUrl(topicJson.getString("cover")));
-
-            JSONArray groupedProductsJson = topicJson.getJSONArray("groups");
-            for (int i = 0; i < groupedProductsJson.size(); i++) {
-                JSONObject productsJson = groupedProductsJson.getJSONObject(i);
-                productsFunc.apply(productsJson.get("products"));
-            }
-
-            return topicJson;
-        }
-    };
-
-    protected long getUserId(String utoken) {
-        MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder().add("utoken", utoken);
-        MomiaHttpRequest request = MomiaHttpRequest.GET(url("user"), builder.build());
-
-        ResponseMessage response = executeRequest(request);
-        if (response.successful()) return ((JSONObject) response.getData()).getLong("id");
-
-        throw new MomiaExpiredException();
+    private String buildUrl(long id) {
+        return Configuration.getString("Product.Url") + "?id=" + id;
     }
 }

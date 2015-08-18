@@ -1,9 +1,9 @@
 package cn.momia.mapi.api.v1;
 
-import cn.momia.mapi.common.http.MomiaHttpParamBuilder;
-import cn.momia.mapi.common.http.MomiaHttpRequest;
 import cn.momia.mapi.web.response.ResponseMessage;
+import cn.momia.api.common.CommonServiceApi;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/v1/recommend")
 public class RecommendV1Api extends AbstractV1Api {
+    @Autowired CommonServiceApi commonServiceApi;
+
     @RequestMapping(method = RequestMethod.POST)
     public ResponseMessage recommend(@RequestParam String content,
                                      @RequestParam String time,
@@ -22,13 +24,8 @@ public class RecommendV1Api extends AbstractV1Api {
                 StringUtils.isBlank(address) ||
                 StringUtils.isBlank(contacts)) return ResponseMessage.BAD_REQUEST;
 
-        MomiaHttpParamBuilder builder = new MomiaHttpParamBuilder()
-                .add("content", content)
-                .add("time", time)
-                .add("address", address)
-                .add("contacts", contacts);
-        MomiaHttpRequest request = MomiaHttpRequest.POST(url("recommend"), builder.build());
+        commonServiceApi.RECOMMEND.addRecommend(content, time, address, contacts);
 
-        return executeRequest(request);
+        return ResponseMessage.SUCCESS;
     }
 }
