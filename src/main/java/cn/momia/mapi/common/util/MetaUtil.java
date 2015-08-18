@@ -16,6 +16,7 @@ public class MetaUtil {
     private static Map<Integer, Region> regionsMap = new HashMap<Integer, Region>();
 
     public void init() {
+        // TODO reloadable
         try {
             citiesMap = new HashMap<Integer, City>();
             for (City city : CommonServiceApi.CITY.getAll()) citiesMap.put(city.getId(), city);
