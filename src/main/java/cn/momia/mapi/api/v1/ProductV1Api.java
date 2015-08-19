@@ -29,21 +29,21 @@ public class ProductV1Api extends AbstractV1Api {
     public ResponseMessage listByWeekend(@RequestParam(value = "city") int cityId, @RequestParam int start) {
         if (cityId < 0 || start < 0) return ResponseMessage.BAD_REQUEST;
 
-        return ResponseMessage.SUCCESS(processPagedProducts(ProductServiceApi.PRODUCT.listByWeekend(cityId, start, Configuration.getInt("PageSize.Product"))));
+        return ResponseMessage.SUCCESS(processPagedProducts(ProductServiceApi.PRODUCT.listByWeekend(cityId, start, Configuration.getInt("PageSize.Product")), IMAGE_MIDDLE));
     }
 
     @RequestMapping(value = "/month", method = RequestMethod.GET)
     public ResponseMessage listByMonth(@RequestParam(value = "city") int cityId, @RequestParam int month) {
         if (cityId < 0 || month <= 0 || month > 12) return ResponseMessage.BAD_REQUEST;
 
-        return ResponseMessage.SUCCESS(processGroupedProducts(ProductServiceApi.PRODUCT.listByMonth(cityId, month)));
+        return ResponseMessage.SUCCESS(processGroupedProducts(ProductServiceApi.PRODUCT.listByMonth(cityId, month), IMAGE_MIDDLE));
     }
 
     @RequestMapping(value = "/leader", method = RequestMethod.GET)
     public ResponseMessage listNeedLeader(@RequestParam(value = "city") int cityId, @RequestParam int start) {
         if (cityId < 0 || start < 0) return ResponseMessage.BAD_REQUEST;
 
-        return ResponseMessage.SUCCESS(processPagedProducts(ProductServiceApi.PRODUCT.listNeedLeader(cityId, start, Configuration.getInt("PageSize.Product"))));
+        return ResponseMessage.SUCCESS(processPagedProducts(ProductServiceApi.PRODUCT.listNeedLeader(cityId, start, Configuration.getInt("PageSize.Product")), IMAGE_MIDDLE));
     }
 
     @RequestMapping(value = "/sku/leader", method = RequestMethod.GET)
@@ -54,7 +54,7 @@ public class ProductV1Api extends AbstractV1Api {
         List<Sku> skus = ProductServiceApi.SKU.listWithLeader(id);
 
         JSONObject productSkusJson = new JSONObject();
-        productSkusJson.put("product", processProduct(product));
+        productSkusJson.put("product", processProduct(product, IMAGE_MIDDLE));
         productSkusJson.put("skus", skus);
 
         return ResponseMessage.SUCCESS(productSkusJson);

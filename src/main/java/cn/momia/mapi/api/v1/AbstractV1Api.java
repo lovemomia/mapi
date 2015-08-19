@@ -28,6 +28,10 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.List;
 
 public class AbstractV1Api extends AbstractApi {
+    protected static final int IMAGE_LARGE = 1;
+    protected static final int IMAGE_MIDDLE = 2;
+    protected static final int IMAGE_SMALL = 3;
+
     protected PagedOrders processPagedOrders(PagedOrders orders) {
         for (Order order : orders.getList()) {
             processOrder(order);
@@ -112,12 +116,21 @@ public class AbstractV1Api extends AbstractApi {
     }
 
     protected Product processProduct(Product product) {
+        return processProduct(product, IMAGE_LARGE);
+    }
+
+    protected Product processProduct(Product product, int size) {
         product.setUrl(buildUrl(product.getId()));
         product.setThumb(ImageFile.smallUrl(product.getThumb()));
 
         if (product.getRegionId() != null) product.setRegion(MetaUtil.getRegionName(product.getRegionId()));
 
-        if (!StringUtils.isBlank(product.getCover())) product.setCover(ImageFile.largeUrl(product.getCover()));
+        if (!StringUtils.isBlank(product.getCover())) {
+            if (size == IMAGE_LARGE) product.setCover(ImageFile.largeUrl(product.getCover()));
+            else if (size == IMAGE_MIDDLE) product.setCover(ImageFile.middleUrl(product.getCover()));
+            else product.setCover(ImageFile.smallUrl(product.getCover()));
+        }
+
         if (product.getImgs() != null) processImgs(product.getImgs());
         if (product.getContent() != null) processContent(product.getContent());
 
@@ -147,22 +160,34 @@ public class AbstractV1Api extends AbstractApi {
     }
 
     protected List<Product> processProducts(List<Product> products) {
+        return processProducts(products, IMAGE_LARGE);
+    }
+
+    protected List<Product> processProducts(List<Product> products, int size) {
         for (Product product : products) {
-            processProduct(product);
+            processProduct(product, size);
         }
 
         return products;
     }
 
     protected PagedProducts processPagedProducts(PagedProducts products) {
-        processProducts(products.getList());
+        return processPagedProducts(products, IMAGE_LARGE);
+    }
+
+    protected PagedProducts processPagedProducts(PagedProducts products, int size) {
+        processProducts(products.getList(), size);
 
         return products;
     }
 
     protected List<ProductGroup> processGroupedProducts(List<ProductGroup> products) {
+        return processGroupedProducts(products, IMAGE_LARGE);
+    }
+
+    protected List<ProductGroup> processGroupedProducts(List<ProductGroup> products, int size) {
         for (ProductGroup productGroup : products) {
-            processProducts(productGroup.getProducts());
+            processProducts(productGroup.getProducts(), size);
         }
 
         return products;

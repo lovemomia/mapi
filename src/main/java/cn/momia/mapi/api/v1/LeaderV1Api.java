@@ -57,7 +57,7 @@ public class LeaderV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken) || start < 0) return ResponseMessage.BAD_REQUEST;
 
         User user = UserServiceApi.USER.get(utoken);
-        return ResponseMessage.SUCCESS(processPagedProducts(ProductServiceApi.SKU.getLedProducts(user.getId(), start, Configuration.getInt("PageSize.Leader.Product"))));
+        return ResponseMessage.SUCCESS(processPagedProducts(ProductServiceApi.SKU.getLedProducts(user.getId(), start, Configuration.getInt("PageSize.Leader.Product")), IMAGE_MIDDLE));
     }
 
     @RequestMapping(value = "/apply", method = RequestMethod.POST)

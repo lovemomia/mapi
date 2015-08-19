@@ -195,6 +195,6 @@ public class UserV1Api extends AbstractV1Api {
         User user = UserServiceApi.USER.get(utoken);
         PagedProducts favorites = ProductServiceApi.FAVORITE.listFavorites(user.getId(), start, Configuration.getInt("PageSize.Favorite"));
 
-        return ResponseMessage.SUCCESS(processPagedProducts(favorites));
+        return ResponseMessage.SUCCESS(processPagedProducts(favorites, IMAGE_MIDDLE));
     }
 }
