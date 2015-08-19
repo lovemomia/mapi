@@ -45,7 +45,7 @@ public class AbstractV1Api extends AbstractApi {
     protected List<SkuPlaymates> processPlaymates(List<SkuPlaymates> playmates) {
         for (SkuPlaymates skuPlaymates : playmates) {
             for (Playmate playmate : skuPlaymates.getPlaymates()) {
-                playmate.setAvatar(ImageFile.url(playmate.getAvatar()));
+                playmate.setAvatar(ImageFile.smallUrl(playmate.getAvatar()));
             }
         }
 
@@ -61,7 +61,7 @@ public class AbstractV1Api extends AbstractApi {
     }
 
     protected Feed processFeed(Feed feed) {
-        feed.setAvatar(ImageFile.url(feed.getAvatar()));
+        feed.setAvatar(ImageFile.smallUrl(feed.getAvatar()));
         if (feed.getImgs() != null) {
             for (int i = 0; i < feed.getImgs().size(); i++) {
                 feed.getImgs().set(i, ImageFile.middleUrl(feed.getImgs().get(i)));
@@ -73,7 +73,7 @@ public class AbstractV1Api extends AbstractApi {
 
     protected PagedFeedComments processPagedFeedComments(PagedFeedComments comments) {
         for (FeedComment feedComment : comments.getList()) {
-            feedComment.setAvatar(ImageFile.url(feedComment.getAvatar()));
+            feedComment.setAvatar(ImageFile.smallUrl(feedComment.getAvatar()));
         }
 
         return comments;
@@ -81,7 +81,7 @@ public class AbstractV1Api extends AbstractApi {
 
     protected PagedFeedStars processPagedFeedStars(PagedFeedStars stars) {
         for (FeedStar feedStar : stars.getList()) {
-            feedStar.setAvatar(ImageFile.url(feedStar.getAvatar()));
+            feedStar.setAvatar(ImageFile.smallUrl(feedStar.getAvatar()));
         }
 
         return stars;
@@ -170,14 +170,14 @@ public class AbstractV1Api extends AbstractApi {
 
     protected User processUser(User user) {
         String avatar = user.getAvatar();
-        if (!StringUtils.isBlank(avatar)) user.setAvatar(ImageFile.url(avatar));
+        if (!StringUtils.isBlank(avatar)) user.setAvatar(ImageFile.smallUrl(avatar));
 
         return user;
     }
 
     protected List<String> processAvatars(List<String> avatars) {
         for (int i = 0; i < avatars.size(); i++) {
-            avatars.set(i, ImageFile.url(avatars.get(i)));
+            avatars.set(i, ImageFile.smallUrl(avatars.get(i)));
         }
 
         return avatars;
