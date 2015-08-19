@@ -160,8 +160,7 @@ public class UserV1Api extends AbstractV1Api {
                                       @RequestParam int start) {
         if (StringUtils.isBlank(utoken) || start < 0) return ResponseMessage.BAD_REQUEST;
 
-        User user = UserServiceApi.USER.get(utoken);
-        PagedOrders orders = processPagedOrders(DealServiceApi.ORDER.listOrders(user.getId(), status < 0 ? 1 : status, start, Configuration.getInt("PageSize.Order")));
+        PagedOrders orders = processPagedOrders(DealServiceApi.ORDER.listOrders(utoken, status < 0 ? 1 : status, start, Configuration.getInt("PageSize.Order")));
 
         return ResponseMessage.SUCCESS(orders);
     }
@@ -172,8 +171,7 @@ public class UserV1Api extends AbstractV1Api {
                                           @RequestParam(value = "pid") long productId) {
         if (StringUtils.isBlank(utoken) || orderId <= 0 || productId <= 0) return ResponseMessage.BAD_REQUEST;
 
-        User user = UserServiceApi.USER.get(utoken);
-        Order order = processOrder(DealServiceApi.ORDER.get(user.getId(), orderId, productId));
+        Order order = processOrder(DealServiceApi.ORDER.get(utoken, orderId, productId));
 
         return ResponseMessage.SUCCESS(order);
     }
@@ -185,8 +183,7 @@ public class UserV1Api extends AbstractV1Api {
                                        @RequestParam int start) {
         if (StringUtils.isBlank(utoken) || orderId < 0 || status < 0 || start < 0) return ResponseMessage.BAD_REQUEST;
 
-        User user = UserServiceApi.USER.get(utoken);
-        PagedCoupons coupons = DealServiceApi.COUPON.listCoupons(user.getId(), orderId, status, start, Configuration.getInt("PageSize.Coupon"));
+        PagedCoupons coupons = DealServiceApi.COUPON.listCoupons(utoken, orderId, status, start, Configuration.getInt("PageSize.Coupon"));
 
         return ResponseMessage.SUCCESS(coupons);
     }

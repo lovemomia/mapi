@@ -3,7 +3,6 @@ package cn.momia.mapi.api.v1;
 import cn.momia.mapi.web.response.ResponseMessage;
 import cn.momia.api.deal.DealServiceApi;
 import cn.momia.api.user.UserServiceApi;
-import cn.momia.api.user.User;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
@@ -29,8 +28,7 @@ public class OrderV1Api extends AbstractV1Api {
     public ResponseMessage deleteOrder(@RequestParam String utoken, @RequestParam long id) {
         if (StringUtils.isBlank(utoken) || id <= 0) return ResponseMessage.BAD_REQUEST;
 
-        User user = UserServiceApi.USER.get(utoken);
-        DealServiceApi.ORDER.delete(user.getId(), id);
+        DealServiceApi.ORDER.delete(utoken, id);
 
         return ResponseMessage.SUCCESS;
     }
