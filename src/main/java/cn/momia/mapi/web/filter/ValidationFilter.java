@@ -34,14 +34,12 @@ public class ValidationFilter implements Filter {
         }
 
         if (needParamsValidation(httpRequest)) {
-            if (isParamMissing(httpRequest))
-            {
+            if (isParamMissing(httpRequest)) {
                 forwardErrorPage(request, response, 400);
                 return;
             }
 
-            if (isInvalidUri(httpRequest) || isInvalidSign(httpRequest))
-            {
+            if (isInvalidUri(httpRequest) || isInvalidSign(httpRequest)) {
                 forwardErrorPage(request, response, 403);
                 return;
             }

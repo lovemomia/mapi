@@ -6,7 +6,6 @@ import cn.momia.api.deal.DealServiceApi;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,13 +19,11 @@ import java.util.Map;
 public class CallbackV1Api extends AbstractV1Api {
     private static final Logger LOGGER = LoggerFactory.getLogger(CallbackV1Api.class);
 
-    @Autowired private DealServiceApi dealServiceApi;
-
     @RequestMapping(value = "/alipay", method = RequestMethod.POST, produces = "text/plain")
     public String alipayCallback(HttpServletRequest request) {
         try {
             Map<String, String> params = extractParams(request.getParameterMap());
-            if (dealServiceApi.CALLBACK.callbackAlipay(params)) return "success";
+            if (DealServiceApi.CALLBACK.callbackAlipay(params)) return "success";
         } catch (Exception e) {
             LOGGER.error("ali pay callback error", e);
         }
@@ -51,7 +48,7 @@ public class CallbackV1Api extends AbstractV1Api {
     public Xml wechatpayCallback(HttpServletRequest request) {
         try {
             Map<String, String> params = XmlUtil.xmlToParams(IOUtils.toString(request.getInputStream()));
-            if (dealServiceApi.CALLBACK.callbackWechatpay(params)) return new Xml("SUCCESS", "OK");
+            if (DealServiceApi.CALLBACK.callbackWechatpay(params)) return new Xml("SUCCESS", "OK");
         } catch (Exception e) {
             LOGGER.error("wechat pay callback error", e);
         }

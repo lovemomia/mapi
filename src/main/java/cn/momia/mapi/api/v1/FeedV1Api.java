@@ -1,7 +1,6 @@
 package cn.momia.mapi.api.v1;
 
 import cn.momia.mapi.common.config.Configuration;
-import cn.momia.mapi.common.img.ImageFile;
 import cn.momia.mapi.web.response.ResponseMessage;
 import cn.momia.api.feed.FeedServiceApi;
 import cn.momia.api.feed.comment.FeedComment;
@@ -18,7 +17,6 @@ import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -31,16 +29,12 @@ import java.util.List;
 public class FeedV1Api extends AbstractV1Api {
     private static final Logger LOGGER = LoggerFactory.getLogger(FeedV1Api.class);
 
-    @Autowired private FeedServiceApi feedServiceApi;
-    @Autowired private ProductServiceApi productServiceApi;
-    @Autowired private UserServiceApi userServiceApi;
-
     @RequestMapping(method = RequestMethod.GET)
     public ResponseMessage list(@RequestParam String utoken, @RequestParam int start) {
         if (StringUtils.isBlank(utoken) || start < 0) return ResponseMessage.BAD_REQUEST;
 
-        User user = userServiceApi.USER.get(utoken);
-        PagedFeeds feeds = feedServiceApi.FEED.list(user.getId(), start, Configuration.getInt("PageSize.Feed.List"));
+        User user = UserServiceApi.USER.get(utoken);
+        PagedFeeds feeds = FeedServiceApi.FEED.list(user.getId(), start, Configuration.getInt("PageSize.Feed.List"));
 
         return ResponseMessage.SUCCESS(processPagedFeeds(feeds));
     }
@@ -53,16 +47,16 @@ public class FeedV1Api extends AbstractV1Api {
         if (topicId <= 0 || productId <= 0 || start < 0) return ResponseMessage.BAD_REQUEST;
 
         Product product = null;
-        if (start == 0) product = processProduct(productServiceApi.PRODUCT.get(productId, Product.Type.BASE));
+        if (start == 0) product = processProduct(ProductServiceApi.PRODUCT.get(productId, Product.Type.BASE));
 
         long userId = 0;
         try {
-            if (!StringUtils.isBlank(utoken)) userId = userServiceApi.USER.get(utoken).getId();
+            if (!StringUtils.isBlank(utoken)) userId = UserServiceApi.USER.get(utoken).getId();
         } catch (Exception e) {
             LOGGER.error("exception!!", e);
         }
 
-        PagedFeeds feeds = processPagedFeeds(feedServiceApi.FEED.listByTopic(userId, topicId, start, Configuration.getInt("PageSize.Feed.List")));
+        PagedFeeds feeds = processPagedFeeds(FeedServiceApi.FEED.listByTopic(userId, topicId, start, Configuration.getInt("PageSize.Feed.List")));
 
         JSONObject feedTopicJson = new JSONObject();
         if (start == 0) feedTopicJson.put("product", product);
@@ -78,8 +72,8 @@ public class FeedV1Api extends AbstractV1Api {
         JSONObject feedJson = JSON.parseObject(feed);
         JSONObject baseFeedJson = feedJson.getJSONObject("baseFeed");
         if (baseFeedJson == null) return ResponseMessage.BAD_REQUEST;
-        baseFeedJson.put("userId", userServiceApi.USER.get(utoken).getId());
-        feedServiceApi.add(feedJson);
+        baseFeedJson.put("userId", UserServiceApi.USER.get(utoken).getId());
+        FeedServiceApi.FEED.add(feedJson);
 
         return ResponseMessage.SUCCESS;
     }
@@ -88,11 +82,11 @@ public class FeedV1Api extends AbstractV1Api {
     public ResponseMessage detail(@RequestParam(defaultValue = "") String utoken, @RequestParam long id, @RequestParam(value = "pid") long productId) {
         if (id <= 0 || productId <= 0) return ResponseMessage.BAD_REQUEST;
 
-        User user = userServiceApi.USER.get(utoken);
-        Feed feed = feedServiceApi.FEED.get(user.getId(), id);
-        Product product = productServiceApi.PRODUCT.get(productId, Product.Type.BASE);
-        List<FeedStar> stars = processPagedFeedStars(feedServiceApi.FEED.listStars(id, 0, Configuration.getInt("PageSize.Feed.Detail.Star"))).getList();
-        List<FeedComment> comments = processPagedFeedComments(feedServiceApi.FEED.listComments(id, 0, Configuration.getInt("PageSize.Feed.Detail.Comment"))).getList();
+        User user = UserServiceApi.USER.get(utoken);
+        Feed feed = FeedServiceApi.FEED.get(user.getId(), id);
+        Product product = ProductServiceApi.PRODUCT.get(productId, Product.Type.BASE);
+        List<FeedStar> stars = processPagedFeedStars(FeedServiceApi.FEED.listStars(id, 0, Configuration.getInt("PageSize.Feed.Detail.Star"))).getList();
+        List<FeedComment> comments = processPagedFeedComments(FeedServiceApi.FEED.listComments(id, 0, Configuration.getInt("PageSize.Feed.Detail.Comment"))).getList();
 
         JSONObject feedDetailJson = new JSONObject();
         feedDetailJson.put("feed", processFeed(feed));
@@ -107,8 +101,8 @@ public class FeedV1Api extends AbstractV1Api {
     public ResponseMessage delete(@RequestParam String utoken, @RequestParam long id) {
         if (StringUtils.isBlank(utoken) || id <= 0) return ResponseMessage.BAD_REQUEST;
 
-        User user = userServiceApi.USER.get(utoken);
-        feedServiceApi.FEED.delete(user.getId(), id);
+        User user = UserServiceApi.USER.get(utoken);
+        FeedServiceApi.FEED.delete(user.getId(), id);
 
         return ResponseMessage.SUCCESS;
     }
@@ -117,7 +111,7 @@ public class FeedV1Api extends AbstractV1Api {
     public ResponseMessage listComments(@RequestParam long id, @RequestParam int start) {
         if (id <= 0 || start < 0) return ResponseMessage.BAD_REQUEST;
 
-        PagedFeedComments comments = feedServiceApi.FEED.listComments(id, start, Configuration.getInt("PageSize.Feed.Comment"));
+        PagedFeedComments comments = FeedServiceApi.FEED.listComments(id, start, Configuration.getInt("PageSize.Feed.Comment"));
         return ResponseMessage.SUCCESS(processPagedFeedComments(comments));
     }
 
@@ -125,8 +119,8 @@ public class FeedV1Api extends AbstractV1Api {
     public ResponseMessage addComment(@RequestParam String utoken, @RequestParam long id, @RequestParam String content) {
         if (StringUtils.isBlank(utoken) || id <= 0 || StringUtils.isBlank(content)) return ResponseMessage.BAD_REQUEST;
 
-        User user = userServiceApi.USER.get(utoken);
-        feedServiceApi.addComment(user.getId(), id, content);
+        User user = UserServiceApi.USER.get(utoken);
+        FeedServiceApi.FEED.addComment(user.getId(), id, content);
 
         return ResponseMessage.SUCCESS;
     }
@@ -135,8 +129,8 @@ public class FeedV1Api extends AbstractV1Api {
     public ResponseMessage deleteComment(@RequestParam String utoken, @RequestParam long id, @RequestParam(value = "cmid") long commentId) {
         if (StringUtils.isBlank(utoken) || id <= 0 || commentId <= 0) return ResponseMessage.BAD_REQUEST;
 
-        User user = userServiceApi.USER.get(utoken);
-        feedServiceApi.deleteComment(user.getId(), id, commentId);
+        User user = UserServiceApi.USER.get(utoken);
+        FeedServiceApi.FEED.deleteComment(user.getId(), id, commentId);
 
         return ResponseMessage.SUCCESS;
     }
@@ -145,8 +139,8 @@ public class FeedV1Api extends AbstractV1Api {
     public ResponseMessage star(@RequestParam String utoken, @RequestParam long id) {
         if (StringUtils.isBlank(utoken) || id <= 0) return ResponseMessage.BAD_REQUEST;
 
-        User user = userServiceApi.USER.get(utoken);
-        feedServiceApi.FEED.star(user.getId(), id);
+        User user = UserServiceApi.USER.get(utoken);
+        FeedServiceApi.FEED.star(user.getId(), id);
 
         return ResponseMessage.SUCCESS;
     }
@@ -155,10 +149,9 @@ public class FeedV1Api extends AbstractV1Api {
     public ResponseMessage unstar(@RequestParam String utoken, @RequestParam long id) {
         if (StringUtils.isBlank(utoken) || id <= 0) return ResponseMessage.BAD_REQUEST;
 
-        User user = userServiceApi.USER.get(utoken);
-        feedServiceApi.FEED.unstar(user.getId(), id);
+        User user = UserServiceApi.USER.get(utoken);
+        FeedServiceApi.FEED.unstar(user.getId(), id);
 
         return ResponseMessage.SUCCESS;
     }
 }
-

@@ -13,7 +13,6 @@ import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -26,37 +25,33 @@ import java.util.List;
 public class ProductV1Api extends AbstractV1Api {
     private static final Logger LOGGER = LoggerFactory.getLogger(ProductV1Api.class);
 
-    @Autowired private DealServiceApi dealServiceApi;
-    @Autowired private ProductServiceApi productServiceApi;
-    @Autowired private UserServiceApi userServiceApi;
-
     @RequestMapping(value = "/weekend", method = RequestMethod.GET)
     public ResponseMessage listByWeekend(@RequestParam(value = "city") int cityId, @RequestParam int start) {
         if (cityId < 0 || start < 0) return ResponseMessage.BAD_REQUEST;
 
-        return ResponseMessage.SUCCESS(processPagedProducts(productServiceApi.PRODUCT.listByWeekend(cityId, start, Configuration.getInt("PageSize.Product"))));
+        return ResponseMessage.SUCCESS(processPagedProducts(ProductServiceApi.PRODUCT.listByWeekend(cityId, start, Configuration.getInt("PageSize.Product"))));
     }
 
     @RequestMapping(value = "/month", method = RequestMethod.GET)
     public ResponseMessage listByMonth(@RequestParam(value = "city") int cityId, @RequestParam int month) {
         if (cityId < 0 || month <= 0 || month > 12) return ResponseMessage.BAD_REQUEST;
 
-        return ResponseMessage.SUCCESS(processGroupedProducts(productServiceApi.PRODUCT.listByMonth(cityId, month)));
+        return ResponseMessage.SUCCESS(processGroupedProducts(ProductServiceApi.PRODUCT.listByMonth(cityId, month)));
     }
 
     @RequestMapping(value = "/leader", method = RequestMethod.GET)
     public ResponseMessage listNeedLeader(@RequestParam(value = "city") int cityId, @RequestParam int start) {
         if (cityId < 0 || start < 0) return ResponseMessage.BAD_REQUEST;
 
-        return ResponseMessage.SUCCESS(processPagedProducts(productServiceApi.PRODUCT.listNeedLeader(cityId, start, Configuration.getInt("PageSize.Product"))));
+        return ResponseMessage.SUCCESS(processPagedProducts(ProductServiceApi.PRODUCT.listNeedLeader(cityId, start, Configuration.getInt("PageSize.Product"))));
     }
 
     @RequestMapping(value = "/sku/leader", method = RequestMethod.GET)
     public ResponseMessage listSkusNeedLeader(@RequestParam(value = "pid") long id) {
         if (id <= 0) return ResponseMessage.BAD_REQUEST;
 
-        Product product = productServiceApi.PRODUCT.get(id, Product.Type.BASE);
-        List<Sku> skus = productServiceApi.SKU.listWithLeader(id);
+        Product product = ProductServiceApi.PRODUCT.get(id, Product.Type.BASE);
+        List<Sku> skus = ProductServiceApi.SKU.listWithLeader(id);
 
         JSONObject productSkusJson = new JSONObject();
         productSkusJson.put("product", processProduct(product));
@@ -69,16 +64,16 @@ public class ProductV1Api extends AbstractV1Api {
     public ResponseMessage get(@RequestParam(defaultValue = "") String utoken, @RequestParam long id) {
         if (id <= 0) return ResponseMessage.BAD_REQUEST;
 
-        Product product = processProduct(productServiceApi.PRODUCT.get(id, Product.Type.FULL));
+        Product product = processProduct(ProductServiceApi.PRODUCT.get(id, Product.Type.FULL));
         if (!product.isOpened()) product.setSoldOut(true);
 
         JSONObject productJson = JSON.parseObject(JSON.toJSONString(product));
         try {
-            List<String> avatars = dealServiceApi.ORDER.listCustomerAvatars(id, Configuration.getInt("PageSize.ProductCustomer"));
+            List<String> avatars = DealServiceApi.ORDER.listCustomerAvatars(id, Configuration.getInt("PageSize.ProductCustomer"));
             productJson.put("customers", buildCustomers(avatars, product.getStock()));
 
-            long userId = StringUtils.isBlank(utoken) ? 0 : userServiceApi.USER.get(utoken).getId();
-            if (productServiceApi.PRODUCT.favored(userId, id)) productJson.put("favored", true);
+            long userId = StringUtils.isBlank(utoken) ? 0 : UserServiceApi.USER.get(utoken).getId();
+            if (ProductServiceApi.PRODUCT.favored(userId, id)) productJson.put("favored", true);
         } catch (Exception e) {
             LOGGER.error("exception!!", e);
         }
@@ -98,7 +93,7 @@ public class ProductV1Api extends AbstractV1Api {
     public ResponseMessage getDetail(@RequestParam long id) {
         if (id <= 0) return ResponseMessage.BAD_REQUEST;
 
-        return ResponseMessage.SUCCESS(productServiceApi.PRODUCT.getDetail(id));
+        return ResponseMessage.SUCCESS(ProductServiceApi.PRODUCT.getDetail(id));
     }
 
     @RequestMapping(value = "/order", method = RequestMethod.GET)
@@ -106,8 +101,8 @@ public class ProductV1Api extends AbstractV1Api {
         if(StringUtils.isBlank(utoken) || id <= 0) return ResponseMessage.BAD_REQUEST;
 
         JSONObject placeOrderJson = new JSONObject();
-        placeOrderJson.put("contacts", userServiceApi.USER.getContacts(utoken));
-        placeOrderJson.put("skus", productServiceApi.SKU.list(id));
+        placeOrderJson.put("contacts", UserServiceApi.USER.getContacts(utoken));
+        placeOrderJson.put("skus", ProductServiceApi.SKU.list(id));
 
         return ResponseMessage.SUCCESS(placeOrderJson);
     }
@@ -116,15 +111,15 @@ public class ProductV1Api extends AbstractV1Api {
     public ResponseMessage listPlaymates(@RequestParam long id) {
         if (id <= 0) return ResponseMessage.BAD_REQUEST;
 
-        return ResponseMessage.SUCCESS(processPlaymates(dealServiceApi.ORDER.listPlaymates(id, Configuration.getInt("PageSize.PlaymateSku"))));
+        return ResponseMessage.SUCCESS(processPlaymates(DealServiceApi.ORDER.listPlaymates(id, Configuration.getInt("PageSize.PlaymateSku"))));
     }
 
     @RequestMapping(value = "/favor", method = RequestMethod.POST)
     public ResponseMessage favor(@RequestParam String utoken, @RequestParam long id){
         if (StringUtils.isBlank(utoken) || id <= 0) return ResponseMessage.BAD_REQUEST;
 
-        User user = userServiceApi.USER.get(utoken);
-        productServiceApi.PRODUCT.favor(user.getId(), id);
+        User user = UserServiceApi.USER.get(utoken);
+        ProductServiceApi.PRODUCT.favor(user.getId(), id);
 
         return ResponseMessage.SUCCESS;
     }
@@ -133,8 +128,8 @@ public class ProductV1Api extends AbstractV1Api {
     public ResponseMessage unfavor(@RequestParam String utoken, @RequestParam long id){
         if (StringUtils.isBlank(utoken) || id <= 0) return ResponseMessage.BAD_REQUEST;
 
-        User user = userServiceApi.USER.get(utoken);
-        productServiceApi.PRODUCT.unfavor(user.getId(), id);
+        User user = UserServiceApi.USER.get(utoken);
+        ProductServiceApi.PRODUCT.unfavor(user.getId(), id);
 
         return ResponseMessage.SUCCESS;
     }

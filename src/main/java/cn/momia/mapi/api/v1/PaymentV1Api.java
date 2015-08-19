@@ -4,10 +4,7 @@ import cn.momia.api.product.Product;
 import cn.momia.mapi.web.response.ResponseMessage;
 import cn.momia.api.deal.DealServiceApi;
 import cn.momia.api.product.ProductServiceApi;
-import cn.momia.api.user.UserServiceApi;
-import cn.momia.api.user.User;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -16,10 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/v1/payment")
 public class PaymentV1Api extends AbstractV1Api {
-    @Autowired private DealServiceApi dealServiceApi;
-    @Autowired private ProductServiceApi productServiceApi;
-    @Autowired private UserServiceApi userServiceApi;
-
     @RequestMapping(value = "/prepay/alipay", method = RequestMethod.POST)
     public ResponseMessage prepayAlipay(@RequestParam String utoken,
                                         @RequestParam(value = "oid") long orderId,
@@ -32,8 +25,7 @@ public class PaymentV1Api extends AbstractV1Api {
                 productId <= 0 ||
                 skuId <= 0) return ResponseMessage.BAD_REQUEST;
 
-        User user = userServiceApi.USER.get(utoken);
-        return ResponseMessage.SUCCESS(dealServiceApi.PAYMENT.prepayAlipay(user.getId(), orderId, productId, skuId, type, coupon));
+        return ResponseMessage.SUCCESS(DealServiceApi.PAYMENT.prepayAlipay(utoken, orderId, productId, skuId, type, coupon));
     }
 
     @RequestMapping(value = "/prepay/wechatpay", method = RequestMethod.POST)
@@ -52,8 +44,7 @@ public class PaymentV1Api extends AbstractV1Api {
 
         if (tradeType.equals("JSAPI") && StringUtils.isBlank(code)) return ResponseMessage.BAD_REQUEST;
 
-        User user = userServiceApi.USER.get(utoken);
-        return ResponseMessage.SUCCESS(dealServiceApi.PAYMENT.prepayWechatpay(user.getId(), orderId, productId, skuId, tradeType, coupon, code));
+        return ResponseMessage.SUCCESS(DealServiceApi.PAYMENT.prepayWechatpay(utoken, orderId, productId, skuId, tradeType, coupon, code));
     }
 
     @RequestMapping(value = "/prepay/free", method = RequestMethod.POST)
@@ -67,10 +58,9 @@ public class PaymentV1Api extends AbstractV1Api {
                 productId <= 0 ||
                 skuId <= 0) return ResponseMessage.BAD_REQUEST;
 
-        User user = userServiceApi.USER.get(utoken);
-        dealServiceApi.PAYMENT.prepayFree(user.getId(), orderId, productId, skuId, coupon);
+        DealServiceApi.PAYMENT.prepayFree(utoken, orderId, productId, skuId, coupon);
 
-        return ResponseMessage.SUCCESS(processProduct(productServiceApi.PRODUCT.get(productId, Product.Type.MINI)));
+        return ResponseMessage.SUCCESS(processProduct(ProductServiceApi.PRODUCT.get(productId, Product.Type.MINI)));
     }
 
     @RequestMapping(value = "/check", method = RequestMethod.POST)
@@ -83,9 +73,8 @@ public class PaymentV1Api extends AbstractV1Api {
                 productId <= 0 ||
                 skuId <= 0) return ResponseMessage.BAD_REQUEST;
 
-        User user = userServiceApi.USER.get(utoken);
-        dealServiceApi.PAYMENT.check(user.getId(), orderId, productId, skuId);
+        DealServiceApi.PAYMENT.check(utoken, orderId, productId, skuId);
 
-        return ResponseMessage.SUCCESS(processProduct(productServiceApi.PRODUCT.get(productId, Product.Type.MINI)));
+        return ResponseMessage.SUCCESS(processProduct(ProductServiceApi.PRODUCT.get(productId, Product.Type.MINI)));
     }
 }
