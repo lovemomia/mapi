@@ -1,5 +1,7 @@
 package cn.momia.mapi.api.v1;
 
+import cn.momia.api.deal.DealServiceApi;
+import cn.momia.api.user.User;
 import cn.momia.api.user.UserServiceApi;
 import cn.momia.mapi.web.response.ResponseMessage;
 import cn.momia.mapi.common.util.MobileUtil;
@@ -36,8 +38,15 @@ public class AuthV1Api extends AbstractV1Api {
                 StringUtils.isBlank(password) ||
                 StringUtils.isBlank(code)) return ResponseMessage.FAILED("昵称、密码和验证码都不能为空");
 
-        // TODO 发红包
-        return ResponseMessage.SUCCESS(processUser(UserServiceApi.USER.register(nickName, mobile, password, code)));
+        User user = processUser(UserServiceApi.USER.register(nickName, mobile, password, code));
+
+        try {
+            DealServiceApi.COUPON.distributeRegisterCoupon(user.getToken());
+        } catch (Exception e) {
+            LOGGER.error("fail to distribute coupon to user: {}", user.getId(), e);
+        }
+
+        return ResponseMessage.SUCCESS(user);
     }
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
