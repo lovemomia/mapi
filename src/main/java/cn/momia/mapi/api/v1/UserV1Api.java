@@ -154,6 +154,14 @@ public class UserV1Api extends AbstractV1Api {
         return ResponseMessage.SUCCESS(UserServiceApi.USER.listChildren(utoken));
     }
 
+    @RequestMapping(value = "/code", method = RequestMethod.GET)
+    public ResponseMessage getInviteCode(@RequestParam String utoken) {
+        if (StringUtils.isBlank(utoken)) return ResponseMessage.BAD_REQUEST;
+
+        return ResponseMessage.SUCCESS(UserServiceApi.USER.getInviteCode(utoken));
+    }
+
+
     @RequestMapping(value = "/order", method = RequestMethod.GET)
     public ResponseMessage listOrders(@RequestParam String utoken,
                                       @RequestParam(defaultValue = "1") int status,
