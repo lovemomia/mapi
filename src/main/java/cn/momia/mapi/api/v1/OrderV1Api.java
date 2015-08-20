@@ -15,11 +15,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/v1/order")
 public class OrderV1Api extends AbstractV1Api {
     @RequestMapping(method = RequestMethod.POST)
-    public ResponseMessage placeOrder(@RequestParam String utoken, @RequestParam String order) {
+    public ResponseMessage placeOrder(@RequestParam String utoken,
+                                      @RequestParam String order,
+                                      @RequestParam(required = false, defaultValue = "") String invite) {
         if (StringUtils.isBlank(utoken) || StringUtils.isBlank(order)) return ResponseMessage.BAD_REQUEST;
 
         JSONObject orderJson = JSON.parseObject(order);
         orderJson.put("customerId", UserServiceApi.USER.get(utoken).getId());
+        if (!StringUtils.isBlank(invite)) orderJson.put("inviteCode", invite);
 
         return ResponseMessage.SUCCESS(processOrder(DealServiceApi.ORDER.add(orderJson)));
     }
