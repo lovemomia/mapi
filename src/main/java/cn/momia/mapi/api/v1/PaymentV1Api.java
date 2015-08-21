@@ -19,14 +19,13 @@ public class PaymentV1Api extends AbstractV1Api {
                                         @RequestParam(value = "pid") long productId,
                                         @RequestParam(value = "sid") long skuId,
                                         @RequestParam(defaultValue = "app") String type,
-                                        @RequestParam(required = false, defaultValue = "") String terminal,
                                         @RequestParam(required = false) Long coupon) {
         if (StringUtils.isBlank(utoken) ||
                 orderId <= 0 ||
                 productId <= 0 ||
                 skuId <= 0) return ResponseMessage.BAD_REQUEST;
 
-        return ResponseMessage.SUCCESS(DealServiceApi.PAYMENT.prepayAlipay(utoken, orderId, productId, skuId, type, terminal, coupon));
+        return ResponseMessage.SUCCESS(DealServiceApi.PAYMENT.prepayAlipay(utoken, orderId, productId, skuId, type, coupon));
     }
 
     @RequestMapping(value = "/prepay/wechatpay", method = RequestMethod.POST)
