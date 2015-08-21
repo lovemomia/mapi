@@ -145,7 +145,10 @@ public class AbstractV1Api extends AbstractApi {
     protected Product processProduct(Product product, String utoken) {
         Product processedProduct = processProduct(product);
         try {
-            if (!StringUtils.isBlank(utoken)) processedProduct.setUrl(processedProduct.getUrl() + "&invite=" + UserServiceApi.USER.getInviteCode(utoken));
+            if (!StringUtils.isBlank(utoken)) {
+                String inviteCode = UserServiceApi.USER.getInviteCode(utoken);
+                if (!StringUtils.isBlank(inviteCode)) processedProduct.setUrl(processedProduct.getUrl() + "&invite=" + inviteCode);
+            }
         } catch (Exception e) {
             LOGGER.error("fail to generate invite url");
         }
