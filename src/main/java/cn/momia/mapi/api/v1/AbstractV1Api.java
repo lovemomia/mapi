@@ -2,6 +2,7 @@ package cn.momia.mapi.api.v1;
 
 import cn.momia.api.feed.Feed;
 import cn.momia.api.feed.PagedFeeds;
+import cn.momia.api.user.UserServiceApi;
 import cn.momia.mapi.common.config.Configuration;
 import cn.momia.mapi.common.img.ImageFile;
 import cn.momia.mapi.common.util.MetaUtil;
@@ -24,10 +25,14 @@ import cn.momia.api.user.User;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
 public class AbstractV1Api extends AbstractApi {
+    private static Logger LOGGER = LoggerFactory.getLogger(AbstractApi.class);
+
     protected static final int IMAGE_LARGE = 1;
     protected static final int IMAGE_MIDDLE = 2;
     protected static final int IMAGE_SMALL = 3;
@@ -135,6 +140,17 @@ public class AbstractV1Api extends AbstractApi {
         if (product.getContent() != null) processContent(product.getContent());
 
         return product;
+    }
+
+    protected Product processProduct(Product product, String utoken) {
+        Product processedProduct = processProduct(product);
+        try {
+            if (!StringUtils.isBlank(utoken)) processedProduct.setUrl(processedProduct.getUrl() + "&invite=" + UserServiceApi.USER.getInviteCode(utoken));
+        } catch (Exception e) {
+            LOGGER.error("fail to generate invite url");
+        }
+
+        return processedProduct;
     }
 
     private List<String> processImgs(List<String> imgs) {

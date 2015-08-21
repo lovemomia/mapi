@@ -60,7 +60,7 @@ public class PaymentV1Api extends AbstractV1Api {
 
         DealServiceApi.PAYMENT.prepayFree(utoken, orderId, productId, skuId, coupon);
 
-        return ResponseMessage.SUCCESS(processProduct(ProductServiceApi.PRODUCT.get(productId, Product.Type.MINI)));
+        return ResponseMessage.SUCCESS(processProduct(ProductServiceApi.PRODUCT.get(productId, Product.Type.MINI), utoken));
     }
 
     @RequestMapping(value = "/check", method = RequestMethod.POST)
@@ -75,6 +75,6 @@ public class PaymentV1Api extends AbstractV1Api {
 
         DealServiceApi.PAYMENT.check(utoken, orderId, productId, skuId);
 
-        return ResponseMessage.SUCCESS(processProduct(ProductServiceApi.PRODUCT.get(productId, Product.Type.MINI)));
+        return ResponseMessage.SUCCESS(processProduct(ProductServiceApi.PRODUCT.get(productId, Product.Type.MINI), utoken));
     }
 }
