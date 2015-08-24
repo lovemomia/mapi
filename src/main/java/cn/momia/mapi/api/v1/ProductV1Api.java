@@ -83,7 +83,7 @@ public class ProductV1Api extends AbstractV1Api {
     }
 
     private int getClientType(HttpServletRequest request) {
-        return request.getRequestURI().startsWith("/m/") ? CLIENT_TYPE_WAP : CLIENT_TYPE_APP;
+        return StringUtils.isBlank(request.getParameter("terminal")) ? CLIENT_TYPE_WAP : CLIENT_TYPE_APP;
     }
 
     private JSONObject buildCustomers(List<String> avatars, int stock) {
