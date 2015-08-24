@@ -25,17 +25,18 @@ import cn.momia.api.user.User;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URLEncoder;
 import java.util.List;
 
 public class AbstractV1Api extends AbstractApi {
     private static Logger LOGGER = LoggerFactory.getLogger(AbstractApi.class);
-
-    protected static final int IMAGE_LARGE = 1;
-    protected static final int IMAGE_MIDDLE = 2;
-    protected static final int IMAGE_SMALL = 3;
 
     protected PagedOrders processPagedOrders(PagedOrders orders) {
         for (Order order : orders.getList()) {
@@ -125,6 +126,10 @@ public class AbstractV1Api extends AbstractApi {
     }
 
     protected Product processProduct(Product product, int size) {
+        return processProduct(product, size, CLIENT_TYPE_WAP);
+    }
+
+    protected Product processProduct(Product product, int size, int clientType) {
         product.setUrl(buildUrl(product.getId()));
         product.setThumb(ImageFile.smallUrl(product.getThumb()));
 
@@ -137,13 +142,17 @@ public class AbstractV1Api extends AbstractApi {
         }
 
         if (product.getImgs() != null) processImgs(product.getImgs());
-        if (product.getContent() != null) processContent(product.getContent());
+        if (product.getContent() != null) processContent(product.getContent(), clientType);
 
         return product;
     }
 
     protected Product processProduct(Product product, String utoken) {
-        Product processedProduct = processProduct(product);
+        return processProduct(product, utoken, CLIENT_TYPE_WAP);
+    }
+
+    protected Product processProduct(Product product, String utoken, int clientType) {
+        Product processedProduct = processProduct(product, IMAGE_LARGE, clientType);
         try {
             if (!StringUtils.isBlank(utoken)) {
                 String inviteCode = UserServiceApi.USER.getInviteCode(utoken);
@@ -164,7 +173,7 @@ public class AbstractV1Api extends AbstractApi {
         return imgs;
     }
 
-    private static JSONArray processContent(JSONArray contentJson) {
+    private static JSONArray processContent(JSONArray contentJson, int clientType) {
         for (int i = 0; i < contentJson.size(); i++) {
             JSONObject contentBlockJson = contentJson.getJSONObject(i);
             JSONArray bodyJson = contentBlockJson.getJSONArray("body");
@@ -172,10 +181,18 @@ public class AbstractV1Api extends AbstractApi {
                 JSONObject bodyBlockJson = bodyJson.getJSONObject(j);
                 String img = bodyBlockJson.getString("img");
                 if (!StringUtils.isBlank(img)) bodyBlockJson.put("img", ImageFile.largeUrl(img));
+
+                String link = bodyBlockJson.getString("link");
+                if (!StringUtils.isBlank(link)) bodyBlockJson.put("link", buildLink(link, clientType));
             }
         }
 
         return contentJson;
+    }
+
+    private static String buildLink(String link, int clientType) {
+        if (clientType == CLIENT_TYPE_APP) return Configuration.getString("AppConf.Name") + "://web?url=" + URLEncoder.encode(link);
+        return URLEncoder.encode(link);
     }
 
     protected List<Product> processProducts(List<Product> products) {
@@ -210,6 +227,17 @@ public class AbstractV1Api extends AbstractApi {
         }
 
         return products;
+    }
+
+    protected String processProductDetail(String detail) {
+        Document detailDoc = Jsoup.parse(detail);
+        Elements imgs = detailDoc.select("img[src]");
+        for (Element element : imgs) {
+            String imgUrl = element.attr("src");
+            element.attr("src", ImageFile.largeUrl(imgUrl));
+        }
+
+        return detailDoc.toString();
     }
 
     protected User processUser(User user) {

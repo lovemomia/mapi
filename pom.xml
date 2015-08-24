@@ -54,6 +54,13 @@
             <version>1.6.1</version>
         </dependency>
 
+        <!-- Html -->
+        <dependency>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <version>1.8.2</version>
+        </dependency>
+
         <!-- Guava -->
         <dependency>
             <groupId>com.google.guava</groupId>
