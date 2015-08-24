@@ -192,7 +192,7 @@ public class AbstractV1Api extends AbstractApi {
 
     private static String buildLink(String link, int clientType) {
         if (clientType == CLIENT_TYPE_APP) return Configuration.getString("AppConf.Name") + "://web?url=" + URLEncoder.encode(link);
-        return URLEncoder.encode(link);
+        return link;
     }
 
     protected List<Product> processProducts(List<Product> products) {
