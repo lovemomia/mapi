@@ -64,7 +64,7 @@ public class ProductV1Api extends AbstractV1Api {
     public ResponseMessage get(@RequestParam(defaultValue = "") String utoken, @RequestParam long id) {
         if (id <= 0) return ResponseMessage.BAD_REQUEST;
 
-        Product product = processProduct(ProductServiceApi.PRODUCT.get(id, Product.Type.FULL));
+        Product product = processProduct(ProductServiceApi.PRODUCT.get(id, Product.Type.FULL), utoken);
         if (!product.isOpened()) product.setSoldOut(true);
 
         JSONObject productJson = JSON.parseObject(JSON.toJSONString(product));
