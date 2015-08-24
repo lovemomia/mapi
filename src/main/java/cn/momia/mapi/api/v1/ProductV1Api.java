@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @RestController
@@ -61,10 +62,10 @@ public class ProductV1Api extends AbstractV1Api {
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public ResponseMessage get(@RequestParam(defaultValue = "") String utoken, @RequestParam long id) {
+    public ResponseMessage get(@RequestParam(defaultValue = "") String utoken, @RequestParam long id, HttpServletRequest request) {
         if (id <= 0) return ResponseMessage.BAD_REQUEST;
 
-        Product product = processProduct(ProductServiceApi.PRODUCT.get(id, Product.Type.FULL), utoken);
+        Product product = processProduct(ProductServiceApi.PRODUCT.get(id, Product.Type.FULL), utoken, getClientType(request));
         if (!product.isOpened()) product.setSoldOut(true);
 
         JSONObject productJson = JSON.parseObject(JSON.toJSONString(product));
@@ -81,6 +82,10 @@ public class ProductV1Api extends AbstractV1Api {
         return ResponseMessage.SUCCESS(productJson);
     }
 
+    private int getClientType(HttpServletRequest request) {
+        return request.getRequestURI().startsWith("/m/") ? CLIENT_TYPE_WAP : CLIENT_TYPE_APP;
+    }
+
     private JSONObject buildCustomers(List<String> avatars, int stock) {
         JSONObject customersJson = new JSONObject();
         customersJson.put("text", "玩伴信息" + ((stock > 0 && stock <= Configuration.getInt("Product.StockAlert")) ? "（仅剩" + stock + "个名额）" : ""));
@@ -93,7 +98,7 @@ public class ProductV1Api extends AbstractV1Api {
     public ResponseMessage getDetail(@RequestParam long id) {
         if (id <= 0) return ResponseMessage.BAD_REQUEST;
 
-        return ResponseMessage.SUCCESS(ProductServiceApi.PRODUCT.getDetail(id));
+        return ResponseMessage.SUCCESS(processProductDetail(ProductServiceApi.PRODUCT.getDetail(id)));
     }
 
     @RequestMapping(value = "/order", method = RequestMethod.GET)

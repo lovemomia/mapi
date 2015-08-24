@@ -17,6 +17,7 @@
     </Service>
 
     <AppConf>
+        <Name>duola</Name>
         <ShowLeader>true</ShowLeader>
     </AppConf>
 

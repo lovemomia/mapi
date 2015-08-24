@@ -11,6 +11,13 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 public abstract class AbstractApi {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractApi.class);
 
+    protected static int CLIENT_TYPE_WAP = 1;
+    protected static int CLIENT_TYPE_APP = 2;
+
+    protected static final int IMAGE_LARGE = 1;
+    protected static final int IMAGE_MIDDLE = 2;
+    protected static final int IMAGE_SMALL = 3;
+
     @ExceptionHandler
     public ResponseMessage exception(Exception exception) throws Exception {
         if (exception instanceof MomiaException) LOGGER.error("exception!!", exception);
