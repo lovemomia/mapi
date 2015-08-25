@@ -82,10 +82,6 @@ public class ProductV1Api extends AbstractV1Api {
         return ResponseMessage.SUCCESS(productJson);
     }
 
-    private int getClientType(HttpServletRequest request) {
-        return StringUtils.isBlank(request.getParameter("terminal")) ? CLIENT_TYPE_WAP : CLIENT_TYPE_APP;
-    }
-
     private JSONObject buildCustomers(List<String> avatars, int stock) {
         JSONObject customersJson = new JSONObject();
         customersJson.put("text", "玩伴信息" + ((stock > 0 && stock <= Configuration.getInt("Product.StockAlert")) ? "（仅剩" + stock + "个名额）" : ""));

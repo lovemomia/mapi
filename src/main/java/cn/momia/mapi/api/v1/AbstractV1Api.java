@@ -97,18 +97,24 @@ public class AbstractV1Api extends AbstractApi {
         return stars;
     }
 
-    protected List<Banner> processBanners(List<Banner> banners) {
+    protected List<Banner> processBanners(List<Banner> banners, int clientType) {
         for (Banner banner : banners) {
-            processBanner(banner);
+            processBanner(banner, clientType);
         }
 
         return banners;
     }
 
-    private Banner processBanner(Banner banner) {
+    private Banner processBanner(Banner banner, int clientType) {
         banner.setCover(ImageFile.largeUrl(banner.getCover()));
+        banner.setAction(buildLink(banner.getAction(), clientType));
 
         return banner;
+    }
+
+    private static String buildLink(String link, int clientType) {
+        if (clientType == CLIENT_TYPE_APP) return Configuration.getString("AppConf.Name") + "://web?url=" + URLEncoder.encode(link);
+        return link;
     }
 
     protected Topic processTopic(Topic topic) {
@@ -188,11 +194,6 @@ public class AbstractV1Api extends AbstractApi {
         }
 
         return contentJson;
-    }
-
-    private static String buildLink(String link, int clientType) {
-        if (clientType == CLIENT_TYPE_APP) return Configuration.getString("AppConf.Name") + "://web?url=" + URLEncoder.encode(link);
-        return link;
     }
 
     protected List<Product> processProducts(List<Product> products) {

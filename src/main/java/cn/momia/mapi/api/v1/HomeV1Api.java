@@ -11,13 +11,16 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @RestController
 @RequestMapping("/v1/home")
 public class HomeV1Api extends AbstractV1Api {
     @RequestMapping(method = RequestMethod.GET)
-    public ResponseMessage home(@RequestParam(value = "city") int cityId, @RequestParam(value = "pageindex") final int pageIndex) {
+    public ResponseMessage home(@RequestParam(value = "city") int cityId,
+                                @RequestParam(value = "pageindex") final int pageIndex,
+                                HttpServletRequest request) {
         if (cityId < 0 || pageIndex < 0) return ResponseMessage.BAD_REQUEST;
 
         int pageSize = Configuration.getInt("PageSize.Product");
@@ -28,13 +31,13 @@ public class HomeV1Api extends AbstractV1Api {
         if (start== 0) banners = ProductServiceApi.TOPIC.listBanners(cityId, Configuration.getInt("PageSize.Banner"));
         PagedProducts products = ProductServiceApi.PRODUCT.list(cityId, start, count);
 
-        return ResponseMessage.SUCCESS(buildHomeResponse(banners, products, start, count, pageIndex));
+        return ResponseMessage.SUCCESS(buildHomeResponse(banners, products, start, count, pageIndex, getClientType(request)));
     }
 
-    private JSONObject buildHomeResponse(List<Banner> banners, PagedProducts products, int start, int count, int pageIndex) {
+    private JSONObject buildHomeResponse(List<Banner> banners, PagedProducts products, int start, int count, int pageIndex, int clientType) {
         JSONObject homeJson = new JSONObject();
 
-        if (pageIndex == 0) homeJson.put("banners", processBanners(banners));
+        if (pageIndex == 0) homeJson.put("banners", processBanners(banners, clientType));
 
         products = processPagedProducts(products);
         homeJson.put("products", products.getList());
