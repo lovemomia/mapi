@@ -134,4 +134,24 @@ public class ProductV1Api extends AbstractV1Api {
 
         return ResponseMessage.SUCCESS;
     }
+
+    @RequestMapping(value = "/comment", method = RequestMethod.POST)
+    public ResponseMessage addComment(@RequestParam String utoken, @RequestParam String comment) {
+        if (StringUtils.isBlank(utoken) || StringUtils.isBlank(comment)) return ResponseMessage.BAD_REQUEST;
+
+        User user = UserServiceApi.USER.get(utoken);
+        JSONObject commentJson = JSON.parseObject(comment);
+        commentJson.put("userId", user.getId());
+        // TODO check
+        ProductServiceApi.COMMENT.add(commentJson);
+
+        return ResponseMessage.SUCCESS;
+    }
+
+    @RequestMapping(value = "/comment", method = RequestMethod.GET)
+    public ResponseMessage listComments(@RequestParam long id, @RequestParam int start) {
+        if (id <= 0 || start < 0) return ResponseMessage.BAD_REQUEST;
+
+        return ResponseMessage.SUCCESS(processPagedComments(ProductServiceApi.COMMENT.list(id, start, Configuration.getInt("PageSize.ProductComment"))));
+    }
 }

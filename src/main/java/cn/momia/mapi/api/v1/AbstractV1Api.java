@@ -2,6 +2,8 @@ package cn.momia.mapi.api.v1;
 
 import cn.momia.api.feed.Feed;
 import cn.momia.api.feed.PagedFeeds;
+import cn.momia.api.product.comment.Comment;
+import cn.momia.api.product.comment.PagedComments;
 import cn.momia.api.user.UserServiceApi;
 import cn.momia.mapi.common.config.Configuration;
 import cn.momia.mapi.common.img.ImageFile;
@@ -239,6 +241,22 @@ public class AbstractV1Api extends AbstractApi {
         }
 
         return detailDoc.toString();
+    }
+
+    protected PagedComments processPagedComments(PagedComments pagedComments) {
+        for (Comment comment : pagedComments.getList()) {
+            processComment(comment);
+        }
+
+        return pagedComments;
+    }
+
+    private Comment processComment(Comment comment) {
+        for (int i = 0; i < comment.getImgs().size(); i++) {
+            comment.getImgs().set(i, ImageFile.middleUrl(comment.getImgs().get(i)));
+        }
+
+        return comment;
     }
 
     protected User processUser(User user) {
