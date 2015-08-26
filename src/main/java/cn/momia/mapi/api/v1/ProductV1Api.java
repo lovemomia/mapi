@@ -142,7 +142,12 @@ public class ProductV1Api extends AbstractV1Api {
         User user = UserServiceApi.USER.get(utoken);
         JSONObject commentJson = JSON.parseObject(comment);
         commentJson.put("userId", user.getId());
-        // TODO check
+
+        long orderId = commentJson.getLong("orderId");
+        long productId = commentJson.getLong("productId");
+        long skuId = commentJson.getLong("skuId");
+        if (!DealServiceApi.ORDER.check(utoken, orderId, productId, skuId)) return ResponseMessage.FAILED("您只能对自己参加过的活动发表评论");
+
         ProductServiceApi.COMMENT.add(commentJson);
 
         return ResponseMessage.SUCCESS;
