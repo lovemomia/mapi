@@ -27,6 +27,16 @@ public class OrderV1Api extends AbstractV1Api {
         return ResponseMessage.SUCCESS(processOrder(DealServiceApi.ORDER.add(orderJson)));
     }
 
+    @RequestMapping(value = "/check/dup", method = RequestMethod.POST)
+    public ResponseMessage checkDup(@RequestParam String utoken, @RequestParam String order) {
+        if (StringUtils.isBlank(utoken) || StringUtils.isBlank(order)) return ResponseMessage.BAD_REQUEST;
+
+        JSONObject orderJson = JSON.parseObject(order);
+        orderJson.put("customerId", UserServiceApi.USER.get(utoken).getId());
+
+        return ResponseMessage.SUCCESS(DealServiceApi.ORDER.checkDup(orderJson));
+    }
+
     @RequestMapping(value = "/delete", method = RequestMethod.POST)
     public ResponseMessage deleteOrder(@RequestParam String utoken, @RequestParam long id) {
         if (StringUtils.isBlank(utoken) || id <= 0) return ResponseMessage.BAD_REQUEST;

@@ -24,6 +24,8 @@
     <PageSize>
         <Banner>3</Banner>
         <Product>20</Product>
+        <ProductDetailComment>3</ProductDetailComment>
+        <ProductComment>20</ProductComment>
         <ProductCustomer>6</ProductCustomer>
         <PlaymateSku>20</PlaymateSku>
         <Coupon>20</Coupon>

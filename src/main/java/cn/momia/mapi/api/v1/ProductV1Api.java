@@ -1,6 +1,9 @@
 package cn.momia.mapi.api.v1;
 
+import cn.momia.api.product.comment.Comment;
+import cn.momia.api.product.comment.PagedComments;
 import cn.momia.mapi.common.config.Configuration;
+import cn.momia.mapi.common.img.ImageFile;
 import cn.momia.mapi.web.response.ResponseMessage;
 import cn.momia.api.deal.DealServiceApi;
 import cn.momia.api.product.ProductServiceApi;
@@ -19,7 +22,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/v1/product")
@@ -73,6 +79,8 @@ public class ProductV1Api extends AbstractV1Api {
             List<String> avatars = DealServiceApi.ORDER.listCustomerAvatars(id, Configuration.getInt("PageSize.ProductCustomer"));
             productJson.put("customers", buildCustomers(avatars, product.getStock()));
 
+            productJson.put("comments", listComments(id, 0, Configuration.getInt("PageSize.ProductDetailComment")));
+
             long userId = StringUtils.isBlank(utoken) ? 0 : UserServiceApi.USER.get(utoken).getId();
             if (ProductServiceApi.PRODUCT.favored(userId, id)) productJson.put("favored", true);
         } catch (Exception e) {
@@ -80,6 +88,27 @@ public class ProductV1Api extends AbstractV1Api {
         }
 
         return ResponseMessage.SUCCESS(productJson);
+    }
+
+    private PagedComments listComments(long id, int start, int count) {
+        PagedComments pagedComments = ProductServiceApi.COMMENT.list(id, start, count);
+        List<Long> userIds = new ArrayList<Long>();
+        for (Comment comment : pagedComments.getList()) userIds.add(comment.getUserId());
+        List<User> users = UserServiceApi.USER.list(userIds, User.Type.MINI);
+        Map<Long, User> usersMap = new HashMap<Long, User>();
+        for (User user : users) usersMap.put(user.getId(), user);
+        for (Comment comment : pagedComments.getList()) {
+            User user = usersMap.get(comment.getUserId());
+            if (user == null || !user.exists()) {
+                comment.setNickName("");
+                comment.setAvatar("");
+            } else {
+                comment.setNickName(user.getNickName());
+                comment.setAvatar(ImageFile.smallUrl(user.getAvatar()));
+            }
+        }
+
+        return processPagedComments(pagedComments);
     }
 
     private JSONObject buildCustomers(List<String> avatars, int stock) {
@@ -133,5 +162,30 @@ public class ProductV1Api extends AbstractV1Api {
         ProductServiceApi.PRODUCT.unfavor(user.getId(), id);
 
         return ResponseMessage.SUCCESS;
+    }
+
+    @RequestMapping(value = "/comment", method = RequestMethod.POST)
+    public ResponseMessage addComment(@RequestParam String utoken, @RequestParam String comment) {
+        if (StringUtils.isBlank(utoken) || StringUtils.isBlank(comment)) return ResponseMessage.BAD_REQUEST;
+
+        User user = UserServiceApi.USER.get(utoken);
+        JSONObject commentJson = JSON.parseObject(comment);
+        commentJson.put("userId", user.getId());
+
+        long orderId = commentJson.getLong("orderId");
+        long productId = commentJson.getLong("productId");
+        long skuId = commentJson.getLong("skuId");
+        if (!DealServiceApi.ORDER.check(utoken, orderId, productId, skuId)) return ResponseMessage.FAILED("您只能对自己参加过的活动发表评论");
+
+        ProductServiceApi.COMMENT.add(commentJson);
+
+        return ResponseMessage.SUCCESS;
+    }
+
+    @RequestMapping(value = "/comment", method = RequestMethod.GET)
+    public ResponseMessage listComments(@RequestParam long id, @RequestParam int start) {
+        if (id <= 0 || start < 0) return ResponseMessage.BAD_REQUEST;
+
+        return ResponseMessage.SUCCESS(listComments(id, start, Configuration.getInt("PageSize.ProductComment")));
     }
 }
