@@ -7,7 +7,6 @@ import cn.momia.api.product.comment.PagedComments;
 import cn.momia.api.user.UserServiceApi;
 import cn.momia.mapi.common.config.Configuration;
 import cn.momia.mapi.common.img.ImageFile;
-import cn.momia.mapi.common.util.MetaUtil;
 import cn.momia.mapi.api.AbstractApi;
 import cn.momia.api.deal.order.Order;
 import cn.momia.api.deal.order.PagedOrders;
@@ -140,8 +139,6 @@ public class AbstractV1Api extends AbstractApi {
     protected Product processProduct(Product product, int size, int clientType) {
         product.setUrl(buildUrl(product.getId()));
         product.setThumb(ImageFile.smallUrl(product.getThumb()));
-
-        if (product.getRegionId() != null) product.setRegion(MetaUtil.getRegionName(product.getRegionId()));
 
         if (!StringUtils.isBlank(product.getCover())) {
             if (size == IMAGE_LARGE) product.setCover(ImageFile.largeUrl(product.getCover()));
