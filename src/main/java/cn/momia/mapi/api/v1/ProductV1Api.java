@@ -148,6 +148,8 @@ public class ProductV1Api extends AbstractV1Api {
         for (Sku sku : skus) {
             int placeId = sku.getPlaceId();
             if (placeId <= 0 || placeIds.contains(placeId)) continue;
+            placeIds.add(placeId);
+            
             JSONObject placeJson = new JSONObject();
             placeJson.put("id", placeId);
             placeJson.put("name", sku.getPlaceName());
