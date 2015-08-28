@@ -149,6 +149,8 @@ public class ProductV1Api extends AbstractV1Api {
             placeJson.put("id", placeId);
             placeJson.put("name", sku.getPlaceName());
             placeJson.put("address", sku.getAddress());
+
+            placesJson.add(placeJson);
         }
         return placesJson;
     }
