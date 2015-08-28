@@ -12,6 +12,7 @@ import cn.momia.api.product.sku.Sku;
 import cn.momia.api.user.UserServiceApi;
 import cn.momia.api.user.User;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -24,8 +25,10 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/v1/product")
@@ -132,9 +135,29 @@ public class ProductV1Api extends AbstractV1Api {
 
         JSONObject placeOrderJson = new JSONObject();
         placeOrderJson.put("contacts", UserServiceApi.USER.getContacts(utoken));
-        placeOrderJson.put("skus", ProductServiceApi.SKU.list(id));
+        List<Sku> skus = ProductServiceApi.SKU.list(id);
+        placeOrderJson.put("places", extractPlaces(skus));
+        placeOrderJson.put("skus", skus);
 
         return ResponseMessage.SUCCESS(placeOrderJson);
+    }
+
+    private JSONArray extractPlaces(List<Sku> skus) {
+        JSONArray placesJson = new JSONArray();
+        Set<Integer> placeIds = new HashSet<Integer>();
+        for (Sku sku : skus) {
+            int placeId = sku.getPlaceId();
+            if (placeId <= 0 || placeIds.contains(placeId)) continue;
+            placeIds.add(placeId);
+            
+            JSONObject placeJson = new JSONObject();
+            placeJson.put("id", placeId);
+            placeJson.put("name", sku.getPlaceName());
+            placeJson.put("address", sku.getAddress());
+
+            placesJson.add(placeJson);
+        }
+        return placesJson;
     }
 
     @RequestMapping(value = "/playmate", method = RequestMethod.GET)
