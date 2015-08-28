@@ -25,8 +25,10 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/v1/product")
@@ -142,9 +144,10 @@ public class ProductV1Api extends AbstractV1Api {
 
     private JSONArray extractPlaces(List<Sku> skus) {
         JSONArray placesJson = new JSONArray();
+        Set<Integer> placeIds = new HashSet<Integer>();
         for (Sku sku : skus) {
             int placeId = sku.getPlaceId();
-            if (placeId <= 0) continue;
+            if (placeId <= 0 || placeIds.contains(placeId)) continue;
             JSONObject placeJson = new JSONObject();
             placeJson.put("id", placeId);
             placeJson.put("name", sku.getPlaceName());
