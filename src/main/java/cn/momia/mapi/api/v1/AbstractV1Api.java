@@ -114,7 +114,16 @@ public class AbstractV1Api extends AbstractApi {
     }
 
     private static String buildLink(String link, int clientType) {
-        if (clientType == CLIENT_TYPE_APP) return Configuration.getString("AppConf.Name") + "://web?url=" + URLEncoder.encode(link);
+        if (clientType == CLIENT_TYPE_APP) return Configuration.getString("AppConf.Name") + "://web?url=" + URLEncoder.encode(fullUrl(link, clientType));
+        return fullUrl(link, clientType);
+    }
+
+    private static String fullUrl(String link, int clientType) {
+        if (link.startsWith("/")) {
+            if (clientType == CLIENT_TYPE_APP) return Configuration.getString("AppConf.WapDomain") + link;
+            return Configuration.getString("AppConf.WapDomain") + "/m" + link;
+        }
+
         return link;
     }
 

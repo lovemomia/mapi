@@ -19,6 +19,7 @@
     <AppConf>
         <Name>duola</Name>
         <ShowLeader>true</ShowLeader>
+        <WapDomain>http://m.momia.cn</WapDomain>
     </AppConf>
 
     <PageSize>
