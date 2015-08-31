@@ -107,7 +107,7 @@ public class AbstractV1Api extends AbstractApi {
     }
 
     private Banner processBanner(Banner banner, int clientType) {
-        banner.setCover(ImageFile.largeUrl(banner.getCover()));
+        banner.setCover(ImageFile.url(banner.getCover()));
         banner.setAction(buildLink(banner.getAction(), clientType));
 
         return banner;
@@ -119,7 +119,7 @@ public class AbstractV1Api extends AbstractApi {
     }
 
     protected Topic processTopic(Topic topic) {
-        topic.setCover(ImageFile.largeUrl(topic.getCover()));
+        topic.setCover(ImageFile.url(topic.getCover()));
 
         for (TopicGroup topicGroup : topic.getGroups()) {
             processProducts(topicGroup.getProducts());
