@@ -113,12 +113,12 @@ public class AbstractV1Api extends AbstractApi {
         return banner;
     }
 
-    private static String buildLink(String link, int clientType) {
+    private String buildLink(String link, int clientType) {
         if (clientType == CLIENT_TYPE_APP) return Configuration.getString("AppConf.Name") + "://web?url=" + URLEncoder.encode(fullUrl(link, clientType));
         return fullUrl(link, clientType);
     }
 
-    private static String fullUrl(String link, int clientType) {
+    private String fullUrl(String link, int clientType) {
         if (link.startsWith("/")) {
             if (clientType == CLIENT_TYPE_APP) return Configuration.getString("AppConf.WapDomain") + link;
             return Configuration.getString("AppConf.WapDomain") + "/m" + link;
@@ -187,7 +187,7 @@ public class AbstractV1Api extends AbstractApi {
         return imgs;
     }
 
-    private static JSONArray processContent(JSONArray contentJson, int clientType) {
+    private JSONArray processContent(JSONArray contentJson, int clientType) {
         for (int i = 0; i < contentJson.size(); i++) {
             JSONObject contentBlockJson = contentJson.getJSONObject(i);
             JSONArray bodyJson = contentBlockJson.getJSONArray("body");
