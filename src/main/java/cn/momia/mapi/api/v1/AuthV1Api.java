@@ -1,10 +1,10 @@
 package cn.momia.mapi.api.v1;
 
+import cn.momia.api.base.BaseServiceApi;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.api.deal.DealServiceApi;
 import cn.momia.api.user.User;
 import cn.momia.api.user.UserServiceApi;
-import cn.momia.api.common.CommonServiceApi;
 import cn.momia.common.util.MobileUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -23,7 +23,7 @@ public class AuthV1Api extends AbstractV1Api {
     public MomiaHttpResponse send(@RequestParam String mobile, @RequestParam(defaultValue = "login") String type)  {
         if (MobileUtil.isInvalid(mobile)) return MomiaHttpResponse.FAILED("无效的手机号码，请检查输入");
 
-        CommonServiceApi.SMS.send(mobile, type);
+        BaseServiceApi.SMS.send(mobile, type);
 
         return MomiaHttpResponse.SUCCESS;
     }
