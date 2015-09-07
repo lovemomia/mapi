@@ -2,7 +2,7 @@ package cn.momia.mapi.web.controller;
 
 import javax.servlet.http.HttpServletRequest;
 
-public abstract class AbstractController {
+public abstract class VersionController {
     public String forward(HttpServletRequest request) {
         return forward(request, request.getRequestURI());
     }

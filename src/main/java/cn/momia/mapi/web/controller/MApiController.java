@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import javax.servlet.http.HttpServletRequest;
 
 @Controller
-public class MApiController extends AbstractController {
+public class MApiController extends VersionController {
     @RequestMapping(value = "/m/**", method = { RequestMethod.GET, RequestMethod.POST })
     public String processMRequest(HttpServletRequest request) {
         return forward(request, request.getRequestURI().substring(2));
