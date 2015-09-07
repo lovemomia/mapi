@@ -1,5 +1,6 @@
 package cn.momia.mapi.api.v1;
 
+import cn.momia.api.user.leader.Leader;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.api.product.comment.Comment;
 import cn.momia.api.product.comment.PagedComments;
@@ -62,6 +63,23 @@ public class ProductV1Api extends AbstractV1Api {
 
         Product product = ProductServiceApi.PRODUCT.get(id, Product.Type.BASE);
         List<Sku> skus = ProductServiceApi.SKU.listWithLeader(id);
+
+        Set<Long> leaderUserIds = new HashSet<Long>();
+        for (Sku sku : skus) {
+            if (sku.getLeaderUserId() > 0) leaderUserIds.add(sku.getLeaderUserId());
+        }
+        List<Leader> leaders = UserServiceApi.LEADER.list(leaderUserIds);
+        Map<Long, Leader> leadersMap = new HashMap<Long, Leader>();
+        for (Leader leader : leaders) leadersMap.put(leader.getUserId(), leader);
+        for (Sku sku : skus) {
+            if (!sku.isNeedLeader()) {
+                sku.setLeaderInfo("本场不需要领队");
+            } else {
+                Leader leader = leadersMap.get(sku.getLeaderUserId());
+                if (leader == null || StringUtils.isBlank(leader.getName())) sku.setLeaderInfo("");
+                else sku.setLeaderInfo(leader.getName() + "已成为领队");
+            }
+        }
 
         JSONObject productSkusJson = new JSONObject();
         productSkusJson.put("product", processProduct(product, IMAGE_MIDDLE));
