@@ -24,11 +24,11 @@
         <property name="domain" value="${Image.Domain}" />
     </bean>
 
-    <bean id="srviceApi" class="cn.momia.api.base.ServiceApi" abstract="true">
+    <bean id="srviceApi" class="cn.momia.common.api.AbstractServiceApi" abstract="true">
         <property name="service" value="${Service.Base}" />
     </bean>
 
-    <bean class="cn.momia.api.common.CommonServiceApi" parent="srviceApi" init-method="init" />
+    <bean class="cn.momia.api.base.BaseServiceApi" parent="srviceApi" init-method="init" />
     <bean class="cn.momia.api.deal.DealServiceApi" parent="srviceApi" init-method="init" />
     <bean class="cn.momia.api.feed.FeedServiceApi" parent="srviceApi" init-method="init" />
     <bean class="cn.momia.api.product.ProductServiceApi" parent="srviceApi" init-method="init" />
