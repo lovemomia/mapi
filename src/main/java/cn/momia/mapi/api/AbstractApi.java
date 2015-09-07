@@ -1,6 +1,6 @@
 package cn.momia.mapi.api;
 
-import cn.momia.common.webapp.controller.BaseController;
+import cn.momia.common.webapp.ctrl.BaseController;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
