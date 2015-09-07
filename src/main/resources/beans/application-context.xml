@@ -4,20 +4,20 @@
        xsi:schemaLocation="
         http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-    <bean id="conf" class="org.apache.commons.configuration.XMLConfiguration" init-method="load">
+    <bean id="xmlConf" class="org.apache.commons.configuration.XMLConfiguration" init-method="load">
         <property name="fileName" value="conf/configuration.xml" />
     </bean>
 
-    <bean class="cn.momia.mapi.common.config.Configuration">
-        <property name="xmlConf" ref="conf" />
+    <bean class="cn.momia.common.webapp.config.Configuration">
+        <property name="xmlConf" ref="xmlConf" />
     </bean>
 
-    <bean class="cn.momia.mapi.common.config.XmlPropertyPlaceholderConfigurer">
-        <property name="conf" ref="conf" />
+    <bean class="cn.momia.common.webapp.config.XmlPropertyPlaceholderConfigurer">
+        <property name="xmlConf" ref="xmlConf" />
     </bean>
 
-    <bean class="cn.momia.mapi.common.config.LoggerConfigurer" init-method="init">
-        <property name="conf" ref="conf" />
+    <bean class="cn.momia.common.webapp.config.LoggerConfigurer" init-method="init">
+        <property name="xmlConf" ref="xmlConf" />
     </bean>
 
     <bean class="cn.momia.mapi.common.img.ImageFile">

@@ -2,8 +2,8 @@ package cn.momia.mapi.api;
 
 import cn.momia.api.base.exception.MomiaExpiredException;
 import cn.momia.api.base.exception.MomiaFailedException;
-import cn.momia.mapi.web.response.ResponseMessage;
 import cn.momia.api.base.exception.MomiaException;
+import cn.momia.api.base.http.MomiaHttpResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,13 +26,13 @@ public abstract class AbstractApi {
     }
 
     @ExceptionHandler
-    public ResponseMessage exception(Exception exception) throws Exception {
+    public MomiaHttpResponse exception(Exception exception) throws Exception {
         if (exception instanceof MomiaException) LOGGER.error("exception!!", exception);
 
         if (exception instanceof MomiaFailedException) {
-            return ResponseMessage.FAILED(exception.getMessage());
+            return MomiaHttpResponse.FAILED(exception.getMessage());
         } else if (exception instanceof MomiaExpiredException) {
-            return ResponseMessage.TOKEN_EXPIRED;
+            return MomiaHttpResponse.TOKEN_EXPIRED;
         } else {
             throw exception;
         }

@@ -1,10 +1,10 @@
 package cn.momia.mapi.api.v1;
 
+import cn.momia.api.base.http.MomiaHttpResponse;
 import cn.momia.api.product.comment.Comment;
 import cn.momia.api.product.comment.PagedComments;
-import cn.momia.mapi.common.config.Configuration;
+import cn.momia.common.webapp.config.Configuration;
 import cn.momia.mapi.common.img.ImageFile;
-import cn.momia.mapi.web.response.ResponseMessage;
 import cn.momia.api.deal.DealServiceApi;
 import cn.momia.api.product.ProductServiceApi;
 import cn.momia.api.product.Product;
@@ -36,29 +36,29 @@ public class ProductV1Api extends AbstractV1Api {
     private static final Logger LOGGER = LoggerFactory.getLogger(ProductV1Api.class);
 
     @RequestMapping(value = "/weekend", method = RequestMethod.GET)
-    public ResponseMessage listByWeekend(@RequestParam(value = "city") int cityId, @RequestParam int start) {
-        if (cityId < 0 || start < 0) return ResponseMessage.BAD_REQUEST;
+    public MomiaHttpResponse listByWeekend(@RequestParam(value = "city") int cityId, @RequestParam int start) {
+        if (cityId < 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        return ResponseMessage.SUCCESS(processPagedProducts(ProductServiceApi.PRODUCT.listByWeekend(cityId, start, Configuration.getInt("PageSize.Product")), IMAGE_MIDDLE));
+        return MomiaHttpResponse.SUCCESS(processPagedProducts(ProductServiceApi.PRODUCT.listByWeekend(cityId, start, Configuration.getInt("PageSize.Product")), IMAGE_MIDDLE));
     }
 
     @RequestMapping(value = "/month", method = RequestMethod.GET)
-    public ResponseMessage listByMonth(@RequestParam(value = "city") int cityId, @RequestParam int month) {
-        if (cityId < 0 || month <= 0 || month > 12) return ResponseMessage.BAD_REQUEST;
+    public MomiaHttpResponse listByMonth(@RequestParam(value = "city") int cityId, @RequestParam int month) {
+        if (cityId < 0 || month <= 0 || month > 12) return MomiaHttpResponse.BAD_REQUEST;
 
-        return ResponseMessage.SUCCESS(processGroupedProducts(ProductServiceApi.PRODUCT.listByMonth(cityId, month), IMAGE_MIDDLE));
+        return MomiaHttpResponse.SUCCESS(processGroupedProducts(ProductServiceApi.PRODUCT.listByMonth(cityId, month), IMAGE_MIDDLE));
     }
 
     @RequestMapping(value = "/leader", method = RequestMethod.GET)
-    public ResponseMessage listNeedLeader(@RequestParam(value = "city") int cityId, @RequestParam int start) {
-        if (cityId < 0 || start < 0) return ResponseMessage.BAD_REQUEST;
+    public MomiaHttpResponse listNeedLeader(@RequestParam(value = "city") int cityId, @RequestParam int start) {
+        if (cityId < 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        return ResponseMessage.SUCCESS(processPagedProducts(ProductServiceApi.PRODUCT.listNeedLeader(cityId, start, Configuration.getInt("PageSize.Product")), IMAGE_MIDDLE));
+        return MomiaHttpResponse.SUCCESS(processPagedProducts(ProductServiceApi.PRODUCT.listNeedLeader(cityId, start, Configuration.getInt("PageSize.Product")), IMAGE_MIDDLE));
     }
 
     @RequestMapping(value = "/sku/leader", method = RequestMethod.GET)
-    public ResponseMessage listSkusNeedLeader(@RequestParam(value = "pid") long id) {
-        if (id <= 0) return ResponseMessage.BAD_REQUEST;
+    public MomiaHttpResponse listSkusNeedLeader(@RequestParam(value = "pid") long id) {
+        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
         Product product = ProductServiceApi.PRODUCT.get(id, Product.Type.BASE);
         List<Sku> skus = ProductServiceApi.SKU.listWithLeader(id);
@@ -67,12 +67,12 @@ public class ProductV1Api extends AbstractV1Api {
         productSkusJson.put("product", processProduct(product, IMAGE_MIDDLE));
         productSkusJson.put("skus", skus);
 
-        return ResponseMessage.SUCCESS(productSkusJson);
+        return MomiaHttpResponse.SUCCESS(productSkusJson);
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public ResponseMessage get(@RequestParam(defaultValue = "") String utoken, @RequestParam long id, HttpServletRequest request) {
-        if (id <= 0) return ResponseMessage.BAD_REQUEST;
+    public MomiaHttpResponse get(@RequestParam(defaultValue = "") String utoken, @RequestParam long id, HttpServletRequest request) {
+        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
         Product product = processProduct(ProductServiceApi.PRODUCT.get(id, Product.Type.FULL), utoken, getClientType(request));
         if (!product.isOpened()) product.setSoldOut(true);
@@ -90,7 +90,7 @@ public class ProductV1Api extends AbstractV1Api {
             LOGGER.error("exception!!", e);
         }
 
-        return ResponseMessage.SUCCESS(productJson);
+        return MomiaHttpResponse.SUCCESS(productJson);
     }
 
     private PagedComments listComments(long id, int start, int count) {
@@ -123,15 +123,15 @@ public class ProductV1Api extends AbstractV1Api {
     }
 
     @RequestMapping(value = "/detail", method = RequestMethod.GET)
-    public ResponseMessage getDetail(@RequestParam long id) {
-        if (id <= 0) return ResponseMessage.BAD_REQUEST;
+    public MomiaHttpResponse getDetail(@RequestParam long id) {
+        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        return ResponseMessage.SUCCESS(processProductDetail(ProductServiceApi.PRODUCT.getDetail(id)));
+        return MomiaHttpResponse.SUCCESS(processProductDetail(ProductServiceApi.PRODUCT.getDetail(id)));
     }
 
     @RequestMapping(value = "/order", method = RequestMethod.GET)
-    public ResponseMessage placeOrder(@RequestParam String utoken, @RequestParam long id) {
-        if(StringUtils.isBlank(utoken) || id <= 0) return ResponseMessage.BAD_REQUEST;
+    public MomiaHttpResponse placeOrder(@RequestParam String utoken, @RequestParam long id) {
+        if(StringUtils.isBlank(utoken) || id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
         JSONObject placeOrderJson = new JSONObject();
         placeOrderJson.put("contacts", UserServiceApi.USER.getContacts(utoken));
@@ -139,7 +139,7 @@ public class ProductV1Api extends AbstractV1Api {
         placeOrderJson.put("places", extractPlaces(skus));
         placeOrderJson.put("skus", skus);
 
-        return ResponseMessage.SUCCESS(placeOrderJson);
+        return MomiaHttpResponse.SUCCESS(placeOrderJson);
     }
 
     private JSONArray extractPlaces(List<Sku> skus) {
@@ -161,35 +161,35 @@ public class ProductV1Api extends AbstractV1Api {
     }
 
     @RequestMapping(value = "/playmate", method = RequestMethod.GET)
-    public ResponseMessage listPlaymates(@RequestParam long id) {
-        if (id <= 0) return ResponseMessage.BAD_REQUEST;
+    public MomiaHttpResponse listPlaymates(@RequestParam long id) {
+        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        return ResponseMessage.SUCCESS(processPlaymates(DealServiceApi.ORDER.listPlaymates(id, Configuration.getInt("PageSize.PlaymateSku"))));
+        return MomiaHttpResponse.SUCCESS(processPlaymates(DealServiceApi.ORDER.listPlaymates(id, Configuration.getInt("PageSize.PlaymateSku"))));
     }
 
     @RequestMapping(value = "/favor", method = RequestMethod.POST)
-    public ResponseMessage favor(@RequestParam String utoken, @RequestParam long id){
-        if (StringUtils.isBlank(utoken) || id <= 0) return ResponseMessage.BAD_REQUEST;
+    public MomiaHttpResponse favor(@RequestParam String utoken, @RequestParam long id){
+        if (StringUtils.isBlank(utoken) || id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
         User user = UserServiceApi.USER.get(utoken);
         ProductServiceApi.PRODUCT.favor(user.getId(), id);
 
-        return ResponseMessage.SUCCESS;
+        return MomiaHttpResponse.SUCCESS;
     }
 
     @RequestMapping(value = "/unfavor", method = RequestMethod.POST)
-    public ResponseMessage unfavor(@RequestParam String utoken, @RequestParam long id){
-        if (StringUtils.isBlank(utoken) || id <= 0) return ResponseMessage.BAD_REQUEST;
+    public MomiaHttpResponse unfavor(@RequestParam String utoken, @RequestParam long id){
+        if (StringUtils.isBlank(utoken) || id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
         User user = UserServiceApi.USER.get(utoken);
         ProductServiceApi.PRODUCT.unfavor(user.getId(), id);
 
-        return ResponseMessage.SUCCESS;
+        return MomiaHttpResponse.SUCCESS;
     }
 
     @RequestMapping(value = "/comment", method = RequestMethod.POST)
-    public ResponseMessage addComment(@RequestParam String utoken, @RequestParam String comment) {
-        if (StringUtils.isBlank(utoken) || StringUtils.isBlank(comment)) return ResponseMessage.BAD_REQUEST;
+    public MomiaHttpResponse addComment(@RequestParam String utoken, @RequestParam String comment) {
+        if (StringUtils.isBlank(utoken) || StringUtils.isBlank(comment)) return MomiaHttpResponse.BAD_REQUEST;
 
         User user = UserServiceApi.USER.get(utoken);
         JSONObject commentJson = JSON.parseObject(comment);
@@ -198,17 +198,17 @@ public class ProductV1Api extends AbstractV1Api {
         long orderId = commentJson.getLong("orderId");
         long productId = commentJson.getLong("productId");
         long skuId = commentJson.getLong("skuId");
-        if (!DealServiceApi.ORDER.check(utoken, orderId, productId, skuId)) return ResponseMessage.FAILED("您只能对自己参加过的活动发表评论");
+        if (!DealServiceApi.ORDER.check(utoken, orderId, productId, skuId)) return MomiaHttpResponse.FAILED("您只能对自己参加过的活动发表评论");
 
         ProductServiceApi.COMMENT.add(commentJson);
 
-        return ResponseMessage.SUCCESS;
+        return MomiaHttpResponse.SUCCESS;
     }
 
     @RequestMapping(value = "/comment", method = RequestMethod.GET)
-    public ResponseMessage listComments(@RequestParam long id, @RequestParam int start) {
-        if (id <= 0 || start < 0) return ResponseMessage.BAD_REQUEST;
+    public MomiaHttpResponse listComments(@RequestParam long id, @RequestParam int start) {
+        if (id <= 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        return ResponseMessage.SUCCESS(listComments(id, start, Configuration.getInt("PageSize.ProductComment")));
+        return MomiaHttpResponse.SUCCESS(listComments(id, start, Configuration.getInt("PageSize.ProductComment")));
     }
 }

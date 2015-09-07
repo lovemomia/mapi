@@ -1,6 +1,6 @@
 package cn.momia.mapi.api.v1;
 
-import cn.momia.mapi.web.response.ResponseMessage;
+import cn.momia.api.base.http.MomiaHttpResponse;
 import cn.momia.api.common.CommonServiceApi;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,11 +12,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/v1/feedback")
 public class FeedbackV1Api extends AbstractV1Api {
     @RequestMapping(method = RequestMethod.POST)
-    public ResponseMessage addFeedback(@RequestParam String content, @RequestParam String email) {
-        if (StringUtils.isBlank(content) || StringUtils.isBlank(email)) return ResponseMessage.BAD_REQUEST;
+    public MomiaHttpResponse addFeedback(@RequestParam String content, @RequestParam String email) {
+        if (StringUtils.isBlank(content) || StringUtils.isBlank(email)) return MomiaHttpResponse.BAD_REQUEST;
 
         CommonServiceApi.FEEDBACK.addFeedback(content, email);
 
-        return ResponseMessage.SUCCESS;
+        return MomiaHttpResponse.SUCCESS;
     }
 }

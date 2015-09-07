@@ -1,12 +1,12 @@
 package cn.momia.mapi.api.v1;
 
-import cn.momia.mapi.common.config.Configuration;
-import cn.momia.mapi.web.response.ResponseMessage;
+import cn.momia.api.base.http.MomiaHttpResponse;
 import cn.momia.api.product.ProductServiceApi;
 import cn.momia.api.user.UserServiceApi;
 import cn.momia.api.user.leader.Leader;
 import cn.momia.api.user.leader.LeaderStatus;
 import cn.momia.api.user.User;
+import cn.momia.common.webapp.config.Configuration;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
@@ -26,8 +26,8 @@ public class LeaderV1Api extends AbstractV1Api {
     }
 
     @RequestMapping(value = "/status", method = RequestMethod.GET)
-    public ResponseMessage getStatus(@RequestParam String utoken) {
-        if (StringUtils.isBlank(utoken)) return ResponseMessage.BAD_REQUEST;
+    public MomiaHttpResponse getStatus(@RequestParam String utoken) {
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.BAD_REQUEST;
 
         JSONObject statusJson = new JSONObject();
 
@@ -37,8 +37,8 @@ public class LeaderV1Api extends AbstractV1Api {
 
         switch (leaderStatus.getStatus()) {
             case Status.PASSED:
-                ResponseMessage ledProductsResponse = getLedProducts(utoken, 0);
-                if (!ledProductsResponse.successful()) return ResponseMessage.FAILED("获取领队状态失败");
+                MomiaHttpResponse ledProductsResponse = getLedProducts(utoken, 0);
+                if (!ledProductsResponse.successful()) return MomiaHttpResponse.FAILED("获取领队状态失败");
 
                 statusJson.put("products", ledProductsResponse.getData());
                 break;
@@ -49,57 +49,57 @@ public class LeaderV1Api extends AbstractV1Api {
             default: break;
         }
 
-        return ResponseMessage.SUCCESS(statusJson);
+        return MomiaHttpResponse.SUCCESS(statusJson);
     }
 
     @RequestMapping(value = "/product", method = RequestMethod.GET)
-    public ResponseMessage getLedProducts(@RequestParam String utoken, @RequestParam int start) {
-        if (StringUtils.isBlank(utoken) || start < 0) return ResponseMessage.BAD_REQUEST;
+    public MomiaHttpResponse getLedProducts(@RequestParam String utoken, @RequestParam int start) {
+        if (StringUtils.isBlank(utoken) || start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
         User user = UserServiceApi.USER.get(utoken);
-        return ResponseMessage.SUCCESS(processPagedProducts(ProductServiceApi.SKU.getLedProducts(user.getId(), start, Configuration.getInt("PageSize.Leader.Product")), IMAGE_MIDDLE));
+        return MomiaHttpResponse.SUCCESS(processPagedProducts(ProductServiceApi.SKU.getLedProducts(user.getId(), start, Configuration.getInt("PageSize.Leader.Product")), IMAGE_MIDDLE));
     }
 
     @RequestMapping(value = "/apply", method = RequestMethod.POST)
-    public ResponseMessage apply(@RequestParam String utoken, @RequestParam(value = "pid") long productId, @RequestParam(value = "sid") long skuId) {
-        if (StringUtils.isBlank(utoken) || productId <= 0 || skuId <= 0) return ResponseMessage.BAD_REQUEST;
+    public MomiaHttpResponse apply(@RequestParam String utoken, @RequestParam(value = "pid") long productId, @RequestParam(value = "sid") long skuId) {
+        if (StringUtils.isBlank(utoken) || productId <= 0 || skuId <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
         Leader leader = UserServiceApi.LEADER.get(utoken);
-        if (leader.getStatus() != Status.PASSED) return ResponseMessage.FAILED("您注册成为领队的请求还没通过审核，暂时不能当领队");
+        if (leader.getStatus() != Status.PASSED) return MomiaHttpResponse.FAILED("您注册成为领队的请求还没通过审核，暂时不能当领队");
 
         ProductServiceApi.SKU.applyLeader(leader.getUserId(), productId, skuId);
 
-        return ResponseMessage.SUCCESS;
+        return MomiaHttpResponse.SUCCESS;
     }
 
     @RequestMapping(value = "/signup", method = RequestMethod.POST)
-    public ResponseMessage add(@RequestParam String utoken, @RequestParam String leader) {
-        if (StringUtils.isBlank(utoken) || StringUtils.isBlank(leader)) return ResponseMessage.BAD_REQUEST;
+    public MomiaHttpResponse add(@RequestParam String utoken, @RequestParam String leader) {
+        if (StringUtils.isBlank(utoken) || StringUtils.isBlank(leader)) return MomiaHttpResponse.BAD_REQUEST;
 
         JSONObject leaderJson = JSON.parseObject(leader);
         leaderJson.put("userId", UserServiceApi.USER.get(utoken).getId());
         UserServiceApi.LEADER.add(JSON.toJavaObject(leaderJson, Leader.class));
 
-        return ResponseMessage.SUCCESS;
+        return MomiaHttpResponse.SUCCESS;
     }
 
     @RequestMapping(value = "/update", method = RequestMethod.POST)
-    public ResponseMessage update(@RequestParam String utoken, @RequestParam String leader) {
-        if (StringUtils.isBlank(utoken) || StringUtils.isBlank(leader)) return ResponseMessage.BAD_REQUEST;
+    public MomiaHttpResponse update(@RequestParam String utoken, @RequestParam String leader) {
+        if (StringUtils.isBlank(utoken) || StringUtils.isBlank(leader)) return MomiaHttpResponse.BAD_REQUEST;
 
         JSONObject leaderJson = JSON.parseObject(leader);
         leaderJson.put("userId", UserServiceApi.USER.get(utoken).getId());
         UserServiceApi.LEADER.update(JSON.toJavaObject(leaderJson, Leader.class));
 
-        return ResponseMessage.SUCCESS;
+        return MomiaHttpResponse.SUCCESS;
     }
 
     @RequestMapping(value = "/delete", method = RequestMethod.POST)
-    public ResponseMessage delete(@RequestParam String utoken) {
-        if (StringUtils.isBlank(utoken)) return ResponseMessage.BAD_REQUEST;
+    public MomiaHttpResponse delete(@RequestParam String utoken) {
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.BAD_REQUEST;
 
         UserServiceApi.LEADER.delete(utoken);
 
-        return ResponseMessage.SUCCESS;
+        return MomiaHttpResponse.SUCCESS;
     }
 }
