@@ -1,9 +1,9 @@
 package cn.momia.mapi.api;
 
-import cn.momia.api.base.exception.MomiaExpiredException;
-import cn.momia.api.base.exception.MomiaFailedException;
-import cn.momia.api.base.exception.MomiaException;
-import cn.momia.api.base.http.MomiaHttpResponse;
+import cn.momia.common.api.exception.MomiaExpiredException;
+import cn.momia.common.api.exception.MomiaFailedException;
+import cn.momia.common.api.exception.MomiaException;
+import cn.momia.common.api.http.MomiaHttpResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

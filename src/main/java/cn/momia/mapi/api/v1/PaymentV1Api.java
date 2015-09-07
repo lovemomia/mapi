@@ -1,6 +1,6 @@
 package cn.momia.mapi.api.v1;
 
-import cn.momia.api.base.http.MomiaHttpResponse;
+import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.api.product.Product;
 import cn.momia.api.deal.DealServiceApi;
 import cn.momia.api.product.ProductServiceApi;

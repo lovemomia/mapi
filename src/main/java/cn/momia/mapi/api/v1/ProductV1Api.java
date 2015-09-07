@@ -1,6 +1,6 @@
 package cn.momia.mapi.api.v1;
 
-import cn.momia.api.base.http.MomiaHttpResponse;
+import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.api.product.comment.Comment;
 import cn.momia.api.product.comment.PagedComments;
 import cn.momia.common.webapp.config.Configuration;
