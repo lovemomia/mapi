@@ -6,7 +6,7 @@ import cn.momia.api.product.comment.Comment;
 import cn.momia.api.product.comment.PagedComments;
 import cn.momia.api.user.UserServiceApi;
 import cn.momia.common.webapp.config.Configuration;
-import cn.momia.mapi.common.img.ImageFile;
+import cn.momia.image.api.ImageFile;
 import cn.momia.mapi.api.AbstractApi;
 import cn.momia.api.deal.order.Order;
 import cn.momia.api.deal.order.PagedOrders;

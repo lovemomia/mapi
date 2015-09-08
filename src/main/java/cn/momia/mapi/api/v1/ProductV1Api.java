@@ -5,7 +5,7 @@ import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.api.product.comment.Comment;
 import cn.momia.api.product.comment.PagedComments;
 import cn.momia.common.webapp.config.Configuration;
-import cn.momia.mapi.common.img.ImageFile;
+import cn.momia.image.api.ImageFile;
 import cn.momia.api.deal.DealServiceApi;
 import cn.momia.api.product.ProductServiceApi;
 import cn.momia.api.product.Product;
