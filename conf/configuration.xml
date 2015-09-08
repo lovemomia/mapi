@@ -14,7 +14,19 @@
 
     <Service>
         <Base>http://localhost:7070</Base>
+        <Deal>http://localhost:7070</Deal>
+        <Feed>http://localhost:7070</Feed>
+        <Product>http://localhost:7070</Product>
+        <User>http://localhost:7070</User>
     </Service>
+
+    <Database>
+        <Tongqu>
+            <JdbcUrl><![CDATA[jdbc:mysql://120.55.102.12:3306/tongqu?characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull]]></JdbcUrl>
+            <Username>tongqu</Username>
+            <Password>Tongqu!@#456</Password>
+        </Tongqu>
+    </Database>
 
     <AppConf>
         <Name>duola</Name>

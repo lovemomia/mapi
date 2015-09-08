@@ -4,33 +4,4 @@
        xsi:schemaLocation="
         http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-    <bean id="xmlConf" class="org.apache.commons.configuration.XMLConfiguration" init-method="load">
-        <property name="fileName" value="conf/configuration.xml" />
-    </bean>
-
-    <bean class="cn.momia.common.webapp.config.Configuration">
-        <property name="xmlConf" ref="xmlConf" />
-    </bean>
-
-    <bean class="cn.momia.common.webapp.config.XmlPropertyPlaceholderConfigurer">
-        <property name="xmlConf" ref="xmlConf" />
-    </bean>
-
-    <bean class="cn.momia.common.webapp.config.LoggerConfigurer" init-method="init">
-        <property name="xmlConf" ref="xmlConf" />
-    </bean>
-
-    <bean class="cn.momia.image.api.ImageFile">
-        <property name="domain" value="${Image.Domain}" />
-    </bean>
-
-    <bean id="srviceApi" class="cn.momia.common.api.AbstractServiceApi" abstract="true">
-        <property name="service" value="${Service.Base}" />
-    </bean>
-
-    <bean class="cn.momia.api.base.BaseServiceApi" parent="srviceApi" init-method="init" />
-    <bean class="cn.momia.api.deal.DealServiceApi" parent="srviceApi" init-method="init" />
-    <bean class="cn.momia.api.feed.FeedServiceApi" parent="srviceApi" init-method="init" />
-    <bean class="cn.momia.api.product.ProductServiceApi" parent="srviceApi" init-method="init" />
-    <bean class="cn.momia.api.user.UserServiceApi" parent="srviceApi" init-method="init" />
 </beans>
