@@ -153,7 +153,7 @@ public class ProductV1Api extends AbstractV1Api {
 
         JSONObject placeOrderJson = new JSONObject();
         placeOrderJson.put("contacts", UserServiceApi.USER.getContacts(utoken));
-        List<Sku> skus = ProductServiceApi.SKU.list(id);
+        List<Sku> skus = ProductServiceApi.SKU.list(id, Sku.Status.AVALIABLE);
         placeOrderJson.put("places", extractPlaces(skus));
         placeOrderJson.put("skus", skus);
 
