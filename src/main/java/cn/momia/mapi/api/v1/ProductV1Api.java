@@ -1,5 +1,6 @@
 package cn.momia.mapi.api.v1;
 
+import cn.momia.api.base.MetaUtil;
 import cn.momia.api.user.leader.Leader;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.api.product.comment.Comment;
@@ -171,6 +172,7 @@ public class ProductV1Api extends AbstractV1Api {
             JSONObject placeJson = new JSONObject();
             placeJson.put("id", placeId);
             placeJson.put("name", sku.getPlaceName());
+            placeJson.put("region", MetaUtil.getRegionName(sku.getRegionId()));
             placeJson.put("address", sku.getAddress());
 
             placesJson.add(placeJson);
