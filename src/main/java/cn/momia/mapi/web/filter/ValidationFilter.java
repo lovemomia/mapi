@@ -1,6 +1,6 @@
 package cn.momia.mapi.web.filter;
 
-import cn.momia.mapi.common.config.Configuration;
+import cn.momia.common.webapp.config.Configuration;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 

@@ -1,19 +1,11 @@
 package cn.momia.mapi.api;
 
-import cn.momia.api.base.exception.MomiaExpiredException;
-import cn.momia.api.base.exception.MomiaFailedException;
-import cn.momia.mapi.web.response.ResponseMessage;
-import cn.momia.api.base.exception.MomiaException;
+import cn.momia.common.webapp.ctrl.BaseController;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import javax.servlet.http.HttpServletRequest;
 
-public abstract class AbstractApi {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractApi.class);
-
+public abstract class AbstractApi extends BaseController {
     protected static int CLIENT_TYPE_WAP = 1;
     protected static int CLIENT_TYPE_APP = 2;
 
@@ -23,18 +15,5 @@ public abstract class AbstractApi {
 
     protected int getClientType(HttpServletRequest request) {
         return StringUtils.isBlank(request.getParameter("terminal")) ? CLIENT_TYPE_WAP : CLIENT_TYPE_APP;
-    }
-
-    @ExceptionHandler
-    public ResponseMessage exception(Exception exception) throws Exception {
-        if (exception instanceof MomiaException) LOGGER.error("exception!!", exception);
-
-        if (exception instanceof MomiaFailedException) {
-            return ResponseMessage.FAILED(exception.getMessage());
-        } else if (exception instanceof MomiaExpiredException) {
-            return ResponseMessage.TOKEN_EXPIRED;
-        } else {
-            throw exception;
-        }
     }
 }

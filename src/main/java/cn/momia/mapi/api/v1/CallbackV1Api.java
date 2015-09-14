@@ -1,7 +1,6 @@
 package cn.momia.mapi.api.v1;
 
-import cn.momia.mapi.api.v1.misc.Xml;
-import cn.momia.mapi.common.util.XmlUtil;
+import cn.momia.common.util.XmlUtil;
 import cn.momia.api.deal.DealServiceApi;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -45,16 +44,34 @@ public class CallbackV1Api extends AbstractV1Api {
     }
 
     @RequestMapping(value = "/wechatpay", method = RequestMethod.POST, produces = "application/xml")
-    public Xml wechatpayCallback(HttpServletRequest request) {
+    public String wechatpayCallback(HttpServletRequest request) {
         try {
-            Map<String, String> params = XmlUtil.xmlToParams(IOUtils.toString(request.getInputStream()));
-            if (DealServiceApi.CALLBACK.callbackWechatpay(params)) return new Xml("SUCCESS", "OK");
+            Map<String, String> params = XmlUtil.xmlToMap(IOUtils.toString(request.getInputStream()));
+            if (DealServiceApi.CALLBACK.callbackWechatpay(params)) return WechatpayResponse.SUCCESS;
         } catch (Exception e) {
             LOGGER.error("wechat pay callback error", e);
         }
 
         LOGGER.error("wechat pay: callback failure");
 
-        return new Xml("FAIL", "ERROR");
+        return WechatpayResponse.FAILED;
+    }
+
+    private static class WechatpayResponse {
+        public static String SUCCESS = new WechatpayResponse("SUCCESS", "OK").toString();
+        public static String FAILED = new WechatpayResponse("FAIL", "ERROR").toString();
+
+        private String return_code;
+        private String return_msg;
+
+        public WechatpayResponse(String return_code, String return_msg) {
+            this.return_code = return_code;
+            this.return_msg = return_msg;
+        }
+
+        @Override
+        public String toString() {
+            return "<xml><return_code>" + return_code + "</return_code><return_msg>" + return_msg + "</return_msg></xml>";
+        }
     }
 }
