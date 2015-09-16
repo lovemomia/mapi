@@ -18,6 +18,7 @@
         <Feed>http://localhost:7070</Feed>
         <Product>http://localhost:7070</Product>
         <User>http://localhost:7070</User>
+        <Im>http://localhost:7070</Im>
     </Service>
 
     <Database>
