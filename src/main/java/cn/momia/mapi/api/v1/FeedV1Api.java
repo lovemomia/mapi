@@ -29,6 +29,16 @@ import java.util.List;
 public class FeedV1Api extends AbstractV1Api {
     private static final Logger LOGGER = LoggerFactory.getLogger(FeedV1Api.class);
 
+    @RequestMapping(value = "/follow", method = RequestMethod.POST)
+    public MomiaHttpResponse follow(@RequestParam String utoken, @RequestParam(value = "fuid") long followedId) {
+        if (StringUtils.isBlank(utoken) || followedId < 0) return MomiaHttpResponse.BAD_REQUEST;
+
+        User user = UserServiceApi.USER.get(utoken);
+        FeedServiceApi.FEED.follow(user.getId(), followedId);
+
+        return MomiaHttpResponse.SUCCESS;
+    }
+
     @RequestMapping(method = RequestMethod.GET)
     public MomiaHttpResponse list(@RequestParam String utoken, @RequestParam int start) {
         if (StringUtils.isBlank(utoken) || start < 0) return MomiaHttpResponse.BAD_REQUEST;
