@@ -1,12 +1,12 @@
 package cn.momia.mapi.api.v1;
 
+import cn.momia.api.deal.entity.Coupon;
+import cn.momia.api.product.entity.Product;
+import cn.momia.common.api.entity.PagedList;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.api.deal.DealServiceApi;
-import cn.momia.api.deal.entity.PagedCoupons;
 import cn.momia.api.deal.entity.Order;
-import cn.momia.api.deal.entity.PagedOrders;
 import cn.momia.api.product.ProductServiceApi;
-import cn.momia.api.product.entity.PagedProducts;
 import cn.momia.api.user.UserServiceApi;
 import cn.momia.api.user.entity.Participant;
 import cn.momia.api.user.entity.User;
@@ -169,7 +169,7 @@ public class UserV1Api extends AbstractV1Api {
                                         @RequestParam int start) {
         if (StringUtils.isBlank(utoken) || start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        PagedOrders orders = processPagedOrders(DealServiceApi.ORDER.listOrders(utoken, status < 0 ? 1 : status, start, Configuration.getInt("PageSize.Order")));
+        PagedList<Order> orders = processPagedOrders(DealServiceApi.ORDER.listOrders(utoken, status < 0 ? 1 : status, start, Configuration.getInt("PageSize.Order")));
 
         return MomiaHttpResponse.SUCCESS(orders);
     }
@@ -192,7 +192,7 @@ public class UserV1Api extends AbstractV1Api {
                                          @RequestParam int start) {
         if (StringUtils.isBlank(utoken) || orderId < 0 || status < 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        PagedCoupons coupons = DealServiceApi.COUPON.listCoupons(utoken, orderId, status, start, Configuration.getInt("PageSize.Coupon"));
+        PagedList<Coupon> coupons = DealServiceApi.COUPON.listCoupons(utoken, orderId, status, start, Configuration.getInt("PageSize.Coupon"));
 
         return MomiaHttpResponse.SUCCESS(coupons);
     }
@@ -202,7 +202,7 @@ public class UserV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken) || start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
         User user = UserServiceApi.USER.get(utoken);
-        PagedProducts favorites = ProductServiceApi.FAVORITE.listFavorites(user.getId(), start, Configuration.getInt("PageSize.Favorite"));
+        PagedList<Product> favorites = ProductServiceApi.FAVORITE.listFavorites(user.getId(), start, Configuration.getInt("PageSize.Favorite"));
 
         return MomiaHttpResponse.SUCCESS(processPagedProducts(favorites, IMAGE_MIDDLE));
     }

@@ -2,9 +2,9 @@ package cn.momia.mapi.api.v1;
 
 import cn.momia.api.base.MetaUtil;
 import cn.momia.api.user.entity.Leader;
+import cn.momia.common.api.entity.PagedList;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.api.product.entity.Comment;
-import cn.momia.api.product.entity.PagedComments;
 import cn.momia.common.webapp.config.Configuration;
 import cn.momia.image.api.ImageFile;
 import cn.momia.api.deal.DealServiceApi;
@@ -110,8 +110,8 @@ public class ProductV1Api extends AbstractV1Api {
         return MomiaHttpResponse.SUCCESS(productJson);
     }
 
-    private PagedComments listComments(long id, int start, int count) {
-        PagedComments pagedComments = ProductServiceApi.COMMENT.list(id, start, count);
+    private PagedList<Comment> listComments(long id, int start, int count) {
+        PagedList<Comment> pagedComments = ProductServiceApi.COMMENT.list(id, start, count);
         List<Long> userIds = new ArrayList<Long>();
         for (Comment comment : pagedComments.getList()) userIds.add(comment.getUserId());
         List<User> users = UserServiceApi.USER.list(userIds, User.Type.MINI);

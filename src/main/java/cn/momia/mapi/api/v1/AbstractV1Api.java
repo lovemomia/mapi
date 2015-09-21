@@ -1,22 +1,17 @@
 package cn.momia.mapi.api.v1;
 
 import cn.momia.api.feed.entity.Feed;
-import cn.momia.api.feed.entity.PagedFeeds;
 import cn.momia.api.product.entity.Comment;
-import cn.momia.api.product.entity.PagedComments;
 import cn.momia.api.user.UserServiceApi;
+import cn.momia.common.api.entity.PagedList;
 import cn.momia.common.webapp.config.Configuration;
 import cn.momia.image.api.ImageFile;
 import cn.momia.mapi.api.AbstractApi;
 import cn.momia.api.deal.entity.Order;
-import cn.momia.api.deal.entity.PagedOrders;
 import cn.momia.api.deal.entity.Playmate;
 import cn.momia.api.deal.entity.SkuPlaymates;
 import cn.momia.api.feed.entity.FeedComment;
-import cn.momia.api.feed.entity.PagedFeedComments;
 import cn.momia.api.feed.entity.FeedStar;
-import cn.momia.api.feed.entity.PagedFeedStars;
-import cn.momia.api.product.entity.PagedProducts;
 import cn.momia.api.product.entity.Product;
 import cn.momia.api.product.entity.ProductGroup;
 import cn.momia.api.product.entity.Banner;
@@ -32,6 +27,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sun.jvm.hotspot.debugger.Page;
 
 import java.net.URLEncoder;
 import java.util.List;
@@ -39,7 +35,7 @@ import java.util.List;
 public class AbstractV1Api extends AbstractApi {
     private static Logger LOGGER = LoggerFactory.getLogger(AbstractApi.class);
 
-    protected PagedOrders processPagedOrders(PagedOrders orders) {
+    protected PagedList<Order> processPagedOrders(PagedList<Order> orders) {
         for (Order order : orders.getList()) {
             processOrder(order);
         }
@@ -63,7 +59,7 @@ public class AbstractV1Api extends AbstractApi {
         return playmates;
     }
 
-    protected PagedFeeds processPagedFeeds(PagedFeeds feeds) {
+    protected PagedList<Feed> processPagedFeeds(PagedList<Feed> feeds) {
         for (Feed feed : feeds.getList()) {
             processFeed(feed);
         }
@@ -82,7 +78,7 @@ public class AbstractV1Api extends AbstractApi {
         return feed;
     }
 
-    protected PagedFeedComments processPagedFeedComments(PagedFeedComments comments) {
+    protected PagedList<FeedComment> processPagedFeedComments(PagedList<FeedComment> comments) {
         for (FeedComment feedComment : comments.getList()) {
             feedComment.setAvatar(ImageFile.smallUrl(feedComment.getAvatar()));
         }
@@ -90,7 +86,7 @@ public class AbstractV1Api extends AbstractApi {
         return comments;
     }
 
-    protected PagedFeedStars processPagedFeedStars(PagedFeedStars stars) {
+    protected PagedList<FeedStar> processPagedFeedStars(PagedList<FeedStar> stars) {
         for (FeedStar feedStar : stars.getList()) {
             feedStar.setAvatar(ImageFile.smallUrl(feedStar.getAvatar()));
         }
@@ -216,11 +212,11 @@ public class AbstractV1Api extends AbstractApi {
         return products;
     }
 
-    protected PagedProducts processPagedProducts(PagedProducts products) {
+    protected PagedList<Product> processPagedProducts(PagedList<Product> products) {
         return processPagedProducts(products, IMAGE_LARGE);
     }
 
-    protected PagedProducts processPagedProducts(PagedProducts products, int size) {
+    protected PagedList<Product> processPagedProducts(PagedList<Product> products, int size) {
         processProducts(products.getList(), size);
 
         return products;
@@ -249,7 +245,7 @@ public class AbstractV1Api extends AbstractApi {
         return detailDoc.toString();
     }
 
-    protected PagedComments processPagedComments(PagedComments pagedComments) {
+    protected PagedList<Comment> processPagedComments(PagedList<Comment> pagedComments) {
         for (Comment comment : pagedComments.getList()) {
             processComment(comment);
         }
