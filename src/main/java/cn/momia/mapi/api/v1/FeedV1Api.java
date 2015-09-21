@@ -42,10 +42,15 @@ public class FeedV1Api extends AbstractV1Api {
 
     @RequestMapping(method = RequestMethod.GET)
     public MomiaHttpResponse list(@RequestParam String utoken, @RequestParam int start) {
-        if (StringUtils.isBlank(utoken) || start < 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        User user = UserServiceApi.USER.get(utoken);
-        PagedFeeds feeds = FeedServiceApi.FEED.list(user.getId(), start, Configuration.getInt("PageSize.Feed.List"));
+        PagedFeeds feeds;
+        if (!StringUtils.isBlank(utoken)) {
+            User user = UserServiceApi.USER.get(utoken);
+            feeds = FeedServiceApi.FEED.list(user.getId(), start, Configuration.getInt("PageSize.Feed.List"));
+        } else {
+            feeds = FeedServiceApi.FEED.list(0, start, Configuration.getInt("PageSize.Feed.List"));
+        }
 
         return MomiaHttpResponse.SUCCESS(processPagedFeeds(feeds));
     }
