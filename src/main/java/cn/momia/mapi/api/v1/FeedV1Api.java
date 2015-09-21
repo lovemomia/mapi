@@ -41,7 +41,7 @@ public class FeedV1Api extends AbstractV1Api {
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public MomiaHttpResponse list(@RequestParam String utoken, @RequestParam int start) {
+    public MomiaHttpResponse list(@RequestParam(required = false, defaultValue = "") String utoken, @RequestParam int start) {
         if (start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
         PagedFeeds feeds;
