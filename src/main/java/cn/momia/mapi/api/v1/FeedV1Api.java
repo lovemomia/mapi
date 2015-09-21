@@ -1,5 +1,6 @@
 package cn.momia.mapi.api.v1;
 
+import cn.momia.api.feed.star.PagedFeedStars;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.api.feed.FeedServiceApi;
 import cn.momia.api.feed.comment.FeedComment;
@@ -101,8 +102,8 @@ public class FeedV1Api extends AbstractV1Api {
         User user = UserServiceApi.USER.get(utoken);
         Feed feed = FeedServiceApi.FEED.get(user.getId(), id);
         Product product = ProductServiceApi.PRODUCT.get(productId, Product.Type.BASE);
-        List<FeedStar> stars = processPagedFeedStars(FeedServiceApi.FEED.listStars(id, 0, Configuration.getInt("PageSize.Feed.Detail.Star"))).getList();
-        List<FeedComment> comments = processPagedFeedComments(FeedServiceApi.FEED.listComments(id, 0, Configuration.getInt("PageSize.Feed.Detail.Comment"))).getList();
+        PagedFeedStars stars = processPagedFeedStars(FeedServiceApi.FEED.listStars(id, 0, Configuration.getInt("PageSize.Feed.Detail.Star")));
+        PagedFeedComments comments = processPagedFeedComments(FeedServiceApi.FEED.listComments(id, 0, Configuration.getInt("PageSize.Feed.Detail.Comment")));
 
         JSONObject feedDetailJson = new JSONObject();
         feedDetailJson.put("feed", processFeed(feed));
