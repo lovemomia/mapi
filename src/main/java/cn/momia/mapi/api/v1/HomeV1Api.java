@@ -2,8 +2,8 @@ package cn.momia.mapi.api.v1;
 
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.api.product.ProductServiceApi;
-import cn.momia.api.product.PagedProducts;
-import cn.momia.api.product.topic.Banner;
+import cn.momia.api.product.entity.PagedProducts;
+import cn.momia.api.product.entity.Banner;
 import cn.momia.common.webapp.config.Configuration;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.web.bind.annotation.RequestMapping;

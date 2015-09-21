@@ -2,7 +2,7 @@ package cn.momia.mapi.api.v1;
 
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.api.user.UserServiceApi;
-import cn.momia.api.user.participant.Participant;
+import cn.momia.api.user.entity.Participant;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;

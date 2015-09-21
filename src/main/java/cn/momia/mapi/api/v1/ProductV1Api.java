@@ -1,18 +1,18 @@
 package cn.momia.mapi.api.v1;
 
 import cn.momia.api.base.MetaUtil;
-import cn.momia.api.user.leader.Leader;
+import cn.momia.api.user.entity.Leader;
 import cn.momia.common.api.http.MomiaHttpResponse;
-import cn.momia.api.product.comment.Comment;
-import cn.momia.api.product.comment.PagedComments;
+import cn.momia.api.product.entity.Comment;
+import cn.momia.api.product.entity.PagedComments;
 import cn.momia.common.webapp.config.Configuration;
 import cn.momia.image.api.ImageFile;
 import cn.momia.api.deal.DealServiceApi;
 import cn.momia.api.product.ProductServiceApi;
-import cn.momia.api.product.Product;
-import cn.momia.api.product.sku.Sku;
+import cn.momia.api.product.entity.Product;
+import cn.momia.api.product.entity.Sku;
 import cn.momia.api.user.UserServiceApi;
-import cn.momia.api.user.User;
+import cn.momia.api.user.entity.User;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
