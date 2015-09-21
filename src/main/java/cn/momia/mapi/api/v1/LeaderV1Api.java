@@ -38,7 +38,7 @@ public class LeaderV1Api extends AbstractV1Api {
         switch (leaderStatus.getStatus()) {
             case Status.PASSED:
                 MomiaHttpResponse ledProductsResponse = getLedProducts(utoken, 0);
-                if (!ledProductsResponse.successful()) return MomiaHttpResponse.FAILED("获取领队状态失败");
+                if (!ledProductsResponse.isSuccessful()) return MomiaHttpResponse.FAILED("获取领队状态失败");
 
                 statusJson.put("products", ledProductsResponse.getData());
                 break;
