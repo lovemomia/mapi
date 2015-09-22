@@ -7,7 +7,7 @@ import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.api.feed.FeedServiceApi;
 import cn.momia.api.feed.dto.FeedDto;
 import cn.momia.api.product.ProductServiceApi;
-import cn.momia.api.product.entity.Product;
+import cn.momia.api.product.dto.ProductDto;
 import cn.momia.api.user.UserServiceApi;
 import cn.momia.api.user.dto.UserDto;
 import cn.momia.common.webapp.config.Configuration;
@@ -59,8 +59,8 @@ public class FeedV1Api extends AbstractV1Api {
                                    @RequestParam final int start) {
         if (topicId <= 0 || productId <= 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        Product product = null;
-        if (start == 0) product = processProduct(ProductServiceApi.PRODUCT.get(productId, Product.Type.BASE));
+        ProductDto product = null;
+        if (start == 0) product = processProduct(ProductServiceApi.PRODUCT.get(productId, ProductDto.Type.BASE));
 
         long userId = 0;
         try {
@@ -97,7 +97,7 @@ public class FeedV1Api extends AbstractV1Api {
 
         UserDto user = UserServiceApi.USER.get(utoken);
         FeedDto feed = FeedServiceApi.FEED.get(user.getId(), id);
-        Product product = ProductServiceApi.PRODUCT.get(productId, Product.Type.BASE);
+        ProductDto product = ProductServiceApi.PRODUCT.get(productId, ProductDto.Type.BASE);
         PagedList<FeedStarDto> stars = processPagedFeedStars(FeedServiceApi.FEED.listStars(id, 0, Configuration.getInt("PageSize.Feed.Detail.Star")));
         PagedList<FeedCommentDto> comments = processPagedFeedComments(FeedServiceApi.FEED.listComments(id, 0, Configuration.getInt("PageSize.Feed.Detail.Comment")));
 

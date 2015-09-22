@@ -1,7 +1,7 @@
 package cn.momia.mapi.api.v1;
 
 import cn.momia.api.feed.dto.FeedDto;
-import cn.momia.api.product.entity.Comment;
+import cn.momia.api.product.dto.CommentDto;
 import cn.momia.api.user.UserServiceApi;
 import cn.momia.common.api.entity.PagedList;
 import cn.momia.common.webapp.config.Configuration;
@@ -12,11 +12,11 @@ import cn.momia.api.deal.dto.PlaymateDto;
 import cn.momia.api.deal.dto.SkuPlaymatesDto;
 import cn.momia.api.feed.dto.FeedCommentDto;
 import cn.momia.api.feed.dto.FeedStarDto;
-import cn.momia.api.product.entity.Product;
-import cn.momia.api.product.entity.ProductGroup;
-import cn.momia.api.product.entity.Banner;
-import cn.momia.api.product.entity.TopicGroup;
-import cn.momia.api.product.entity.Topic;
+import cn.momia.api.product.dto.ProductDto;
+import cn.momia.api.product.dto.ProductGroupDto;
+import cn.momia.api.product.dto.Banner;
+import cn.momia.api.product.dto.TopicGroup;
+import cn.momia.api.product.dto.Topic;
 import cn.momia.api.user.dto.UserDto;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -132,15 +132,15 @@ public class AbstractV1Api extends AbstractApi {
         return topic;
     }
 
-    protected Product processProduct(Product product) {
+    protected ProductDto processProduct(ProductDto product) {
         return processProduct(product, IMAGE_LARGE);
     }
 
-    protected Product processProduct(Product product, int size) {
+    protected ProductDto processProduct(ProductDto product, int size) {
         return processProduct(product, size, CLIENT_TYPE_WAP);
     }
 
-    protected Product processProduct(Product product, int size, int clientType) {
+    protected ProductDto processProduct(ProductDto product, int size, int clientType) {
         product.setUrl(buildUrl(product.getId()));
         product.setThumb(ImageFile.smallUrl(product.getThumb()));
 
@@ -156,12 +156,12 @@ public class AbstractV1Api extends AbstractApi {
         return product;
     }
 
-    protected Product processProduct(Product product, String utoken) {
+    protected ProductDto processProduct(ProductDto product, String utoken) {
         return processProduct(product, utoken, CLIENT_TYPE_WAP);
     }
 
-    protected Product processProduct(Product product, String utoken, int clientType) {
-        Product processedProduct = processProduct(product, IMAGE_LARGE, clientType);
+    protected ProductDto processProduct(ProductDto product, String utoken, int clientType) {
+        ProductDto processedProduct = processProduct(product, IMAGE_LARGE, clientType);
         try {
             if (!StringUtils.isBlank(utoken)) {
                 String inviteCode = UserServiceApi.USER.getInviteCode(utoken);
@@ -199,34 +199,34 @@ public class AbstractV1Api extends AbstractApi {
         return contentJson;
     }
 
-    protected List<Product> processProducts(List<Product> products) {
+    protected List<ProductDto> processProducts(List<ProductDto> products) {
         return processProducts(products, IMAGE_LARGE);
     }
 
-    protected List<Product> processProducts(List<Product> products, int size) {
-        for (Product product : products) {
+    protected List<ProductDto> processProducts(List<ProductDto> products, int size) {
+        for (ProductDto product : products) {
             processProduct(product, size);
         }
 
         return products;
     }
 
-    protected PagedList<Product> processPagedProducts(PagedList<Product> products) {
+    protected PagedList<ProductDto> processPagedProducts(PagedList<ProductDto> products) {
         return processPagedProducts(products, IMAGE_LARGE);
     }
 
-    protected PagedList<Product> processPagedProducts(PagedList<Product> products, int size) {
+    protected PagedList<ProductDto> processPagedProducts(PagedList<ProductDto> products, int size) {
         processProducts(products.getList(), size);
 
         return products;
     }
 
-    protected List<ProductGroup> processGroupedProducts(List<ProductGroup> products) {
+    protected List<ProductGroupDto> processGroupedProducts(List<ProductGroupDto> products) {
         return processGroupedProducts(products, IMAGE_LARGE);
     }
 
-    protected List<ProductGroup> processGroupedProducts(List<ProductGroup> products, int size) {
-        for (ProductGroup productGroup : products) {
+    protected List<ProductGroupDto> processGroupedProducts(List<ProductGroupDto> products, int size) {
+        for (ProductGroupDto productGroup : products) {
             processProducts(productGroup.getProducts(), size);
         }
 
@@ -244,15 +244,15 @@ public class AbstractV1Api extends AbstractApi {
         return detailDoc.toString();
     }
 
-    protected PagedList<Comment> processPagedComments(PagedList<Comment> pagedComments) {
-        for (Comment comment : pagedComments.getList()) {
+    protected PagedList<CommentDto> processPagedComments(PagedList<CommentDto> pagedComments) {
+        for (CommentDto comment : pagedComments.getList()) {
             processComment(comment);
         }
 
         return pagedComments;
     }
 
-    private Comment processComment(Comment comment) {
+    private CommentDto processComment(CommentDto comment) {
         for (int i = 0; i < comment.getImgs().size(); i++) {
             comment.getImgs().set(i, ImageFile.middleUrl(comment.getImgs().get(i)));
         }

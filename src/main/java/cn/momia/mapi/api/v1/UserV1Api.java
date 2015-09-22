@@ -1,7 +1,7 @@
 package cn.momia.mapi.api.v1;
 
 import cn.momia.api.deal.dto.CouponDto;
-import cn.momia.api.product.entity.Product;
+import cn.momia.api.product.dto.ProductDto;
 import cn.momia.common.api.entity.PagedList;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.api.deal.DealServiceApi;
@@ -202,7 +202,7 @@ public class UserV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken) || start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
         UserDto user = UserServiceApi.USER.get(utoken);
-        PagedList<Product> favorites = ProductServiceApi.FAVORITE.listFavorites(user.getId(), start, Configuration.getInt("PageSize.Favorite"));
+        PagedList<ProductDto> favorites = ProductServiceApi.FAVORITE.listFavorites(user.getId(), start, Configuration.getInt("PageSize.Favorite"));
 
         return MomiaHttpResponse.SUCCESS(processPagedProducts(favorites, IMAGE_MIDDLE));
     }

@@ -1,10 +1,10 @@
 package cn.momia.mapi.api.v1;
 
-import cn.momia.api.product.entity.Product;
+import cn.momia.api.product.dto.ProductDto;
 import cn.momia.common.api.entity.PagedList;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.api.product.ProductServiceApi;
-import cn.momia.api.product.entity.Banner;
+import cn.momia.api.product.dto.Banner;
 import cn.momia.common.webapp.config.Configuration;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,12 +30,12 @@ public class HomeV1Api extends AbstractV1Api {
 
         List<Banner> banners = null;
         if (start== 0) banners = ProductServiceApi.TOPIC.listBanners(cityId, Configuration.getInt("PageSize.Banner"));
-        PagedList<Product> products = ProductServiceApi.PRODUCT.list(cityId, start, count);
+        PagedList<ProductDto> products = ProductServiceApi.PRODUCT.list(cityId, start, count);
 
         return MomiaHttpResponse.SUCCESS(buildHomeResponse(banners, products, start, count, pageIndex, getClientType(request)));
     }
 
-    private JSONObject buildHomeResponse(List<Banner> banners, PagedList<Product> products, int start, int count, int pageIndex, int clientType) {
+    private JSONObject buildHomeResponse(List<Banner> banners, PagedList<ProductDto> products, int start, int count, int pageIndex, int clientType) {
         JSONObject homeJson = new JSONObject();
 
         if (pageIndex == 0) homeJson.put("banners", processBanners(banners, clientType));

@@ -4,13 +4,13 @@ import cn.momia.api.base.MetaUtil;
 import cn.momia.api.user.dto.LeaderDto;
 import cn.momia.common.api.entity.PagedList;
 import cn.momia.common.api.http.MomiaHttpResponse;
-import cn.momia.api.product.entity.Comment;
+import cn.momia.api.product.dto.CommentDto;
 import cn.momia.common.webapp.config.Configuration;
 import cn.momia.image.api.ImageFile;
 import cn.momia.api.deal.DealServiceApi;
 import cn.momia.api.product.ProductServiceApi;
-import cn.momia.api.product.entity.Product;
-import cn.momia.api.product.entity.Sku;
+import cn.momia.api.product.dto.ProductDto;
+import cn.momia.api.product.dto.SkuDto;
 import cn.momia.api.user.UserServiceApi;
 import cn.momia.api.user.dto.UserDto;
 import com.alibaba.fastjson.JSON;
@@ -62,17 +62,17 @@ public class ProductV1Api extends AbstractV1Api {
     public MomiaHttpResponse listSkusNeedLeader(@RequestParam(value = "pid") long id) {
         if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        Product product = ProductServiceApi.PRODUCT.get(id, Product.Type.BASE);
-        List<Sku> skus = ProductServiceApi.SKU.listWithLeader(id);
+        ProductDto product = ProductServiceApi.PRODUCT.get(id, ProductDto.Type.BASE);
+        List<SkuDto> skus = ProductServiceApi.SKU.listWithLeader(id);
 
         Set<Long> leaderUserIds = new HashSet<Long>();
-        for (Sku sku : skus) {
+        for (SkuDto sku : skus) {
             if (sku.getLeaderUserId() > 0) leaderUserIds.add(sku.getLeaderUserId());
         }
         List<LeaderDto> leaderDtos = UserServiceApi.LEADER.list(leaderUserIds);
         Map<Long, LeaderDto> leadersMap = new HashMap<Long, LeaderDto>();
         for (LeaderDto leaderDto : leaderDtos) leadersMap.put(leaderDto.getUserId(), leaderDto);
-        for (Sku sku : skus) {
+        for (SkuDto sku : skus) {
             if (!sku.isNeedLeader()) {
                 sku.setLeaderInfo("本场不需要领队");
             } else {
@@ -93,7 +93,7 @@ public class ProductV1Api extends AbstractV1Api {
     public MomiaHttpResponse get(@RequestParam(defaultValue = "") String utoken, @RequestParam long id, HttpServletRequest request) {
         if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        Product product = processProduct(ProductServiceApi.PRODUCT.get(id, Product.Type.FULL), utoken, getClientType(request));
+        ProductDto product = processProduct(ProductServiceApi.PRODUCT.get(id, ProductDto.Type.FULL), utoken, getClientType(request));
         JSONObject productJson = JSON.parseObject(JSON.toJSONString(product));
         try {
             List<String> avatars = DealServiceApi.ORDER.listCustomerAvatars(id, Configuration.getInt("PageSize.ProductCustomer"));
@@ -110,14 +110,14 @@ public class ProductV1Api extends AbstractV1Api {
         return MomiaHttpResponse.SUCCESS(productJson);
     }
 
-    private PagedList<Comment> listComments(long id, int start, int count) {
-        PagedList<Comment> pagedComments = ProductServiceApi.COMMENT.list(id, start, count);
+    private PagedList<CommentDto> listComments(long id, int start, int count) {
+        PagedList<CommentDto> pagedComments = ProductServiceApi.COMMENT.list(id, start, count);
         List<Long> userIds = new ArrayList<Long>();
-        for (Comment comment : pagedComments.getList()) userIds.add(comment.getUserId());
+        for (CommentDto comment : pagedComments.getList()) userIds.add(comment.getUserId());
         List<UserDto> users = UserServiceApi.USER.list(userIds, UserDto.Type.MINI);
         Map<Long, UserDto> usersMap = new HashMap<Long, UserDto>();
         for (UserDto user : users) usersMap.put(user.getId(), user);
-        for (Comment comment : pagedComments.getList()) {
+        for (CommentDto comment : pagedComments.getList()) {
             UserDto user = usersMap.get(comment.getUserId());
             if (user == null || !user.exists()) {
                 comment.setNickName("");
@@ -152,17 +152,17 @@ public class ProductV1Api extends AbstractV1Api {
 
         JSONObject placeOrderJson = new JSONObject();
         placeOrderJson.put("contacts", UserServiceApi.USER.getContacts(utoken));
-        List<Sku> skus = ProductServiceApi.SKU.list(id, Sku.Status.AVALIABLE);
+        List<SkuDto> skus = ProductServiceApi.SKU.list(id, SkuDto.Status.AVALIABLE);
         placeOrderJson.put("places", extractPlaces(skus));
         placeOrderJson.put("skus", skus);
 
         return MomiaHttpResponse.SUCCESS(placeOrderJson);
     }
 
-    private JSONArray extractPlaces(List<Sku> skus) {
+    private JSONArray extractPlaces(List<SkuDto> skus) {
         JSONArray placesJson = new JSONArray();
         Set<Integer> placeIds = new HashSet<Integer>();
-        for (Sku sku : skus) {
+        for (SkuDto sku : skus) {
             int placeId = sku.getPlaceId();
             if (placeId <= 0 || placeIds.contains(placeId)) continue;
             placeIds.add(placeId);
