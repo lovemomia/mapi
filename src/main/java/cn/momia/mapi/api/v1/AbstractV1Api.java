@@ -7,9 +7,9 @@ import cn.momia.common.api.entity.PagedList;
 import cn.momia.common.webapp.config.Configuration;
 import cn.momia.image.api.ImageFile;
 import cn.momia.mapi.api.AbstractApi;
-import cn.momia.api.deal.entity.Order;
-import cn.momia.api.deal.entity.Playmate;
-import cn.momia.api.deal.entity.SkuPlaymates;
+import cn.momia.api.deal.dto.OrderDto;
+import cn.momia.api.deal.dto.PlaymateDto;
+import cn.momia.api.deal.dto.SkuPlaymatesDto;
 import cn.momia.api.feed.entity.FeedComment;
 import cn.momia.api.feed.entity.FeedStar;
 import cn.momia.api.product.entity.Product;
@@ -34,23 +34,23 @@ import java.util.List;
 public class AbstractV1Api extends AbstractApi {
     private static Logger LOGGER = LoggerFactory.getLogger(AbstractApi.class);
 
-    protected PagedList<Order> processPagedOrders(PagedList<Order> orders) {
-        for (Order order : orders.getList()) {
+    protected PagedList<OrderDto> processPagedOrders(PagedList<OrderDto> orders) {
+        for (OrderDto order : orders.getList()) {
             processOrder(order);
         }
 
         return orders;
     }
 
-    protected Order processOrder(Order order) {
+    protected OrderDto processOrder(OrderDto order) {
         order.setCover(ImageFile.middleUrl(order.getCover()));
 
         return order;
     }
 
-    protected List<SkuPlaymates> processPlaymates(List<SkuPlaymates> playmates) {
-        for (SkuPlaymates skuPlaymates : playmates) {
-            for (Playmate playmate : skuPlaymates.getPlaymates()) {
+    protected List<SkuPlaymatesDto> processPlaymates(List<SkuPlaymatesDto> playmates) {
+        for (SkuPlaymatesDto skuPlaymates : playmates) {
+            for (PlaymateDto playmate : skuPlaymates.getPlaymates()) {
                 playmate.setAvatar(ImageFile.smallUrl(playmate.getAvatar()));
             }
         }

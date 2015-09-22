@@ -1,11 +1,11 @@
 package cn.momia.mapi.api.v1;
 
-import cn.momia.api.deal.entity.Coupon;
+import cn.momia.api.deal.dto.CouponDto;
 import cn.momia.api.product.entity.Product;
 import cn.momia.common.api.entity.PagedList;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.api.deal.DealServiceApi;
-import cn.momia.api.deal.entity.Order;
+import cn.momia.api.deal.dto.OrderDto;
 import cn.momia.api.product.ProductServiceApi;
 import cn.momia.api.user.UserServiceApi;
 import cn.momia.api.user.dto.ParticipantDto;
@@ -169,7 +169,7 @@ public class UserV1Api extends AbstractV1Api {
                                         @RequestParam int start) {
         if (StringUtils.isBlank(utoken) || start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        PagedList<Order> orders = processPagedOrders(DealServiceApi.ORDER.listOrders(utoken, status < 0 ? 1 : status, start, Configuration.getInt("PageSize.Order")));
+        PagedList<OrderDto> orders = processPagedOrders(DealServiceApi.ORDER.listOrders(utoken, status < 0 ? 1 : status, start, Configuration.getInt("PageSize.Order")));
 
         return MomiaHttpResponse.SUCCESS(orders);
     }
@@ -180,7 +180,7 @@ public class UserV1Api extends AbstractV1Api {
                                             @RequestParam(value = "pid") long productId) {
         if (StringUtils.isBlank(utoken) || orderId <= 0 || productId <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        Order order = processOrder(DealServiceApi.ORDER.get(utoken, orderId, productId));
+        OrderDto order = processOrder(DealServiceApi.ORDER.get(utoken, orderId, productId));
 
         return MomiaHttpResponse.SUCCESS(order);
     }
@@ -192,7 +192,7 @@ public class UserV1Api extends AbstractV1Api {
                                          @RequestParam int start) {
         if (StringUtils.isBlank(utoken) || orderId < 0 || status < 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        PagedList<Coupon> coupons = DealServiceApi.COUPON.listCoupons(utoken, orderId, status, start, Configuration.getInt("PageSize.Coupon"));
+        PagedList<CouponDto> coupons = DealServiceApi.COUPON.listCoupons(utoken, orderId, status, start, Configuration.getInt("PageSize.Coupon"));
 
         return MomiaHttpResponse.SUCCESS(coupons);
     }
