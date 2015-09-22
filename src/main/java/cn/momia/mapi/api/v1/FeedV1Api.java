@@ -1,11 +1,11 @@
 package cn.momia.mapi.api.v1;
 
-import cn.momia.api.feed.entity.FeedComment;
-import cn.momia.api.feed.entity.FeedStar;
+import cn.momia.api.feed.dto.FeedCommentDto;
+import cn.momia.api.feed.dto.FeedStarDto;
 import cn.momia.common.api.entity.PagedList;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.api.feed.FeedServiceApi;
-import cn.momia.api.feed.entity.Feed;
+import cn.momia.api.feed.dto.FeedDto;
 import cn.momia.api.product.ProductServiceApi;
 import cn.momia.api.product.entity.Product;
 import cn.momia.api.user.UserServiceApi;
@@ -41,7 +41,7 @@ public class FeedV1Api extends AbstractV1Api {
     public MomiaHttpResponse list(@RequestParam(required = false, defaultValue = "") String utoken, @RequestParam int start) {
         if (start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        PagedList<Feed> feeds;
+        PagedList<FeedDto> feeds;
         if (!StringUtils.isBlank(utoken)) {
             UserDto user = UserServiceApi.USER.get(utoken);
             feeds = FeedServiceApi.FEED.list(user.getId(), start, Configuration.getInt("PageSize.Feed.List"));
@@ -69,7 +69,7 @@ public class FeedV1Api extends AbstractV1Api {
             LOGGER.error("exception!!", e);
         }
 
-        PagedList<Feed> feeds = processPagedFeeds(FeedServiceApi.FEED.listByTopic(userId, topicId, start, Configuration.getInt("PageSize.Feed.List")));
+        PagedList<FeedDto> feeds = processPagedFeeds(FeedServiceApi.FEED.listByTopic(userId, topicId, start, Configuration.getInt("PageSize.Feed.List")));
 
         JSONObject feedTopicJson = new JSONObject();
         if (start == 0) feedTopicJson.put("product", product);
@@ -96,10 +96,10 @@ public class FeedV1Api extends AbstractV1Api {
         if (id <= 0 || productId <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
         UserDto user = UserServiceApi.USER.get(utoken);
-        Feed feed = FeedServiceApi.FEED.get(user.getId(), id);
+        FeedDto feed = FeedServiceApi.FEED.get(user.getId(), id);
         Product product = ProductServiceApi.PRODUCT.get(productId, Product.Type.BASE);
-        PagedList<FeedStar> stars = processPagedFeedStars(FeedServiceApi.FEED.listStars(id, 0, Configuration.getInt("PageSize.Feed.Detail.Star")));
-        PagedList<FeedComment> comments = processPagedFeedComments(FeedServiceApi.FEED.listComments(id, 0, Configuration.getInt("PageSize.Feed.Detail.Comment")));
+        PagedList<FeedStarDto> stars = processPagedFeedStars(FeedServiceApi.FEED.listStars(id, 0, Configuration.getInt("PageSize.Feed.Detail.Star")));
+        PagedList<FeedCommentDto> comments = processPagedFeedComments(FeedServiceApi.FEED.listComments(id, 0, Configuration.getInt("PageSize.Feed.Detail.Comment")));
 
         JSONObject feedDetailJson = new JSONObject();
         feedDetailJson.put("feed", processFeed(feed));
@@ -124,7 +124,7 @@ public class FeedV1Api extends AbstractV1Api {
     public MomiaHttpResponse listComments(@RequestParam long id, @RequestParam int start) {
         if (id <= 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        PagedList<FeedComment> comments = FeedServiceApi.FEED.listComments(id, start, Configuration.getInt("PageSize.Feed.Comment"));
+        PagedList<FeedCommentDto> comments = FeedServiceApi.FEED.listComments(id, start, Configuration.getInt("PageSize.Feed.Comment"));
         return MomiaHttpResponse.SUCCESS(processPagedFeedComments(comments));
     }
 

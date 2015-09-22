@@ -1,6 +1,6 @@
 package cn.momia.mapi.api.v1;
 
-import cn.momia.api.feed.entity.Feed;
+import cn.momia.api.feed.dto.FeedDto;
 import cn.momia.api.product.entity.Comment;
 import cn.momia.api.user.UserServiceApi;
 import cn.momia.common.api.entity.PagedList;
@@ -10,8 +10,8 @@ import cn.momia.mapi.api.AbstractApi;
 import cn.momia.api.deal.dto.OrderDto;
 import cn.momia.api.deal.dto.PlaymateDto;
 import cn.momia.api.deal.dto.SkuPlaymatesDto;
-import cn.momia.api.feed.entity.FeedComment;
-import cn.momia.api.feed.entity.FeedStar;
+import cn.momia.api.feed.dto.FeedCommentDto;
+import cn.momia.api.feed.dto.FeedStarDto;
 import cn.momia.api.product.entity.Product;
 import cn.momia.api.product.entity.ProductGroup;
 import cn.momia.api.product.entity.Banner;
@@ -58,15 +58,15 @@ public class AbstractV1Api extends AbstractApi {
         return playmates;
     }
 
-    protected PagedList<Feed> processPagedFeeds(PagedList<Feed> feeds) {
-        for (Feed feed : feeds.getList()) {
+    protected PagedList<FeedDto> processPagedFeeds(PagedList<FeedDto> feeds) {
+        for (FeedDto feed : feeds.getList()) {
             processFeed(feed);
         }
 
         return feeds;
     }
 
-    protected Feed processFeed(Feed feed) {
+    protected FeedDto processFeed(FeedDto feed) {
         feed.setAvatar(ImageFile.smallUrl(feed.getAvatar()));
         if (feed.getImgs() != null) {
             for (int i = 0; i < feed.getImgs().size(); i++) {
@@ -77,16 +77,16 @@ public class AbstractV1Api extends AbstractApi {
         return feed;
     }
 
-    protected PagedList<FeedComment> processPagedFeedComments(PagedList<FeedComment> comments) {
-        for (FeedComment feedComment : comments.getList()) {
+    protected PagedList<FeedCommentDto> processPagedFeedComments(PagedList<FeedCommentDto> comments) {
+        for (FeedCommentDto feedComment : comments.getList()) {
             feedComment.setAvatar(ImageFile.smallUrl(feedComment.getAvatar()));
         }
 
         return comments;
     }
 
-    protected PagedList<FeedStar> processPagedFeedStars(PagedList<FeedStar> stars) {
-        for (FeedStar feedStar : stars.getList()) {
+    protected PagedList<FeedStarDto> processPagedFeedStars(PagedList<FeedStarDto> stars) {
+        for (FeedStarDto feedStar : stars.getList()) {
             feedStar.setAvatar(ImageFile.smallUrl(feedStar.getAvatar()));
         }
 
