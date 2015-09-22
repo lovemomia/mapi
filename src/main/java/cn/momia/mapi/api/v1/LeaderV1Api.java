@@ -3,9 +3,9 @@ package cn.momia.mapi.api.v1;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.api.product.ProductServiceApi;
 import cn.momia.api.user.UserServiceApi;
-import cn.momia.api.user.entity.Leader;
-import cn.momia.api.user.entity.LeaderStatus;
-import cn.momia.api.user.entity.User;
+import cn.momia.api.user.dto.LeaderDto;
+import cn.momia.api.user.dto.LeaderStatusDto;
+import cn.momia.api.user.dto.UserDto;
 import cn.momia.common.webapp.config.Configuration;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -31,11 +31,11 @@ public class LeaderV1Api extends AbstractV1Api {
 
         JSONObject statusJson = new JSONObject();
 
-        LeaderStatus leaderStatus = UserServiceApi.LEADER.getStatus(utoken);
-        statusJson.put("status", leaderStatus.getStatus());
-        statusJson.put("msg", leaderStatus.getMsg());
+        LeaderStatusDto leaderStatusDto = UserServiceApi.LEADER.getStatus(utoken);
+        statusJson.put("status", leaderStatusDto.getStatus());
+        statusJson.put("msg", leaderStatusDto.getMsg());
 
-        switch (leaderStatus.getStatus()) {
+        switch (leaderStatusDto.getStatus()) {
             case Status.PASSED:
                 MomiaHttpResponse ledProductsResponse = getLedProducts(utoken, 0);
                 if (!ledProductsResponse.isSuccessful()) return MomiaHttpResponse.FAILED("获取领队状态失败");
@@ -56,7 +56,7 @@ public class LeaderV1Api extends AbstractV1Api {
     public MomiaHttpResponse getLedProducts(@RequestParam String utoken, @RequestParam int start) {
         if (StringUtils.isBlank(utoken) || start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        User user = UserServiceApi.USER.get(utoken);
+        UserDto user = UserServiceApi.USER.get(utoken);
         return MomiaHttpResponse.SUCCESS(processPagedProducts(ProductServiceApi.SKU.getLedProducts(user.getId(), start, Configuration.getInt("PageSize.Leader.Product")), IMAGE_MIDDLE));
     }
 
@@ -64,10 +64,10 @@ public class LeaderV1Api extends AbstractV1Api {
     public MomiaHttpResponse apply(@RequestParam String utoken, @RequestParam(value = "pid") long productId, @RequestParam(value = "sid") long skuId) {
         if (StringUtils.isBlank(utoken) || productId <= 0 || skuId <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        Leader leader = UserServiceApi.LEADER.get(utoken);
-        if (leader.getStatus() != Status.PASSED) return MomiaHttpResponse.FAILED("您注册成为领队的请求还没通过审核，暂时不能当领队");
+        LeaderDto leaderDto = UserServiceApi.LEADER.get(utoken);
+        if (leaderDto.getStatus() != Status.PASSED) return MomiaHttpResponse.FAILED("您注册成为领队的请求还没通过审核，暂时不能当领队");
 
-        ProductServiceApi.SKU.applyLeader(leader.getUserId(), productId, skuId);
+        ProductServiceApi.SKU.applyLeader(leaderDto.getUserId(), productId, skuId);
 
         return MomiaHttpResponse.SUCCESS;
     }
@@ -78,7 +78,7 @@ public class LeaderV1Api extends AbstractV1Api {
 
         JSONObject leaderJson = JSON.parseObject(leader);
         leaderJson.put("userId", UserServiceApi.USER.get(utoken).getId());
-        UserServiceApi.LEADER.add(JSON.toJavaObject(leaderJson, Leader.class));
+        UserServiceApi.LEADER.add(JSON.toJavaObject(leaderJson, LeaderDto.class));
 
         return MomiaHttpResponse.SUCCESS;
     }
@@ -89,7 +89,7 @@ public class LeaderV1Api extends AbstractV1Api {
 
         JSONObject leaderJson = JSON.parseObject(leader);
         leaderJson.put("userId", UserServiceApi.USER.get(utoken).getId());
-        UserServiceApi.LEADER.update(JSON.toJavaObject(leaderJson, Leader.class));
+        UserServiceApi.LEADER.update(JSON.toJavaObject(leaderJson, LeaderDto.class));
 
         return MomiaHttpResponse.SUCCESS;
     }

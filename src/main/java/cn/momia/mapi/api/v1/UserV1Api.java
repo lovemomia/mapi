@@ -8,8 +8,8 @@ import cn.momia.api.deal.DealServiceApi;
 import cn.momia.api.deal.entity.Order;
 import cn.momia.api.product.ProductServiceApi;
 import cn.momia.api.user.UserServiceApi;
-import cn.momia.api.user.entity.Participant;
-import cn.momia.api.user.entity.User;
+import cn.momia.api.user.dto.ParticipantDto;
+import cn.momia.api.user.dto.UserDto;
 import cn.momia.common.webapp.config.Configuration;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -95,15 +95,15 @@ public class UserV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken) || StringUtils.isBlank(children)) return MomiaHttpResponse.BAD_REQUEST;
 
         long userId = UserServiceApi.USER.get(utoken).getId();
-        List<Participant> participants = new ArrayList<Participant>();
+        List<ParticipantDto> participantDtos = new ArrayList<ParticipantDto>();
         JSONArray childrenJson = JSONArray.parseArray(children);
         for (int i = 0; i < childrenJson.size(); i++) {
-            Participant participant = JSON.toJavaObject(childrenJson.getJSONObject(i), Participant.class);
-            participant.setUserId(userId);
-            participants.add(participant);
+            ParticipantDto participantDto = JSON.toJavaObject(childrenJson.getJSONObject(i), ParticipantDto.class);
+            participantDto.setUserId(userId);
+            participantDtos.add(participantDto);
         }
 
-        return MomiaHttpResponse.SUCCESS(processUser(UserServiceApi.USER.addChildren(participants)));
+        return MomiaHttpResponse.SUCCESS(processUser(UserServiceApi.USER.addChildren(participantDtos)));
     }
 
     @RequestMapping(value = "/child", method = RequestMethod.GET)
@@ -201,7 +201,7 @@ public class UserV1Api extends AbstractV1Api {
     public MomiaHttpResponse getFavoritesOfUser(@RequestParam String utoken, @RequestParam int start) {
         if (StringUtils.isBlank(utoken) || start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        User user = UserServiceApi.USER.get(utoken);
+        UserDto user = UserServiceApi.USER.get(utoken);
         PagedList<Product> favorites = ProductServiceApi.FAVORITE.listFavorites(user.getId(), start, Configuration.getInt("PageSize.Favorite"));
 
         return MomiaHttpResponse.SUCCESS(processPagedProducts(favorites, IMAGE_MIDDLE));

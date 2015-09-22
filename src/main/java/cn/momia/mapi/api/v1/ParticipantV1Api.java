@@ -2,7 +2,7 @@ package cn.momia.mapi.api.v1;
 
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.api.user.UserServiceApi;
-import cn.momia.api.user.entity.Participant;
+import cn.momia.api.user.dto.ParticipantDto;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
@@ -20,7 +20,7 @@ public class ParticipantV1Api extends AbstractV1Api {
 
         JSONObject paticipantJson = JSON.parseObject(participant);
         paticipantJson.put("userId", UserServiceApi.USER.get(utoken).getId());
-        UserServiceApi.PARTICIPANT.add(JSON.toJavaObject(paticipantJson, Participant.class));
+        UserServiceApi.PARTICIPANT.add(JSON.toJavaObject(paticipantJson, ParticipantDto.class));
 
         return MomiaHttpResponse.SUCCESS;
     }
@@ -38,7 +38,7 @@ public class ParticipantV1Api extends AbstractV1Api {
 
         JSONObject paticipantJson = JSON.parseObject(participant);
         paticipantJson.put("userId", UserServiceApi.USER.get(utoken).getId());
-        UserServiceApi.PARTICIPANT.update(JSON.toJavaObject(paticipantJson, Participant.class));
+        UserServiceApi.PARTICIPANT.update(JSON.toJavaObject(paticipantJson, ParticipantDto.class));
 
         return MomiaHttpResponse.SUCCESS;
     }

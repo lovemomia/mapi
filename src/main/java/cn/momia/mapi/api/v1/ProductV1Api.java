@@ -1,7 +1,7 @@
 package cn.momia.mapi.api.v1;
 
 import cn.momia.api.base.MetaUtil;
-import cn.momia.api.user.entity.Leader;
+import cn.momia.api.user.dto.LeaderDto;
 import cn.momia.common.api.entity.PagedList;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.api.product.entity.Comment;
@@ -12,7 +12,7 @@ import cn.momia.api.product.ProductServiceApi;
 import cn.momia.api.product.entity.Product;
 import cn.momia.api.product.entity.Sku;
 import cn.momia.api.user.UserServiceApi;
-import cn.momia.api.user.entity.User;
+import cn.momia.api.user.dto.UserDto;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -69,16 +69,16 @@ public class ProductV1Api extends AbstractV1Api {
         for (Sku sku : skus) {
             if (sku.getLeaderUserId() > 0) leaderUserIds.add(sku.getLeaderUserId());
         }
-        List<Leader> leaders = UserServiceApi.LEADER.list(leaderUserIds);
-        Map<Long, Leader> leadersMap = new HashMap<Long, Leader>();
-        for (Leader leader : leaders) leadersMap.put(leader.getUserId(), leader);
+        List<LeaderDto> leaderDtos = UserServiceApi.LEADER.list(leaderUserIds);
+        Map<Long, LeaderDto> leadersMap = new HashMap<Long, LeaderDto>();
+        for (LeaderDto leaderDto : leaderDtos) leadersMap.put(leaderDto.getUserId(), leaderDto);
         for (Sku sku : skus) {
             if (!sku.isNeedLeader()) {
                 sku.setLeaderInfo("本场不需要领队");
             } else {
-                Leader leader = leadersMap.get(sku.getLeaderUserId());
-                if (leader == null || StringUtils.isBlank(leader.getName())) sku.setLeaderInfo("");
-                else sku.setLeaderInfo(leader.getName() + "已成为领队");
+                LeaderDto leaderDto = leadersMap.get(sku.getLeaderUserId());
+                if (leaderDto == null || StringUtils.isBlank(leaderDto.getName())) sku.setLeaderInfo("");
+                else sku.setLeaderInfo(leaderDto.getName() + "已成为领队");
             }
         }
 
@@ -114,11 +114,11 @@ public class ProductV1Api extends AbstractV1Api {
         PagedList<Comment> pagedComments = ProductServiceApi.COMMENT.list(id, start, count);
         List<Long> userIds = new ArrayList<Long>();
         for (Comment comment : pagedComments.getList()) userIds.add(comment.getUserId());
-        List<User> users = UserServiceApi.USER.list(userIds, User.Type.MINI);
-        Map<Long, User> usersMap = new HashMap<Long, User>();
-        for (User user : users) usersMap.put(user.getId(), user);
+        List<UserDto> users = UserServiceApi.USER.list(userIds, UserDto.Type.MINI);
+        Map<Long, UserDto> usersMap = new HashMap<Long, UserDto>();
+        for (UserDto user : users) usersMap.put(user.getId(), user);
         for (Comment comment : pagedComments.getList()) {
-            User user = usersMap.get(comment.getUserId());
+            UserDto user = usersMap.get(comment.getUserId());
             if (user == null || !user.exists()) {
                 comment.setNickName("");
                 comment.setAvatar("");
@@ -189,7 +189,7 @@ public class ProductV1Api extends AbstractV1Api {
     public MomiaHttpResponse favor(@RequestParam String utoken, @RequestParam long id){
         if (StringUtils.isBlank(utoken) || id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        User user = UserServiceApi.USER.get(utoken);
+        UserDto user = UserServiceApi.USER.get(utoken);
         ProductServiceApi.PRODUCT.favor(user.getId(), id);
 
         return MomiaHttpResponse.SUCCESS;
@@ -199,7 +199,7 @@ public class ProductV1Api extends AbstractV1Api {
     public MomiaHttpResponse unfavor(@RequestParam String utoken, @RequestParam long id){
         if (StringUtils.isBlank(utoken) || id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        User user = UserServiceApi.USER.get(utoken);
+        UserDto user = UserServiceApi.USER.get(utoken);
         ProductServiceApi.PRODUCT.unfavor(user.getId(), id);
 
         return MomiaHttpResponse.SUCCESS;
@@ -209,7 +209,7 @@ public class ProductV1Api extends AbstractV1Api {
     public MomiaHttpResponse addComment(@RequestParam String utoken, @RequestParam String comment) {
         if (StringUtils.isBlank(utoken) || StringUtils.isBlank(comment)) return MomiaHttpResponse.BAD_REQUEST;
 
-        User user = UserServiceApi.USER.get(utoken);
+        UserDto user = UserServiceApi.USER.get(utoken);
         JSONObject commentJson = JSON.parseObject(comment);
         commentJson.put("userId", user.getId());
 

@@ -17,7 +17,7 @@ import cn.momia.api.product.entity.ProductGroup;
 import cn.momia.api.product.entity.Banner;
 import cn.momia.api.product.entity.TopicGroup;
 import cn.momia.api.product.entity.Topic;
-import cn.momia.api.user.entity.User;
+import cn.momia.api.user.dto.UserDto;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
@@ -260,7 +260,7 @@ public class AbstractV1Api extends AbstractApi {
         return comment;
     }
 
-    protected User processUser(User user) {
+    protected UserDto processUser(UserDto user) {
         String avatar = user.getAvatar();
         if (!StringUtils.isBlank(avatar)) user.setAvatar(ImageFile.smallUrl(avatar));
 

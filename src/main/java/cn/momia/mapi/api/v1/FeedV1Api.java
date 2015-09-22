@@ -9,7 +9,7 @@ import cn.momia.api.feed.entity.Feed;
 import cn.momia.api.product.ProductServiceApi;
 import cn.momia.api.product.entity.Product;
 import cn.momia.api.user.UserServiceApi;
-import cn.momia.api.user.entity.User;
+import cn.momia.api.user.dto.UserDto;
 import cn.momia.common.webapp.config.Configuration;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -31,7 +31,7 @@ public class FeedV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken) || followedId < 0) return MomiaHttpResponse.BAD_REQUEST;
         if (!UserServiceApi.USER.get(followedId).exists()) return MomiaHttpResponse.FAILED("关注的用户不存在");
 
-        User user = UserServiceApi.USER.get(utoken);
+        UserDto user = UserServiceApi.USER.get(utoken);
         FeedServiceApi.FEED.follow(user.getId(), followedId);
 
         return MomiaHttpResponse.SUCCESS;
@@ -43,7 +43,7 @@ public class FeedV1Api extends AbstractV1Api {
 
         PagedList<Feed> feeds;
         if (!StringUtils.isBlank(utoken)) {
-            User user = UserServiceApi.USER.get(utoken);
+            UserDto user = UserServiceApi.USER.get(utoken);
             feeds = FeedServiceApi.FEED.list(user.getId(), start, Configuration.getInt("PageSize.Feed.List"));
         } else {
             feeds = FeedServiceApi.FEED.list(0, start, Configuration.getInt("PageSize.Feed.List"));
@@ -95,7 +95,7 @@ public class FeedV1Api extends AbstractV1Api {
     public MomiaHttpResponse detail(@RequestParam(defaultValue = "") String utoken, @RequestParam long id, @RequestParam(value = "pid") long productId) {
         if (id <= 0 || productId <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        User user = UserServiceApi.USER.get(utoken);
+        UserDto user = UserServiceApi.USER.get(utoken);
         Feed feed = FeedServiceApi.FEED.get(user.getId(), id);
         Product product = ProductServiceApi.PRODUCT.get(productId, Product.Type.BASE);
         PagedList<FeedStar> stars = processPagedFeedStars(FeedServiceApi.FEED.listStars(id, 0, Configuration.getInt("PageSize.Feed.Detail.Star")));
@@ -114,7 +114,7 @@ public class FeedV1Api extends AbstractV1Api {
     public MomiaHttpResponse delete(@RequestParam String utoken, @RequestParam long id) {
         if (StringUtils.isBlank(utoken) || id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        User user = UserServiceApi.USER.get(utoken);
+        UserDto user = UserServiceApi.USER.get(utoken);
         FeedServiceApi.FEED.delete(user.getId(), id);
 
         return MomiaHttpResponse.SUCCESS;
@@ -132,7 +132,7 @@ public class FeedV1Api extends AbstractV1Api {
     public MomiaHttpResponse addComment(@RequestParam String utoken, @RequestParam long id, @RequestParam String content) {
         if (StringUtils.isBlank(utoken) || id <= 0 || StringUtils.isBlank(content)) return MomiaHttpResponse.BAD_REQUEST;
 
-        User user = UserServiceApi.USER.get(utoken);
+        UserDto user = UserServiceApi.USER.get(utoken);
         FeedServiceApi.FEED.addComment(user.getId(), id, content);
 
         return MomiaHttpResponse.SUCCESS;
@@ -142,7 +142,7 @@ public class FeedV1Api extends AbstractV1Api {
     public MomiaHttpResponse deleteComment(@RequestParam String utoken, @RequestParam long id, @RequestParam(value = "cmid") long commentId) {
         if (StringUtils.isBlank(utoken) || id <= 0 || commentId <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        User user = UserServiceApi.USER.get(utoken);
+        UserDto user = UserServiceApi.USER.get(utoken);
         FeedServiceApi.FEED.deleteComment(user.getId(), id, commentId);
 
         return MomiaHttpResponse.SUCCESS;
@@ -152,7 +152,7 @@ public class FeedV1Api extends AbstractV1Api {
     public MomiaHttpResponse star(@RequestParam String utoken, @RequestParam long id) {
         if (StringUtils.isBlank(utoken) || id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        User user = UserServiceApi.USER.get(utoken);
+        UserDto user = UserServiceApi.USER.get(utoken);
         FeedServiceApi.FEED.star(user.getId(), id);
 
         return MomiaHttpResponse.SUCCESS;
@@ -162,7 +162,7 @@ public class FeedV1Api extends AbstractV1Api {
     public MomiaHttpResponse unstar(@RequestParam String utoken, @RequestParam long id) {
         if (StringUtils.isBlank(utoken) || id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        User user = UserServiceApi.USER.get(utoken);
+        UserDto user = UserServiceApi.USER.get(utoken);
         FeedServiceApi.FEED.unstar(user.getId(), id);
 
         return MomiaHttpResponse.SUCCESS;
