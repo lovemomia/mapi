@@ -14,9 +14,9 @@ import cn.momia.api.feed.dto.FeedCommentDto;
 import cn.momia.api.feed.dto.FeedStarDto;
 import cn.momia.api.product.dto.ProductDto;
 import cn.momia.api.product.dto.ProductGroupDto;
-import cn.momia.api.product.dto.Banner;
-import cn.momia.api.product.dto.TopicGroup;
-import cn.momia.api.product.dto.Topic;
+import cn.momia.api.product.dto.BannerDto;
+import cn.momia.api.product.dto.TopicGroupDto;
+import cn.momia.api.product.dto.TopicDto;
 import cn.momia.api.user.dto.UserDto;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -93,15 +93,15 @@ public class AbstractV1Api extends AbstractApi {
         return stars;
     }
 
-    protected List<Banner> processBanners(List<Banner> banners, int clientType) {
-        for (Banner banner : banners) {
+    protected List<BannerDto> processBanners(List<BannerDto> banners, int clientType) {
+        for (BannerDto banner : banners) {
             processBanner(banner, clientType);
         }
 
         return banners;
     }
 
-    private Banner processBanner(Banner banner, int clientType) {
+    private BannerDto processBanner(BannerDto banner, int clientType) {
         banner.setCover(ImageFile.url(banner.getCover()));
         banner.setAction(buildLink(banner.getAction(), clientType));
 
@@ -122,10 +122,10 @@ public class AbstractV1Api extends AbstractApi {
         return link;
     }
 
-    protected Topic processTopic(Topic topic) {
+    protected TopicDto processTopic(TopicDto topic) {
         topic.setCover(ImageFile.url(topic.getCover()));
 
-        for (TopicGroup topicGroup : topic.getGroups()) {
+        for (TopicGroupDto topicGroup : topic.getGroups()) {
             processProducts(topicGroup.getProducts());
         }
 
