@@ -3,7 +3,7 @@ package cn.momia.mapi.api.v1;
 import cn.momia.api.feed.dto.FeedDto;
 import cn.momia.api.product.dto.CommentDto;
 import cn.momia.api.user.UserServiceApi;
-import cn.momia.common.api.entity.PagedList;
+import cn.momia.common.api.dto.PagedList;
 import cn.momia.common.webapp.config.Configuration;
 import cn.momia.image.api.ImageFile;
 import cn.momia.mapi.api.AbstractApi;

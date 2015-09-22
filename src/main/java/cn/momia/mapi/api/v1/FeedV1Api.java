@@ -2,7 +2,7 @@ package cn.momia.mapi.api.v1;
 
 import cn.momia.api.feed.dto.FeedCommentDto;
 import cn.momia.api.feed.dto.FeedStarDto;
-import cn.momia.common.api.entity.PagedList;
+import cn.momia.common.api.dto.PagedList;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.api.feed.FeedServiceApi;
 import cn.momia.api.feed.dto.FeedDto;

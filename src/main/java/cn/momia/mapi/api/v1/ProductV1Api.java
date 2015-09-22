@@ -2,7 +2,7 @@ package cn.momia.mapi.api.v1;
 
 import cn.momia.api.base.MetaUtil;
 import cn.momia.api.user.dto.LeaderDto;
-import cn.momia.common.api.entity.PagedList;
+import cn.momia.common.api.dto.PagedList;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.api.product.dto.CommentDto;
 import cn.momia.common.webapp.config.Configuration;
