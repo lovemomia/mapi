@@ -78,6 +78,12 @@ public class FeedV1Api extends AbstractV1Api {
         return MomiaHttpResponse.SUCCESS(feedTopicJson);
     }
 
+    @RequestMapping(value = "/topic/list", method = RequestMethod.GET)
+    public MomiaHttpResponse listTopic(@RequestParam int start) {
+        if (start < 0) return MomiaHttpResponse.BAD_REQUEST;
+        return MomiaHttpResponse.SUCCESS(FeedServiceApi.FEED.listTopic(start, Configuration.getInt("PageSize.Feed.Topic")));
+    }
+
     @RequestMapping(value = "/add", method = RequestMethod.POST)
     public MomiaHttpResponse add(@RequestParam String utoken, @RequestParam String feed) {
         if (StringUtils.isBlank(utoken) || StringUtils.isBlank(feed)) return MomiaHttpResponse.BAD_REQUEST;
