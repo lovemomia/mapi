@@ -2,7 +2,7 @@ package cn.momia.mapi.api.v1;
 
 import cn.momia.api.base.BaseServiceApi;
 import cn.momia.common.api.http.MomiaHttpResponse;
-import cn.momia.api.deal.DealServiceApi;
+import cn.momia.api.product.DealServiceApi;
 import cn.momia.api.user.dto.UserDto;
 import cn.momia.api.user.UserServiceApi;
 import cn.momia.common.util.MobileUtil;

@@ -2,7 +2,7 @@ package cn.momia.mapi.api.v1;
 
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.api.product.dto.ProductDto;
-import cn.momia.api.deal.DealServiceApi;
+import cn.momia.api.product.DealServiceApi;
 import cn.momia.api.product.ProductServiceApi;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;

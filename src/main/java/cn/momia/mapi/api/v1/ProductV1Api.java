@@ -7,7 +7,7 @@ import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.api.product.dto.CommentDto;
 import cn.momia.common.webapp.config.Configuration;
 import cn.momia.image.api.ImageFile;
-import cn.momia.api.deal.DealServiceApi;
+import cn.momia.api.product.DealServiceApi;
 import cn.momia.api.product.ProductServiceApi;
 import cn.momia.api.product.dto.ProductDto;
 import cn.momia.api.product.dto.SkuDto;

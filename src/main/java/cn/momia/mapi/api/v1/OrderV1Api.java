@@ -1,7 +1,7 @@
 package cn.momia.mapi.api.v1;
 
 import cn.momia.common.api.http.MomiaHttpResponse;
-import cn.momia.api.deal.DealServiceApi;
+import cn.momia.api.product.DealServiceApi;
 import cn.momia.api.user.UserServiceApi;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;

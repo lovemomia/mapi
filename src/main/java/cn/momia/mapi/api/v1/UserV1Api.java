@@ -1,11 +1,11 @@
 package cn.momia.mapi.api.v1;
 
-import cn.momia.api.deal.dto.CouponDto;
+import cn.momia.api.product.dto.CouponDto;
 import cn.momia.api.product.dto.ProductDto;
 import cn.momia.common.api.dto.PagedList;
 import cn.momia.common.api.http.MomiaHttpResponse;
-import cn.momia.api.deal.DealServiceApi;
-import cn.momia.api.deal.dto.OrderDto;
+import cn.momia.api.product.DealServiceApi;
+import cn.momia.api.product.dto.OrderDto;
 import cn.momia.api.product.ProductServiceApi;
 import cn.momia.api.user.UserServiceApi;
 import cn.momia.api.user.dto.ParticipantDto;
