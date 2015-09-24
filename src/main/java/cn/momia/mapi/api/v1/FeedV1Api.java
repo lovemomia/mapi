@@ -100,7 +100,7 @@ public class FeedV1Api extends AbstractV1Api {
     @RequestMapping(value = "/detail", method = RequestMethod.GET)
     public MomiaHttpResponse detail(@RequestParam(defaultValue = "") String utoken, @RequestParam long id,
                                     @RequestParam(value = "pid", required = false, defaultValue = "0") long productId) {
-        if (id <= 0 || productId <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
         UserDto user = UserServiceApi.USER.get(utoken);
         FeedDto feed = FeedServiceApi.FEED.get(user.getId(), id);
