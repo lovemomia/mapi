@@ -82,16 +82,16 @@ public class ProductV1Api extends AbstractV1Api {
         for (SkuDto sku : skus) {
             if (sku.getLeaderUserId() > 0) leaderUserIds.add(sku.getLeaderUserId());
         }
-        List<LeaderDto> leaderDtos = UserServiceApi.LEADER.list(leaderUserIds);
+        List<LeaderDto> leaders = UserServiceApi.LEADER.list(leaderUserIds);
         Map<Long, LeaderDto> leadersMap = new HashMap<Long, LeaderDto>();
-        for (LeaderDto leaderDto : leaderDtos) leadersMap.put(leaderDto.getUserId(), leaderDto);
+        for (LeaderDto leader : leaders) leadersMap.put(leader.getUserId(), leader);
         for (SkuDto sku : skus) {
             if (!sku.isNeedLeader()) {
                 sku.setLeaderInfo("本场不需要领队");
             } else {
-                LeaderDto leaderDto = leadersMap.get(sku.getLeaderUserId());
-                if (leaderDto == null || StringUtils.isBlank(leaderDto.getName())) sku.setLeaderInfo("");
-                else sku.setLeaderInfo(leaderDto.getName() + "已成为领队");
+                LeaderDto leader = leadersMap.get(sku.getLeaderUserId());
+                if (leader == null || StringUtils.isBlank(leader.getName())) sku.setLeaderInfo("");
+                else sku.setLeaderInfo(leader.getName() + "已成为领队");
             }
         }
 

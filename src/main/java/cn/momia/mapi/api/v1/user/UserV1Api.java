@@ -87,15 +87,15 @@ public class UserV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken) || StringUtils.isBlank(children)) return MomiaHttpResponse.BAD_REQUEST;
 
         long userId = UserServiceApi.USER.get(utoken).getId();
-        List<ParticipantDto> participantDtos = new ArrayList<ParticipantDto>();
+        List<ParticipantDto> participants = new ArrayList<ParticipantDto>();
         JSONArray childrenJson = JSONArray.parseArray(children);
         for (int i = 0; i < childrenJson.size(); i++) {
-            ParticipantDto participantDto = JSON.toJavaObject(childrenJson.getJSONObject(i), ParticipantDto.class);
-            participantDto.setUserId(userId);
-            participantDtos.add(participantDto);
+            ParticipantDto participant = JSON.toJavaObject(childrenJson.getJSONObject(i), ParticipantDto.class);
+            participant.setUserId(userId);
+            participants.add(participant);
         }
 
-        return MomiaHttpResponse.SUCCESS(processUser(UserServiceApi.USER.addChildren(participantDtos)));
+        return MomiaHttpResponse.SUCCESS(processUser(UserServiceApi.USER.addChildren(participants)));
     }
 
     @RequestMapping(value = "/child", method = RequestMethod.GET)
