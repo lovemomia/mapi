@@ -98,20 +98,24 @@ public class FeedV1Api extends AbstractV1Api {
     }
 
     @RequestMapping(value = "/detail", method = RequestMethod.GET)
-    public MomiaHttpResponse detail(@RequestParam(defaultValue = "") String utoken, @RequestParam long id, @RequestParam(value = "pid") long productId) {
+    public MomiaHttpResponse detail(@RequestParam(defaultValue = "") String utoken, @RequestParam long id,
+                                    @RequestParam(value = "pid", required = false, defaultValue = "0") long productId) {
         if (id <= 0 || productId <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
         UserDto user = UserServiceApi.USER.get(utoken);
         FeedDto feed = FeedServiceApi.FEED.get(user.getId(), id);
-        ProductDto product = ProductServiceApi.PRODUCT.get(productId, ProductDto.Type.BASE);
         PagedList<FeedStarDto> stars = processPagedFeedStars(FeedServiceApi.FEED.listStars(id, 0, Configuration.getInt("PageSize.Feed.Detail.Star")));
         PagedList<FeedCommentDto> comments = processPagedFeedComments(FeedServiceApi.FEED.listComments(id, 0, Configuration.getInt("PageSize.Feed.Detail.Comment")));
 
         JSONObject feedDetailJson = new JSONObject();
         feedDetailJson.put("feed", processFeed(feed));
-        feedDetailJson.put("product", processProduct(product));
         feedDetailJson.put("staredUsers", stars);
         feedDetailJson.put("comments", comments);
+
+        if (productId > 0) {
+            ProductDto product = ProductServiceApi.PRODUCT.get(productId, ProductDto.Type.BASE);
+            feedDetailJson.put("product", processProduct(product));
+        }
 
         return MomiaHttpResponse.SUCCESS(feedDetailJson);
     }
