@@ -50,13 +50,11 @@ public class ValidationFilter implements Filter {
 
     private boolean isUserAgentMissing(HttpServletRequest httpRequest) {
         String userAgent = httpRequest.getHeader("user-agent");
-
         return StringUtils.isBlank(userAgent);
     }
 
     private boolean needParamsValidation(HttpServletRequest request) {
         String uri = request.getRequestURI();
-
         return !(uri.startsWith("/callback") || uri.startsWith("/m/"));
     }
 

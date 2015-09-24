@@ -1,7 +1,8 @@
-package cn.momia.mapi.api.v1;
+package cn.momia.mapi.api.v1.base;
 
 import cn.momia.api.base.BaseServiceApi;
 import cn.momia.common.api.http.MomiaHttpResponse;
+import cn.momia.mapi.api.v1.AbstractV1Api;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -16,7 +17,6 @@ public class FeedbackV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(content) || StringUtils.isBlank(email)) return MomiaHttpResponse.BAD_REQUEST;
 
         BaseServiceApi.FEEDBACK.addFeedback(content, email);
-
         return MomiaHttpResponse.SUCCESS;
     }
 }

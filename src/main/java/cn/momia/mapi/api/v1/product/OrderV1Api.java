@@ -1,8 +1,9 @@
-package cn.momia.mapi.api.v1;
+package cn.momia.mapi.api.v1.product;
 
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.api.product.DealServiceApi;
 import cn.momia.api.user.UserServiceApi;
+import cn.momia.mapi.api.v1.AbstractV1Api;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
@@ -42,7 +43,6 @@ public class OrderV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken) || id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
         DealServiceApi.ORDER.delete(utoken, id);
-
         return MomiaHttpResponse.SUCCESS;
     }
 }

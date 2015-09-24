@@ -1,4 +1,4 @@
-package cn.momia.mapi.api.v1;
+package cn.momia.mapi.api.v1.user;
 
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.api.product.ProductServiceApi;
@@ -7,6 +7,7 @@ import cn.momia.api.user.dto.LeaderDto;
 import cn.momia.api.user.dto.LeaderStatusDto;
 import cn.momia.api.user.dto.UserDto;
 import cn.momia.common.webapp.config.Configuration;
+import cn.momia.mapi.api.v1.AbstractV1Api;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
@@ -39,7 +40,6 @@ public class LeaderV1Api extends AbstractV1Api {
             case Status.PASSED:
                 MomiaHttpResponse ledProductsResponse = getLedProducts(utoken, 0);
                 if (!ledProductsResponse.isSuccessful()) return MomiaHttpResponse.FAILED("获取领队状态失败");
-
                 statusJson.put("products", ledProductsResponse.getData());
                 break;
             case Status.NOTEXIST:
@@ -57,7 +57,7 @@ public class LeaderV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken) || start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
         UserDto user = UserServiceApi.USER.get(utoken);
-        return MomiaHttpResponse.SUCCESS(processPagedProducts(ProductServiceApi.SKU.getLedProducts(user.getId(), start, Configuration.getInt("PageSize.Leader.Product")), IMAGE_MIDDLE));
+        return MomiaHttpResponse.SUCCESS(processPagedProducts(ProductServiceApi.SKU.getLedProducts(user.getId(), start, Configuration.getInt("PageSize.Leader.Product"))));
     }
 
     @RequestMapping(value = "/apply", method = RequestMethod.POST)
@@ -68,7 +68,6 @@ public class LeaderV1Api extends AbstractV1Api {
         if (leaderDto.getStatus() != Status.PASSED) return MomiaHttpResponse.FAILED("您注册成为领队的请求还没通过审核，暂时不能当领队");
 
         ProductServiceApi.SKU.applyLeader(leaderDto.getUserId(), productId, skuId);
-
         return MomiaHttpResponse.SUCCESS;
     }
 
@@ -99,7 +98,6 @@ public class LeaderV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.BAD_REQUEST;
 
         UserServiceApi.LEADER.delete(utoken);
-
         return MomiaHttpResponse.SUCCESS;
     }
 }

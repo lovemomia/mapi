@@ -1,7 +1,8 @@
-package cn.momia.mapi.api.v1;
+package cn.momia.mapi.api.v1.product;
 
 import cn.momia.common.util.XmlUtil;
 import cn.momia.api.product.DealServiceApi;
+import cn.momia.mapi.api.v1.AbstractV1Api;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -21,26 +21,15 @@ public class CallbackV1Api extends AbstractV1Api {
     @RequestMapping(value = "/alipay", method = RequestMethod.POST, produces = "text/plain")
     public String alipayCallback(HttpServletRequest request) {
         try {
-            Map<String, String> params = extractParams(request.getParameterMap());
+            Map<String, String> params = extractParams(request);
             if (DealServiceApi.CALLBACK.callbackAlipay(params)) return "success";
         } catch (Exception e) {
             LOGGER.error("ali pay callback error", e);
         }
 
-        LOGGER.error("ali pay: callback failure");
+        LOGGER.error("ali pay callback failure");
 
         return "fail";
-    }
-
-    private Map<String, String> extractParams(Map<String, String[]> httpParams) {
-        Map<String, String> params = new HashMap<String, String>();
-        for (Map.Entry<String, String[]> entry : httpParams.entrySet()) {
-            String[] values = entry.getValue();
-            if (values.length <= 0) continue;
-            params.put(entry.getKey(), entry.getValue()[0]);
-        }
-
-        return params;
     }
 
     @RequestMapping(value = "/wechatpay", method = RequestMethod.POST, produces = "application/xml")
@@ -52,7 +41,7 @@ public class CallbackV1Api extends AbstractV1Api {
             LOGGER.error("wechat pay callback error", e);
         }
 
-        LOGGER.error("wechat pay: callback failure");
+        LOGGER.error("wechat pay callback failure");
 
         return WechatpayResponse.FAILED;
     }

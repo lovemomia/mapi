@@ -1,4 +1,4 @@
-package cn.momia.mapi.api.v1;
+package cn.momia.mapi.api.v1.feed;
 
 import cn.momia.api.feed.dto.FeedCommentDto;
 import cn.momia.api.feed.dto.FeedStarDto;
@@ -11,6 +11,8 @@ import cn.momia.api.product.dto.ProductDto;
 import cn.momia.api.user.UserServiceApi;
 import cn.momia.api.user.dto.UserDto;
 import cn.momia.common.webapp.config.Configuration;
+import cn.momia.image.api.ImageFile;
+import cn.momia.mapi.api.v1.AbstractV1Api;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
@@ -41,15 +43,27 @@ public class FeedV1Api extends AbstractV1Api {
     public MomiaHttpResponse list(@RequestParam(required = false, defaultValue = "") String utoken, @RequestParam int start) {
         if (start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        PagedList<FeedDto> feeds;
-        if (!StringUtils.isBlank(utoken)) {
-            UserDto user = UserServiceApi.USER.get(utoken);
-            feeds = FeedServiceApi.FEED.list(user.getId(), start, Configuration.getInt("PageSize.Feed.List"));
-        } else {
-            feeds = FeedServiceApi.FEED.list(0, start, Configuration.getInt("PageSize.Feed.List"));
+        long userId = StringUtils.isBlank(utoken) ? 0 : UserServiceApi.USER.get(utoken).getId();
+        return MomiaHttpResponse.SUCCESS(processPagedFeeds(FeedServiceApi.FEED.list(userId, start, Configuration.getInt("PageSize.Feed.List"))));
+    }
+
+    private PagedList<FeedDto> processPagedFeeds(PagedList<FeedDto> feeds) {
+        for (FeedDto feed : feeds.getList()) {
+            processFeed(feed);
         }
 
-        return MomiaHttpResponse.SUCCESS(processPagedFeeds(feeds));
+        return feeds;
+    }
+
+    private FeedDto processFeed(FeedDto feed) {
+        feed.setAvatar(ImageFile.smallUrl(feed.getAvatar()));
+        if (feed.getImgs() != null) {
+            for (int i = 0; i < feed.getImgs().size(); i++) {
+                feed.getImgs().set(i, ImageFile.middleUrl(feed.getImgs().get(i)));
+            }
+        }
+
+        return feed;
     }
 
     @RequestMapping(value = "/topic", method = RequestMethod.GET)
@@ -57,23 +71,14 @@ public class FeedV1Api extends AbstractV1Api {
                                    @RequestParam(value = "pid") long productId,
                                    @RequestParam(value = "tid") long topicId,
                                    @RequestParam final int start) {
-        if (topicId <= 0 || productId <= 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
-
-        ProductDto product = null;
-        if (start == 0) product = processProduct(ProductServiceApi.PRODUCT.get(productId, ProductDto.Type.BASE));
-
-        long userId = 0;
-        try {
-            if (!StringUtils.isBlank(utoken)) userId = UserServiceApi.USER.get(utoken).getId();
-        } catch (Exception e) {
-            LOGGER.error("exception!!", e);
-        }
-
-        PagedList<FeedDto> feeds = processPagedFeeds(FeedServiceApi.FEED.listByTopic(userId, topicId, start, Configuration.getInt("PageSize.Feed.List")));
+        if (productId <= 0 || topicId <= 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
         JSONObject feedTopicJson = new JSONObject();
-        if (start == 0) feedTopicJson.put("product", product);
-        feedTopicJson.put("feeds", feeds);
+
+        if (start == 0) feedTopicJson.put("product", processProduct(ProductServiceApi.PRODUCT.get(productId, ProductDto.Type.BASE), ImageFile.Size.MIDDLE));
+
+        long userId = StringUtils.isBlank(utoken) ? 0 : UserServiceApi.USER.get(utoken).getId();
+        feedTopicJson.put("feeds", processPagedFeeds(FeedServiceApi.FEED.listByTopic(userId, topicId, start, Configuration.getInt("PageSize.Feed.List"))));
 
         return MomiaHttpResponse.SUCCESS(feedTopicJson);
     }
@@ -91,6 +96,7 @@ public class FeedV1Api extends AbstractV1Api {
         JSONObject feedJson = JSON.parseObject(feed);
         JSONObject baseFeedJson = feedJson.getJSONObject("baseFeed");
         if (baseFeedJson == null) return MomiaHttpResponse.BAD_REQUEST;
+
         baseFeedJson.put("userId", UserServiceApi.USER.get(utoken).getId());
         FeedServiceApi.FEED.add(feedJson);
 
@@ -114,10 +120,26 @@ public class FeedV1Api extends AbstractV1Api {
 
         if (productId > 0) {
             ProductDto product = ProductServiceApi.PRODUCT.get(productId, ProductDto.Type.BASE);
-            feedDetailJson.put("product", processProduct(product));
+            feedDetailJson.put("product", processProduct(product, ImageFile.Size.MIDDLE));
         }
 
         return MomiaHttpResponse.SUCCESS(feedDetailJson);
+    }
+
+    private PagedList<FeedStarDto> processPagedFeedStars(PagedList<FeedStarDto> stars) {
+        for (FeedStarDto feedStar : stars.getList()) {
+            feedStar.setAvatar(ImageFile.smallUrl(feedStar.getAvatar()));
+        }
+
+        return stars;
+    }
+
+    private PagedList<FeedCommentDto> processPagedFeedComments(PagedList<FeedCommentDto> comments) {
+        for (FeedCommentDto feedComment : comments.getList()) {
+            feedComment.setAvatar(ImageFile.smallUrl(feedComment.getAvatar()));
+        }
+
+        return comments;
     }
 
     @RequestMapping(value = "/delete", method = RequestMethod.POST)

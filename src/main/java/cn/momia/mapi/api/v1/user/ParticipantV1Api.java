@@ -1,8 +1,9 @@
-package cn.momia.mapi.api.v1;
+package cn.momia.mapi.api.v1.user;
 
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.api.user.UserServiceApi;
 import cn.momia.api.user.dto.ParticipantDto;
+import cn.momia.mapi.api.v1.AbstractV1Api;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
@@ -28,7 +29,6 @@ public class ParticipantV1Api extends AbstractV1Api {
     @RequestMapping(method = RequestMethod.GET)
     public MomiaHttpResponse get(@RequestParam String utoken, @RequestParam long id) {
         if (StringUtils.isBlank(utoken) || id <= 0) return MomiaHttpResponse.BAD_REQUEST;
-
         return MomiaHttpResponse.SUCCESS(UserServiceApi.PARTICIPANT.get(utoken, id));
     }
 
@@ -48,14 +48,12 @@ public class ParticipantV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken) || id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
         UserServiceApi.PARTICIPANT.delete(utoken, id);
-
         return MomiaHttpResponse.SUCCESS;
     }
 
     @RequestMapping(value = "/list", method = RequestMethod.GET)
     public MomiaHttpResponse list(@RequestParam String utoken) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.BAD_REQUEST;
-
         return MomiaHttpResponse.SUCCESS(UserServiceApi.PARTICIPANT.list(utoken));
     }
 }

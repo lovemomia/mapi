@@ -1,9 +1,10 @@
-package cn.momia.mapi.api.v1;
+package cn.momia.mapi.api.v1.product;
 
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.api.product.dto.ProductDto;
 import cn.momia.api.product.DealServiceApi;
 import cn.momia.api.product.ProductServiceApi;
+import cn.momia.mapi.api.v1.AbstractV1Api;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -41,7 +42,6 @@ public class PaymentV1Api extends AbstractV1Api {
                 productId <= 0 ||
                 skuId <= 0 ||
                 StringUtils.isBlank(tradeType)) return MomiaHttpResponse.BAD_REQUEST;
-
         if (tradeType.equals("JSAPI") && StringUtils.isBlank(code)) return MomiaHttpResponse.BAD_REQUEST;
 
         return MomiaHttpResponse.SUCCESS(DealServiceApi.PAYMENT.prepayWechatpay(utoken, orderId, productId, skuId, tradeType, coupon, code));
@@ -59,7 +59,6 @@ public class PaymentV1Api extends AbstractV1Api {
                 skuId <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
         DealServiceApi.PAYMENT.prepayFree(utoken, orderId, productId, skuId, coupon);
-
         return MomiaHttpResponse.SUCCESS(processProduct(ProductServiceApi.PRODUCT.get(productId, ProductDto.Type.MINI), utoken));
     }
 
@@ -74,7 +73,6 @@ public class PaymentV1Api extends AbstractV1Api {
                 skuId <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
         DealServiceApi.PAYMENT.check(utoken, orderId, productId, skuId);
-
         return MomiaHttpResponse.SUCCESS(processProduct(ProductServiceApi.PRODUCT.get(productId, ProductDto.Type.MINI), utoken));
     }
 }

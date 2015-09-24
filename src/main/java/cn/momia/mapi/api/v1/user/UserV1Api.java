@@ -1,4 +1,4 @@
-package cn.momia.mapi.api.v1;
+package cn.momia.mapi.api.v1.user;
 
 import cn.momia.api.product.dto.CouponDto;
 import cn.momia.api.product.dto.ProductDto;
@@ -11,6 +11,7 @@ import cn.momia.api.user.UserServiceApi;
 import cn.momia.api.user.dto.ParticipantDto;
 import cn.momia.api.user.dto.UserDto;
 import cn.momia.common.webapp.config.Configuration;
+import cn.momia.mapi.api.v1.AbstractV1Api;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import org.apache.commons.lang3.StringUtils;
@@ -30,63 +31,54 @@ public class UserV1Api extends AbstractV1Api {
     @RequestMapping(method = RequestMethod.GET)
     public MomiaHttpResponse getUser(@RequestParam String utoken) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.BAD_REQUEST;
-
         return MomiaHttpResponse.SUCCESS(processUser(UserServiceApi.USER.get(utoken)));
     }
 
     @RequestMapping(value = "/nickname", method = RequestMethod.POST)
     public MomiaHttpResponse updateNickName(@RequestParam String utoken, @RequestParam(value = "nickname") String nickName) {
         if (StringUtils.isBlank(utoken) || StringUtils.isBlank(nickName)) return MomiaHttpResponse.BAD_REQUEST;
-
         return MomiaHttpResponse.SUCCESS(processUser(UserServiceApi.USER.updateNickName(utoken, nickName)));
     }
 
     @RequestMapping(value = "/avatar", method = RequestMethod.POST)
     public MomiaHttpResponse updateAvatar(@RequestParam String utoken, @RequestParam String avatar) {
         if (StringUtils.isBlank(utoken) || StringUtils.isBlank(avatar)) return MomiaHttpResponse.BAD_REQUEST;
-
         return MomiaHttpResponse.SUCCESS(processUser(UserServiceApi.USER.updateAvatar(utoken, avatar)));
     }
 
     @RequestMapping(value = "/name", method = RequestMethod.POST)
     public MomiaHttpResponse updateName(@RequestParam String utoken, @RequestParam String name) {
         if (StringUtils.isBlank(utoken) || StringUtils.isBlank(name)) return MomiaHttpResponse.BAD_REQUEST;
-
         return MomiaHttpResponse.SUCCESS(processUser(UserServiceApi.USER.updateName(utoken, name)));
     }
 
     @RequestMapping(value = "/sex", method = RequestMethod.POST)
     public MomiaHttpResponse updateSex(@RequestParam String utoken, @RequestParam String sex) {
         if (StringUtils.isBlank(utoken) || StringUtils.isBlank(sex)) return MomiaHttpResponse.BAD_REQUEST;
-
         return MomiaHttpResponse.SUCCESS(processUser(UserServiceApi.USER.updateSex(utoken, sex)));
     }
 
     @RequestMapping(value = "/birthday", method = RequestMethod.POST)
     public MomiaHttpResponse updateBirthday(@RequestParam String utoken, @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date birthday) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.BAD_REQUEST;
-
         return MomiaHttpResponse.SUCCESS(processUser(UserServiceApi.USER.updateBirthday(utoken, birthday)));
     }
 
     @RequestMapping(value = "/city", method = RequestMethod.POST)
     public MomiaHttpResponse updateCity(@RequestParam String utoken, @RequestParam(value = "city") int cityId) {
         if (StringUtils.isBlank(utoken) || cityId <= 0) return MomiaHttpResponse.BAD_REQUEST;
-
         return MomiaHttpResponse.SUCCESS(processUser(UserServiceApi.USER.updateCity(utoken, cityId)));
     }
 
     @RequestMapping(value = "/region", method = RequestMethod.POST)
     public MomiaHttpResponse updateRegion(@RequestParam String utoken, @RequestParam(value = "region") int regionId) {
         if (StringUtils.isBlank(utoken) || regionId <= 0) return MomiaHttpResponse.BAD_REQUEST;
-
         return MomiaHttpResponse.SUCCESS(processUser(UserServiceApi.USER.updateRegion(utoken, regionId)));
     }
 
     @RequestMapping(value = "/address", method = RequestMethod.POST)
     public MomiaHttpResponse updateAddress(@RequestParam String utoken, @RequestParam String address) {
         if (StringUtils.isBlank(utoken) || StringUtils.isBlank(address)) return MomiaHttpResponse.BAD_REQUEST;
-
         return MomiaHttpResponse.SUCCESS(processUser(UserServiceApi.USER.updateAddress(utoken, address)));
     }
 
@@ -109,7 +101,6 @@ public class UserV1Api extends AbstractV1Api {
     @RequestMapping(value = "/child", method = RequestMethod.GET)
     public MomiaHttpResponse getChild(@RequestParam String utoken, @RequestParam(value = "cid") long childId) {
         if (StringUtils.isBlank(utoken) || childId <= 0) return MomiaHttpResponse.BAD_REQUEST;
-
         return MomiaHttpResponse.SUCCESS(UserServiceApi.USER.getChild(utoken, childId));
     }
 
@@ -117,9 +108,7 @@ public class UserV1Api extends AbstractV1Api {
     public MomiaHttpResponse updateChildName(@RequestParam String utoken,
                                              @RequestParam(value = "cid") long childId,
                                              @RequestParam String name) {
-        if (StringUtils.isBlank(utoken) || childId <= 0 || StringUtils.isBlank(name))
-            return MomiaHttpResponse.BAD_REQUEST;
-
+        if (StringUtils.isBlank(utoken) || childId <= 0 || StringUtils.isBlank(name)) return MomiaHttpResponse.BAD_REQUEST;
         return MomiaHttpResponse.SUCCESS(processUser(UserServiceApi.USER.updateChildName(utoken, childId, name)));
     }
 
@@ -128,7 +117,6 @@ public class UserV1Api extends AbstractV1Api {
                                             @RequestParam(value = "cid") long childId,
                                             @RequestParam String sex) {
         if (StringUtils.isBlank(utoken) || childId <= 0 || StringUtils.isBlank(sex)) return MomiaHttpResponse.BAD_REQUEST;
-
         return MomiaHttpResponse.SUCCESS(processUser(UserServiceApi.USER.updateChildSex(utoken, childId, sex)));
     }
 
@@ -137,28 +125,24 @@ public class UserV1Api extends AbstractV1Api {
                                                  @RequestParam(value = "cid") long childId,
                                                  @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date birthday) {
         if (StringUtils.isBlank(utoken) || childId <= 0) return MomiaHttpResponse.BAD_REQUEST;
-
         return MomiaHttpResponse.SUCCESS(processUser(UserServiceApi.USER.updateChildBirthday(utoken, childId, birthday)));
     }
 
     @RequestMapping(value = "/child/delete", method = RequestMethod.POST)
     public MomiaHttpResponse deleteChild(@RequestParam String utoken, @RequestParam(value = "cid") long childId) {
         if (StringUtils.isBlank(utoken) || childId <= 0) return MomiaHttpResponse.BAD_REQUEST;
-
         return MomiaHttpResponse.SUCCESS(processUser(UserServiceApi.USER.deleteChild(utoken, childId)));
     }
 
     @RequestMapping(value = "/child/list", method = RequestMethod.GET)
     public MomiaHttpResponse listChildren(@RequestParam String utoken) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.BAD_REQUEST;
-
         return MomiaHttpResponse.SUCCESS(UserServiceApi.USER.listChildren(utoken));
     }
 
     @RequestMapping(value = "/code", method = RequestMethod.GET)
     public MomiaHttpResponse getInviteCode(@RequestParam String utoken) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.BAD_REQUEST;
-
         return MomiaHttpResponse.SUCCESS(UserServiceApi.USER.getInviteCode(utoken));
     }
 
@@ -170,7 +154,6 @@ public class UserV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken) || start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
         PagedList<OrderDto> orders = processPagedOrders(DealServiceApi.ORDER.listOrders(utoken, status < 0 ? 1 : status, start, Configuration.getInt("PageSize.Order")));
-
         return MomiaHttpResponse.SUCCESS(orders);
     }
 
@@ -181,7 +164,6 @@ public class UserV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken) || orderId <= 0 || productId <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
         OrderDto order = processOrder(DealServiceApi.ORDER.get(utoken, orderId, productId));
-
         return MomiaHttpResponse.SUCCESS(order);
     }
 
@@ -193,7 +175,6 @@ public class UserV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken) || orderId < 0 || status < 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
         PagedList<CouponDto> coupons = DealServiceApi.COUPON.listCoupons(utoken, orderId, status, start, Configuration.getInt("PageSize.Coupon"));
-
         return MomiaHttpResponse.SUCCESS(coupons);
     }
 
@@ -204,6 +185,6 @@ public class UserV1Api extends AbstractV1Api {
         UserDto user = UserServiceApi.USER.get(utoken);
         PagedList<ProductDto> favorites = ProductServiceApi.FAVORITE.listFavorites(user.getId(), start, Configuration.getInt("PageSize.Favorite"));
 
-        return MomiaHttpResponse.SUCCESS(processPagedProducts(favorites, IMAGE_MIDDLE));
+        return MomiaHttpResponse.SUCCESS(processPagedProducts(favorites));
     }
 }

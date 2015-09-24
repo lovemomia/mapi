@@ -1,7 +1,8 @@
-package cn.momia.mapi.api.v1;
+package cn.momia.mapi.api.v1.product;
 
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.api.product.DealServiceApi;
+import cn.momia.mapi.api.v1.AbstractV1Api;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -16,7 +17,6 @@ public class CouponV1Api extends AbstractV1Api {
                                     @RequestParam(value = "oid") long orderId,
                                     @RequestParam long coupon) {
         if (StringUtils.isBlank(utoken) || orderId <= 0 || coupon <= 0) return MomiaHttpResponse.BAD_REQUEST;
-
         return MomiaHttpResponse.SUCCESS(DealServiceApi.COUPON.calcTotalFee(utoken, orderId, coupon));
     }
 }

@@ -1,4 +1,4 @@
-package cn.momia.mapi.api.v1;
+package cn.momia.mapi.api.v1.user;
 
 import cn.momia.api.base.BaseServiceApi;
 import cn.momia.common.api.http.MomiaHttpResponse;
@@ -6,6 +6,7 @@ import cn.momia.api.product.DealServiceApi;
 import cn.momia.api.user.dto.UserDto;
 import cn.momia.api.user.UserServiceApi;
 import cn.momia.common.util.MobileUtil;
+import cn.momia.mapi.api.v1.AbstractV1Api;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,10 +22,9 @@ public class AuthV1Api extends AbstractV1Api {
 
     @RequestMapping(value = "/send", method = RequestMethod.POST)
     public MomiaHttpResponse send(@RequestParam String mobile, @RequestParam(defaultValue = "login") String type)  {
-        if (MobileUtil.isInvalid(mobile)) return MomiaHttpResponse.FAILED("无效的手机号码，请检查输入");
+        if (MobileUtil.isInvalid(mobile)) return MomiaHttpResponse.FAILED("无效的手机号码");
 
         BaseServiceApi.SMS.send(mobile, type);
-
         return MomiaHttpResponse.SUCCESS;
     }
 
@@ -33,10 +33,10 @@ public class AuthV1Api extends AbstractV1Api {
                                       @RequestParam String mobile,
                                       @RequestParam String password,
                                       @RequestParam String code) {
-        if (MobileUtil.isInvalid(mobile)) return MomiaHttpResponse.FAILED("无效的手机号码，请检查输入");
-        if (StringUtils.isBlank(nickName) ||
-                StringUtils.isBlank(password) ||
-                StringUtils.isBlank(code)) return MomiaHttpResponse.FAILED("昵称、密码和验证码都不能为空");
+        if (MobileUtil.isInvalid(mobile)) return MomiaHttpResponse.FAILED("无效的手机号码");
+        if (StringUtils.isBlank(nickName)) return MomiaHttpResponse.FAILED("昵称不能为空");
+        if (StringUtils.isBlank(password)) return MomiaHttpResponse.FAILED("密码不能为空");
+        if (StringUtils.isBlank(code)) return MomiaHttpResponse.FAILED("验证码不能为空");
 
         UserDto user = processUser(UserServiceApi.USER.register(nickName, mobile, password, code));
 
@@ -51,9 +51,7 @@ public class AuthV1Api extends AbstractV1Api {
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public MomiaHttpResponse login(@RequestParam String mobile, @RequestParam String password) {
-        LOGGER.info("login by password: {}", mobile);
-
-        if (MobileUtil.isInvalid(mobile)) return MomiaHttpResponse.FAILED("无效的手机号码，请检查输入");
+        if (MobileUtil.isInvalid(mobile)) return MomiaHttpResponse.FAILED("无效的手机号码");
         if (StringUtils.isBlank(password)) return MomiaHttpResponse.FAILED("密码不能为空");
 
         return MomiaHttpResponse.SUCCESS(processUser(UserServiceApi.USER.login(mobile, password)));
@@ -61,9 +59,7 @@ public class AuthV1Api extends AbstractV1Api {
 
     @RequestMapping(value = "/login/code", method = RequestMethod.POST)
     public MomiaHttpResponse loginByCode(@RequestParam String mobile, @RequestParam String code) {
-        LOGGER.info("login by code: {}", mobile);
-
-        if (MobileUtil.isInvalid(mobile)) return MomiaHttpResponse.FAILED("无效的手机号码，请检查输入");
+        if (MobileUtil.isInvalid(mobile)) return MomiaHttpResponse.FAILED("无效的手机号码");
         if (StringUtils.isBlank(code)) return MomiaHttpResponse.FAILED("验证码不能为空");
 
         return MomiaHttpResponse.SUCCESS(processUser(UserServiceApi.USER.loginByCode(mobile, code)));
@@ -71,8 +67,9 @@ public class AuthV1Api extends AbstractV1Api {
 
     @RequestMapping(value = "/password", method = RequestMethod.POST)
     public MomiaHttpResponse updatePassword(@RequestParam String mobile, @RequestParam String password, @RequestParam String code) {
-        if (MobileUtil.isInvalid(mobile)) return MomiaHttpResponse.FAILED("无效的手机号码，请检查输入");
-        if (StringUtils.isBlank(password) || StringUtils.isBlank(code)) return MomiaHttpResponse.FAILED("密码和验证码都不能为空");
+        if (MobileUtil.isInvalid(mobile)) return MomiaHttpResponse.FAILED("无效的手机号码");
+        if (StringUtils.isBlank(password)) return MomiaHttpResponse.FAILED("密码不能为空");
+        if (StringUtils.isBlank(code)) return MomiaHttpResponse.FAILED("验证码不能为空");
 
         return MomiaHttpResponse.SUCCESS(processUser(UserServiceApi.USER.updatePassword(mobile, password, code)));
     }
