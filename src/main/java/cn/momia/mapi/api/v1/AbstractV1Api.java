@@ -4,6 +4,7 @@ import cn.momia.api.feed.dto.FeedDto;
 import cn.momia.api.product.dto.CommentDto;
 import cn.momia.api.user.UserServiceApi;
 import cn.momia.common.api.dto.PagedList;
+import cn.momia.common.client.ClientType;
 import cn.momia.common.webapp.config.Configuration;
 import cn.momia.image.api.ImageFile;
 import cn.momia.mapi.api.AbstractApi;
@@ -109,13 +110,13 @@ public class AbstractV1Api extends AbstractApi {
     }
 
     private String buildLink(String link, int clientType) {
-        if (clientType == CLIENT_TYPE_APP) return Configuration.getString("AppConf.Name") + "://web?url=" + URLEncoder.encode(fullUrl(link, clientType));
+        if (ClientType.isApp(clientType)) return Configuration.getString("AppConf.Name") + "://web?url=" + URLEncoder.encode(fullUrl(link, clientType));
         return fullUrl(link, clientType);
     }
 
     private String fullUrl(String link, int clientType) {
         if (link.startsWith("/")) {
-            if (clientType == CLIENT_TYPE_APP) return Configuration.getString("AppConf.WapDomain") + link;
+            if (ClientType.isApp(clientType)) return Configuration.getString("AppConf.WapDomain") + link;
             return Configuration.getString("AppConf.WapDomain") + "/m" + link;
         }
 
@@ -137,7 +138,7 @@ public class AbstractV1Api extends AbstractApi {
     }
 
     protected ProductDto processProduct(ProductDto product, int size) {
-        return processProduct(product, size, CLIENT_TYPE_WAP);
+        return processProduct(product, size, ClientType.WAP);
     }
 
     protected ProductDto processProduct(ProductDto product, int size, int clientType) {
@@ -157,7 +158,7 @@ public class AbstractV1Api extends AbstractApi {
     }
 
     protected ProductDto processProduct(ProductDto product, String utoken) {
-        return processProduct(product, utoken, CLIENT_TYPE_WAP);
+        return processProduct(product, utoken, ClientType.WAP);
     }
 
     protected ProductDto processProduct(ProductDto product, String utoken, int clientType) {
