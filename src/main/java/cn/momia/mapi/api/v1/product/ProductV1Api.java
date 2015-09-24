@@ -33,7 +33,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -111,7 +110,7 @@ public class ProductV1Api extends AbstractV1Api {
         try {
             List<String> avatars = DealServiceApi.ORDER.listCustomerAvatars(id, Configuration.getInt("PageSize.ProductCustomer"));
             productJson.put("customers", buildCustomers(avatars, product.getStock()));
-            productJson.put("comments", listComments(id, 0, Configuration.getInt("PageSize.ProductDetailComment")));
+            productJson.put("comments", processPagedComments(ProductServiceApi.COMMENT.list(id, 0, Configuration.getInt("PageSize.ProductDetailComment"))));
 
             long userId = StringUtils.isBlank(utoken) ? 0 : UserServiceApi.USER.get(utoken).getId();
             if (ProductServiceApi.PRODUCT.favored(userId, id)) productJson.put("favored", true);
@@ -135,29 +134,9 @@ public class ProductV1Api extends AbstractV1Api {
         return avatars;
     }
 
-    private PagedList<CommentDto> listComments(long id, int start, int count) {
-        PagedList<CommentDto> pagedComments = ProductServiceApi.COMMENT.list(id, start, count);
-        List<Long> userIds = new ArrayList<Long>();
-        for (CommentDto comment : pagedComments.getList()) userIds.add(comment.getUserId());
-        List<UserDto> users = UserServiceApi.USER.list(userIds, UserDto.Type.MINI);
-        Map<Long, UserDto> usersMap = new HashMap<Long, UserDto>();
-        for (UserDto user : users) usersMap.put(user.getId(), user);
-        for (CommentDto comment : pagedComments.getList()) {
-            UserDto user = usersMap.get(comment.getUserId());
-            if (user == null || !user.exists()) {
-                comment.setNickName("");
-                comment.setAvatar("");
-            } else {
-                comment.setNickName(user.getNickName());
-                comment.setAvatar(ImageFile.smallUrl(user.getAvatar()));
-            }
-        }
-
-        return processPagedComments(pagedComments);
-    }
-
     private PagedList<CommentDto> processPagedComments(PagedList<CommentDto> pagedComments) {
         for (CommentDto comment : pagedComments.getList()) {
+            comment.setAvatar(ImageFile.smallUrl(comment.getAvatar()));
             for (int i = 0; i < comment.getImgs().size(); i++) {
                 comment.getImgs().set(i, ImageFile.middleUrl(comment.getImgs().get(i)));
             }
@@ -274,6 +253,6 @@ public class ProductV1Api extends AbstractV1Api {
     @RequestMapping(value = "/comment", method = RequestMethod.GET)
     public MomiaHttpResponse listComments(@RequestParam long id, @RequestParam int start) {
         if (id <= 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
-        return MomiaHttpResponse.SUCCESS(listComments(id, start, Configuration.getInt("PageSize.ProductComment")));
+        return MomiaHttpResponse.SUCCESS(processPagedComments(ProductServiceApi.COMMENT.list(id, start, Configuration.getInt("PageSize.ProductComment"))));
     }
 }
