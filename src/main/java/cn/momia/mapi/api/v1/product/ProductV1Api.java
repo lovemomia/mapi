@@ -2,7 +2,7 @@ package cn.momia.mapi.api.v1.product;
 
 import cn.momia.api.base.MetaUtil;
 import cn.momia.api.product.dto.PlaymateDto;
-import cn.momia.api.product.dto.ProductGroupDto;
+import cn.momia.api.product.dto.ProductsOfDayDto;
 import cn.momia.api.product.dto.SkuPlaymatesDto;
 import cn.momia.api.user.dto.LeaderDto;
 import cn.momia.common.api.dto.PagedList;
@@ -56,8 +56,8 @@ public class ProductV1Api extends AbstractV1Api {
         return MomiaHttpResponse.SUCCESS(processGroupedProducts(ProductServiceApi.PRODUCT.listByMonth(cityId, month)));
     }
 
-    private List<ProductGroupDto> processGroupedProducts(List<ProductGroupDto> products) {
-        for (ProductGroupDto productGroup : products) {
+    private List<ProductsOfDayDto> processGroupedProducts(List<ProductsOfDayDto> products) {
+        for (ProductsOfDayDto productGroup : products) {
             processProducts(productGroup.getProducts(), ImageFile.Size.MIDDLE);
         }
 
