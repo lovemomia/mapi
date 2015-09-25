@@ -17,12 +17,14 @@ public class RecommendV1Api extends AbstractV1Api {
                                        @RequestParam String time,
                                        @RequestParam String address,
                                        @RequestParam String contacts) {
-        if (StringUtils.isBlank(content) ||
-                StringUtils.isBlank(time) ||
-                StringUtils.isBlank(address) ||
-                StringUtils.isBlank(contacts)) return MomiaHttpResponse.BAD_REQUEST;
+        if (StringUtils.isBlank(content)) return MomiaHttpResponse.FAILED("爆料内容不能为空");
+        if (StringUtils.isBlank(time)) return MomiaHttpResponse.FAILED("时间不能为空");
+        if (StringUtils.isBlank(address)) return MomiaHttpResponse.FAILED("地址不能为空");
+        if (StringUtils.isBlank(contacts)) return MomiaHttpResponse.FAILED("联系方式不能为空");
 
-        BaseServiceApi.RECOMMEND.addRecommend(content, time, address, contacts);
+        if (content.length() > 600) return MomiaHttpResponse.FAILED("爆料字数超出限制");
+
+        if (!BaseServiceApi.RECOMMEND.addRecommend(content, time, address, contacts)) return MomiaHttpResponse.FAILED("提交爆料信息失败");
         return MomiaHttpResponse.SUCCESS;
     }
 }
