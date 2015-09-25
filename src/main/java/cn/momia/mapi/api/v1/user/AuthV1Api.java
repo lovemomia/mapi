@@ -24,7 +24,7 @@ public class AuthV1Api extends AbstractV1Api {
     public MomiaHttpResponse send(@RequestParam String mobile, @RequestParam(defaultValue = "login") String type)  {
         if (MobileUtil.isInvalid(mobile)) return MomiaHttpResponse.FAILED("无效的手机号码");
 
-        BaseServiceApi.SMS.send(mobile, type);
+        if (!BaseServiceApi.SMS.send(mobile, type)) return MomiaHttpResponse.FAILED("发送短信验证码失败");
         return MomiaHttpResponse.SUCCESS;
     }
 
@@ -33,20 +33,25 @@ public class AuthV1Api extends AbstractV1Api {
                                       @RequestParam String mobile,
                                       @RequestParam String password,
                                       @RequestParam String code) {
-        if (MobileUtil.isInvalid(mobile)) return MomiaHttpResponse.FAILED("无效的手机号码");
         if (StringUtils.isBlank(nickName)) return MomiaHttpResponse.FAILED("昵称不能为空");
+        if (MobileUtil.isInvalid(mobile)) return MomiaHttpResponse.FAILED("无效的手机号码");
         if (StringUtils.isBlank(password)) return MomiaHttpResponse.FAILED("密码不能为空");
         if (StringUtils.isBlank(code)) return MomiaHttpResponse.FAILED("验证码不能为空");
 
         UserDto user = processUser(UserServiceApi.USER.register(nickName, mobile, password, code));
 
+        // TODO 可配置
+        distributeRegisterCoupon(user);
+
+        return MomiaHttpResponse.SUCCESS(user);
+    }
+
+    private void distributeRegisterCoupon(UserDto user) {
         try {
             DealServiceApi.COUPON.distributeRegisterCoupon(user.getToken());
         } catch (Exception e) {
-            LOGGER.error("fail to distribute coupon to user: {}", user.getId(), e);
+            LOGGER.error("fail to distribute register coupons to user: {}", user.getId(), e);
         }
-
-        return MomiaHttpResponse.SUCCESS(user);
     }
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
