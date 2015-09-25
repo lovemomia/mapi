@@ -12,14 +12,10 @@ import cn.momia.api.user.dto.UserDto;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
 public class AbstractV1Api extends AbstractApi {
-    private static Logger LOGGER = LoggerFactory.getLogger(AbstractApi.class);
-
     protected ProductDto processProduct(ProductDto product, int size) {
         return processProduct(product, size, ClientType.WAP);
     }
@@ -72,13 +68,9 @@ public class AbstractV1Api extends AbstractApi {
 
     protected ProductDto processProduct(ProductDto product, String utoken, int clientType) {
         ProductDto processedProduct = processProduct(product, ImageFile.Size.LARGE, clientType);
-        try {
-            if (!StringUtils.isBlank(utoken)) {
-                String inviteCode = UserServiceApi.USER.getInviteCode(utoken);
-                if (!StringUtils.isBlank(inviteCode)) processedProduct.setUrl(processedProduct.getUrl() + "&invite=" + inviteCode);
-            }
-        } catch (Exception e) {
-            LOGGER.error("fail to generate invite url");
+        if (!StringUtils.isBlank(utoken)) {
+            String inviteCode = UserServiceApi.USER.getInviteCode(utoken);
+            if (!StringUtils.isBlank(inviteCode)) processedProduct.setUrl(processedProduct.getUrl() + "&invite=" + inviteCode);
         }
 
         return processedProduct;
@@ -103,9 +95,7 @@ public class AbstractV1Api extends AbstractApi {
     }
 
     protected UserDto processUser(UserDto user) {
-        String avatar = user.getAvatar();
-        if (!StringUtils.isBlank(avatar)) user.setAvatar(ImageFile.smallUrl(avatar));
-
+        user.setAvatar(ImageFile.smallUrl(user.getAvatar()));
         return user;
     }
 

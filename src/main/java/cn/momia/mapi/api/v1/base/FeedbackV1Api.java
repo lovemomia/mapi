@@ -14,9 +14,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class FeedbackV1Api extends AbstractV1Api {
     @RequestMapping(method = RequestMethod.POST)
     public MomiaHttpResponse addFeedback(@RequestParam String content, @RequestParam String email) {
-        if (StringUtils.isBlank(content) || StringUtils.isBlank(email)) return MomiaHttpResponse.BAD_REQUEST;
+        if (StringUtils.isBlank(content)) return MomiaHttpResponse.FAILED("反馈内容不能为空");
+        if (StringUtils.isBlank(email)) return MomiaHttpResponse.FAILED("联系方式不能为空");
 
-        BaseServiceApi.FEEDBACK.addFeedback(content, email);
+        if (content.length() > 480) return MomiaHttpResponse.FAILED("反馈内容字数超出限制");
+
+        if (!BaseServiceApi.FEEDBACK.addFeedback(content, email)) return MomiaHttpResponse.FAILED("提交反馈意见失败");
         return MomiaHttpResponse.SUCCESS;
     }
 }

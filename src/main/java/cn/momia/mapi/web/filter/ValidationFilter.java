@@ -78,9 +78,7 @@ public class ValidationFilter implements Filter {
 
     private boolean isInvalidUri(HttpServletRequest request) {
         String uri = request.getRequestURI();
-
-        if (VERSION_PATTERN.matcher(uri).find()) return true;
-        return false;
+        return VERSION_PATTERN.matcher(uri).find();
     }
 
     private boolean isInvalidSign(HttpServletRequest httpRequest) {
