@@ -2,6 +2,7 @@ package cn.momia.mapi.api.v1.feed;
 
 import cn.momia.api.feed.dto.FeedCommentDto;
 import cn.momia.api.feed.dto.FeedStarDto;
+import cn.momia.api.feed.dto.FeedTopicDto;
 import cn.momia.common.api.dto.PagedList;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.api.feed.FeedServiceApi;
@@ -16,8 +17,6 @@ import cn.momia.mapi.api.v1.AbstractV1Api;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -26,8 +25,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/v1/feed")
 public class FeedV1Api extends AbstractV1Api {
-    private static final Logger LOGGER = LoggerFactory.getLogger(FeedV1Api.class);
-
     @RequestMapping(value = "/follow", method = RequestMethod.POST)
     public MomiaHttpResponse follow(@RequestParam String utoken, @RequestParam(value = "fuid") long followedId) {
         if (StringUtils.isBlank(utoken) || followedId < 0) return MomiaHttpResponse.BAD_REQUEST;
@@ -68,25 +65,37 @@ public class FeedV1Api extends AbstractV1Api {
 
     @RequestMapping(value = "/topic", method = RequestMethod.GET)
     public MomiaHttpResponse topic(@RequestParam(defaultValue = "") String utoken,
-                                   @RequestParam(value = "pid") long productId,
                                    @RequestParam(value = "tid") long topicId,
                                    @RequestParam final int start) {
-        if (productId <= 0 || topicId <= 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (topicId <= 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
         JSONObject feedTopicJson = new JSONObject();
 
-        if (start == 0) feedTopicJson.put("product", processProduct(ProductServiceApi.PRODUCT.get(productId, ProductDto.Type.BASE), ImageFile.Size.MIDDLE));
+        if (start == 0) {
+            FeedTopicDto topic = FeedServiceApi.FEED.getTopic(topicId);
+            feedTopicJson.put("id", topic.getId());
+            feedTopicJson.put("type", topic.getType());
+            feedTopicJson.put("refId", topic.getRefId());
+            feedTopicJson.put("title", topic.getTitle());
+            if (topic.getRefId() > 0) {
+                if (topic.getType() == FeedTopicDto.Type.PRODUCT) {
+                    feedTopicJson.put("product", processProduct(ProductServiceApi.PRODUCT.get(topic.getRefId(), ProductDto.Type.BASE), ImageFile.Size.MIDDLE));
+                } else if (topic.getType() == FeedTopicDto.Type.COURSE) {
+                    // TODO
+                }
+            }
+        }
 
         long userId = StringUtils.isBlank(utoken) ? 0 : UserServiceApi.USER.get(utoken).getId();
-        feedTopicJson.put("feeds", processPagedFeeds(FeedServiceApi.FEED.listByTopic(userId, topicId, start, Configuration.getInt("PageSize.Feed.List"))));
+        feedTopicJson.put("feeds", processPagedFeeds(FeedServiceApi.FEED.list(userId, topicId, start, Configuration.getInt("PageSize.Feed.List"))));
 
         return MomiaHttpResponse.SUCCESS(feedTopicJson);
     }
 
     @RequestMapping(value = "/topic/list", method = RequestMethod.GET)
-    public MomiaHttpResponse listTopic(@RequestParam(value = "topictype", defaultValue = "1") int topicType, @RequestParam int start) {
+    public MomiaHttpResponse listTopic(@RequestParam(defaultValue = "1") int type, @RequestParam int start) {
         if (start < 0) return MomiaHttpResponse.BAD_REQUEST;
-        return MomiaHttpResponse.SUCCESS(FeedServiceApi.FEED.listTopic(topicType, start, Configuration.getInt("PageSize.Feed.Topic")));
+        return MomiaHttpResponse.SUCCESS(FeedServiceApi.FEED.listTopic(type, start, Configuration.getInt("PageSize.Feed.Topic")));
     }
 
     @RequestMapping(value = "/add", method = RequestMethod.POST)
@@ -104,8 +113,7 @@ public class FeedV1Api extends AbstractV1Api {
     }
 
     @RequestMapping(value = "/detail", method = RequestMethod.GET)
-    public MomiaHttpResponse detail(@RequestParam(defaultValue = "") String utoken, @RequestParam long id,
-                                    @RequestParam(value = "pid", required = false, defaultValue = "0") long productId) {
+    public MomiaHttpResponse detail(@RequestParam(defaultValue = "") String utoken, @RequestParam long id) {
         if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
         UserDto user = UserServiceApi.USER.get(utoken);
@@ -118,9 +126,13 @@ public class FeedV1Api extends AbstractV1Api {
         feedDetailJson.put("staredUsers", stars);
         feedDetailJson.put("comments", comments);
 
-        if (productId > 0) {
-            ProductDto product = ProductServiceApi.PRODUCT.get(productId, ProductDto.Type.BASE);
-            feedDetailJson.put("product", processProduct(product, ImageFile.Size.MIDDLE));
+        if (feed.getRefId() > 0) {
+            if (feed.getTopicType() == FeedTopicDto.Type.PRODUCT) {
+                ProductDto product = ProductServiceApi.PRODUCT.get(feed.getRefId(), ProductDto.Type.BASE);
+                feedDetailJson.put("product", processProduct(product, ImageFile.Size.MIDDLE));
+            } else if (feed.getTopicType() == FeedTopicDto.Type.COURSE) {
+                // TODO
+            }
         }
 
         return MomiaHttpResponse.SUCCESS(feedDetailJson);
