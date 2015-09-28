@@ -21,10 +21,8 @@ public class PaymentV1Api extends AbstractV1Api {
                                           @RequestParam(value = "sid") long skuId,
                                           @RequestParam(defaultValue = "app") String type,
                                           @RequestParam(required = false) Long coupon) {
-        if (StringUtils.isBlank(utoken) ||
-                orderId <= 0 ||
-                productId <= 0 ||
-                skuId <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (orderId <= 0 || productId <= 0 || skuId <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
         return MomiaHttpResponse.SUCCESS(DealServiceApi.PAYMENT.prepayAlipay(utoken, orderId, productId, skuId, type, coupon));
     }
@@ -37,11 +35,8 @@ public class PaymentV1Api extends AbstractV1Api {
                                              @RequestParam(value = "trade_type") final String tradeType,
                                              @RequestParam(required = false) Long coupon,
                                              @RequestParam(required = false) String code) {
-        if (StringUtils.isBlank(utoken) ||
-                orderId <= 0 ||
-                productId <= 0 ||
-                skuId <= 0 ||
-                StringUtils.isBlank(tradeType)) return MomiaHttpResponse.BAD_REQUEST;
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (orderId <= 0 || productId <= 0 || skuId <= 0 || StringUtils.isBlank(tradeType)) return MomiaHttpResponse.BAD_REQUEST;
         if (tradeType.equals("JSAPI") && StringUtils.isBlank(code)) return MomiaHttpResponse.BAD_REQUEST;
 
         return MomiaHttpResponse.SUCCESS(DealServiceApi.PAYMENT.prepayWechatpay(utoken, orderId, productId, skuId, tradeType, coupon, code));
@@ -53,10 +48,8 @@ public class PaymentV1Api extends AbstractV1Api {
                                         @RequestParam(value = "pid") long productId,
                                         @RequestParam(value = "sid") long skuId,
                                         @RequestParam(required = false) Long coupon) {
-        if (StringUtils.isBlank(utoken) ||
-                orderId <= 0 ||
-                productId <= 0 ||
-                skuId <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (orderId <= 0 || productId <= 0 || skuId <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
         DealServiceApi.PAYMENT.prepayFree(utoken, orderId, productId, skuId, coupon);
         return MomiaHttpResponse.SUCCESS(processProduct(ProductServiceApi.PRODUCT.get(productId, ProductDto.Type.MINI), utoken));
@@ -67,10 +60,8 @@ public class PaymentV1Api extends AbstractV1Api {
                                           @RequestParam(value = "oid") long orderId,
                                           @RequestParam(value = "pid") long productId,
                                           @RequestParam(value = "sid") long skuId) {
-        if (StringUtils.isBlank(utoken) ||
-                orderId <= 0 ||
-                productId <= 0 ||
-                skuId <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (orderId <= 0 || productId <= 0 || skuId <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
         DealServiceApi.PAYMENT.check(utoken, orderId, productId, skuId);
         return MomiaHttpResponse.SUCCESS(processProduct(ProductServiceApi.PRODUCT.get(productId, ProductDto.Type.MINI), utoken));

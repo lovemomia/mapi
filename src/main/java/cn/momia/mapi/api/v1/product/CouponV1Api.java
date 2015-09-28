@@ -16,7 +16,9 @@ public class CouponV1Api extends AbstractV1Api {
     public MomiaHttpResponse coupon(@RequestParam String utoken,
                                     @RequestParam(value = "oid") long orderId,
                                     @RequestParam long coupon) {
-        if (StringUtils.isBlank(utoken) || orderId <= 0 || coupon <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (orderId <= 0 || coupon <= 0) return MomiaHttpResponse.BAD_REQUEST;
+
         return MomiaHttpResponse.SUCCESS(DealServiceApi.COUPON.calcTotalFee(utoken, orderId, coupon));
     }
 }

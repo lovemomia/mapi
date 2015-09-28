@@ -19,7 +19,8 @@ public class OrderV1Api extends AbstractV1Api {
     public MomiaHttpResponse placeOrder(@RequestParam String utoken,
                                         @RequestParam String order,
                                         @RequestParam(required = false, defaultValue = "") String invite) {
-        if (StringUtils.isBlank(utoken) || StringUtils.isBlank(order)) return MomiaHttpResponse.BAD_REQUEST;
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (StringUtils.isBlank(order)) return MomiaHttpResponse.BAD_REQUEST;
 
         JSONObject orderJson = JSON.parseObject(order);
         orderJson.put("customerId", UserServiceApi.USER.get(utoken).getId());
@@ -30,7 +31,8 @@ public class OrderV1Api extends AbstractV1Api {
 
     @RequestMapping(value = "/check/dup", method = RequestMethod.POST)
     public MomiaHttpResponse checkDup(@RequestParam String utoken, @RequestParam String order) {
-        if (StringUtils.isBlank(utoken) || StringUtils.isBlank(order)) return MomiaHttpResponse.BAD_REQUEST;
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (StringUtils.isBlank(order)) return MomiaHttpResponse.BAD_REQUEST;
 
         JSONObject orderJson = JSON.parseObject(order);
         orderJson.put("customerId", UserServiceApi.USER.get(utoken).getId());
@@ -40,7 +42,8 @@ public class OrderV1Api extends AbstractV1Api {
 
     @RequestMapping(value = "/delete", method = RequestMethod.POST)
     public MomiaHttpResponse deleteOrder(@RequestParam String utoken, @RequestParam long id) {
-        if (StringUtils.isBlank(utoken) || id <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
         DealServiceApi.ORDER.delete(utoken, id);
         return MomiaHttpResponse.SUCCESS;

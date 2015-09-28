@@ -164,7 +164,8 @@ public class ProductV1Api extends AbstractV1Api {
 
     @RequestMapping(value = "/order", method = RequestMethod.GET)
     public MomiaHttpResponse placeOrder(@RequestParam String utoken, @RequestParam long id) {
-        if(StringUtils.isBlank(utoken) || id <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if(StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
         JSONObject placeOrderJson = new JSONObject();
         placeOrderJson.put("contacts", UserServiceApi.USER.getContacts(utoken));
@@ -213,7 +214,8 @@ public class ProductV1Api extends AbstractV1Api {
 
     @RequestMapping(value = "/favor", method = RequestMethod.POST)
     public MomiaHttpResponse favor(@RequestParam String utoken, @RequestParam long id){
-        if (StringUtils.isBlank(utoken) || id <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
         UserDto user = UserServiceApi.USER.get(utoken);
         ProductServiceApi.PRODUCT.favor(user.getId(), id);
@@ -223,7 +225,8 @@ public class ProductV1Api extends AbstractV1Api {
 
     @RequestMapping(value = "/unfavor", method = RequestMethod.POST)
     public MomiaHttpResponse unfavor(@RequestParam String utoken, @RequestParam long id){
-        if (StringUtils.isBlank(utoken) || id <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
         UserDto user = UserServiceApi.USER.get(utoken);
         ProductServiceApi.PRODUCT.unfavor(user.getId(), id);
@@ -233,7 +236,8 @@ public class ProductV1Api extends AbstractV1Api {
 
     @RequestMapping(value = "/comment", method = RequestMethod.POST)
     public MomiaHttpResponse addComment(@RequestParam String utoken, @RequestParam String comment) {
-        if (StringUtils.isBlank(utoken) || StringUtils.isBlank(comment)) return MomiaHttpResponse.BAD_REQUEST;
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (StringUtils.isBlank(comment)) return MomiaHttpResponse.BAD_REQUEST;
 
         UserDto user = UserServiceApi.USER.get(utoken);
 
