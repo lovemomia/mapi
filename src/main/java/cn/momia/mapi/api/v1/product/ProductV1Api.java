@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -137,8 +138,14 @@ public class ProductV1Api extends AbstractV1Api {
     private PagedList<CommentDto> processPagedComments(PagedList<CommentDto> pagedComments) {
         for (CommentDto comment : pagedComments.getList()) {
             comment.setAvatar(ImageFile.smallUrl(comment.getAvatar()));
-            for (int i = 0; i < comment.getImgs().size(); i++) {
-                comment.getImgs().set(i, ImageFile.middleUrl(comment.getImgs().get(i)));
+            if (comment.getImgs() != null) {
+                List<String> largeImgs = new ArrayList<String>();
+                comment.setLargeImgs(largeImgs);
+
+                for (int i = 0; i < comment.getImgs().size(); i++) {
+                    comment.getImgs().set(i, ImageFile.middleUrl(comment.getImgs().get(i)));
+                    largeImgs.add(ImageFile.largeUrl(comment.getImgs().get(i)));
+                }
             }
         }
 

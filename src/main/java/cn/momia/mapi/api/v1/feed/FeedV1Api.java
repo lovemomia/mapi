@@ -22,6 +22,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @RestController
 @RequestMapping("/v1/feed")
 public class FeedV1Api extends AbstractV1Api {
@@ -56,8 +59,12 @@ public class FeedV1Api extends AbstractV1Api {
     private FeedDto processFeed(FeedDto feed) {
         feed.setAvatar(ImageFile.smallUrl(feed.getAvatar()));
         if (feed.getImgs() != null) {
+            List<String> largeImgs = new ArrayList<String>();
+            feed.setLargeImgs(largeImgs);
+
             for (int i = 0; i < feed.getImgs().size(); i++) {
                 feed.getImgs().set(i, ImageFile.middleUrl(feed.getImgs().get(i)));
+                largeImgs.add(ImageFile.largeUrl(feed.getImgs().get(i)));
             }
         }
 
