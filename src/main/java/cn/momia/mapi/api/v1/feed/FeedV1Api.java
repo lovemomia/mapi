@@ -101,7 +101,8 @@ public class FeedV1Api extends AbstractV1Api {
 
     @RequestMapping(value = "/add", method = RequestMethod.POST)
     public MomiaHttpResponse add(@RequestParam String utoken, @RequestParam String feed) {
-        if (StringUtils.isBlank(utoken) || StringUtils.isBlank(feed)) return MomiaHttpResponse.BAD_REQUEST;
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (StringUtils.isBlank(feed)) return MomiaHttpResponse.BAD_REQUEST;
 
         JSONObject feedJson = JSON.parseObject(feed);
         JSONObject baseFeedJson = feedJson.getJSONObject("baseFeed");
@@ -157,7 +158,8 @@ public class FeedV1Api extends AbstractV1Api {
 
     @RequestMapping(value = "/delete", method = RequestMethod.POST)
     public MomiaHttpResponse delete(@RequestParam String utoken, @RequestParam long id) {
-        if (StringUtils.isBlank(utoken) || id <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
         UserDto user = UserServiceApi.USER.get(utoken);
         FeedServiceApi.FEED.delete(user.getId(), id);
@@ -175,7 +177,8 @@ public class FeedV1Api extends AbstractV1Api {
 
     @RequestMapping(value = "/comment/add", method = RequestMethod.POST)
     public MomiaHttpResponse addComment(@RequestParam String utoken, @RequestParam long id, @RequestParam String content) {
-        if (StringUtils.isBlank(utoken) || id <= 0 || StringUtils.isBlank(content)) return MomiaHttpResponse.BAD_REQUEST;
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (id <= 0 || StringUtils.isBlank(content)) return MomiaHttpResponse.BAD_REQUEST;
 
         UserDto user = UserServiceApi.USER.get(utoken);
         FeedServiceApi.FEED.addComment(user.getId(), id, content);
@@ -185,7 +188,8 @@ public class FeedV1Api extends AbstractV1Api {
 
     @RequestMapping(value = "/comment/delete", method = RequestMethod.POST)
     public MomiaHttpResponse deleteComment(@RequestParam String utoken, @RequestParam long id, @RequestParam(value = "cmid") long commentId) {
-        if (StringUtils.isBlank(utoken) || id <= 0 || commentId <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (id <= 0 || commentId <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
         UserDto user = UserServiceApi.USER.get(utoken);
         FeedServiceApi.FEED.deleteComment(user.getId(), id, commentId);
@@ -195,7 +199,8 @@ public class FeedV1Api extends AbstractV1Api {
 
     @RequestMapping(value = "/star", method = RequestMethod.POST)
     public MomiaHttpResponse star(@RequestParam String utoken, @RequestParam long id) {
-        if (StringUtils.isBlank(utoken) || id <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
         UserDto user = UserServiceApi.USER.get(utoken);
         FeedServiceApi.FEED.star(user.getId(), id);
@@ -205,7 +210,8 @@ public class FeedV1Api extends AbstractV1Api {
 
     @RequestMapping(value = "/unstar", method = RequestMethod.POST)
     public MomiaHttpResponse unstar(@RequestParam String utoken, @RequestParam long id) {
-        if (StringUtils.isBlank(utoken) || id <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
         UserDto user = UserServiceApi.USER.get(utoken);
         FeedServiceApi.FEED.unstar(user.getId(), id);
