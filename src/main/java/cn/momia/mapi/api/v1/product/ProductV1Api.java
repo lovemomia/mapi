@@ -143,8 +143,9 @@ public class ProductV1Api extends AbstractV1Api {
                 comment.setLargeImgs(largeImgs);
 
                 for (int i = 0; i < comment.getImgs().size(); i++) {
-                    comment.getImgs().set(i, ImageFile.middleUrl(comment.getImgs().get(i)));
-                    largeImgs.add(ImageFile.largeUrl(comment.getImgs().get(i)));
+                    String img = comment.getImgs().get(i);
+                    comment.getImgs().set(i, ImageFile.middleUrl(img));
+                    largeImgs.add(ImageFile.largeUrl(img));
                 }
             }
         }

@@ -63,8 +63,9 @@ public class FeedV1Api extends AbstractV1Api {
             feed.setLargeImgs(largeImgs);
 
             for (int i = 0; i < feed.getImgs().size(); i++) {
-                feed.getImgs().set(i, ImageFile.middleUrl(feed.getImgs().get(i)));
-                largeImgs.add(ImageFile.largeUrl(feed.getImgs().get(i)));
+                String img = feed.getImgs().get(i);
+                feed.getImgs().set(i, ImageFile.middleUrl(img));
+                largeImgs.add(ImageFile.largeUrl(img));
             }
         }
 
