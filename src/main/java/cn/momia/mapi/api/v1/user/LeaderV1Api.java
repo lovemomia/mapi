@@ -28,7 +28,7 @@ public class LeaderV1Api extends AbstractV1Api {
 
     @RequestMapping(value = "/status", method = RequestMethod.GET)
     public MomiaHttpResponse getStatus(@RequestParam String utoken) {
-        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.BAD_REQUEST;
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
 
         JSONObject statusJson = new JSONObject();
 
@@ -54,7 +54,8 @@ public class LeaderV1Api extends AbstractV1Api {
 
     @RequestMapping(value = "/product", method = RequestMethod.GET)
     public MomiaHttpResponse getLedProducts(@RequestParam String utoken, @RequestParam int start) {
-        if (StringUtils.isBlank(utoken) || start < 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
         UserDto user = UserServiceApi.USER.get(utoken);
         return MomiaHttpResponse.SUCCESS(processPagedProducts(ProductServiceApi.SKU.getLedProducts(user.getId(), start, Configuration.getInt("PageSize.Leader.Product"))));
@@ -62,7 +63,8 @@ public class LeaderV1Api extends AbstractV1Api {
 
     @RequestMapping(value = "/apply", method = RequestMethod.POST)
     public MomiaHttpResponse apply(@RequestParam String utoken, @RequestParam(value = "pid") long productId, @RequestParam(value = "sid") long skuId) {
-        if (StringUtils.isBlank(utoken) || productId <= 0 || skuId <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (productId <= 0 || skuId <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
         LeaderDto leader = UserServiceApi.LEADER.get(utoken);
         if (leader.getStatus() != Status.PASSED) return MomiaHttpResponse.FAILED("您注册成为领队的请求还没通过审核，暂时不能当领队");
@@ -73,7 +75,8 @@ public class LeaderV1Api extends AbstractV1Api {
 
     @RequestMapping(value = "/signup", method = RequestMethod.POST)
     public MomiaHttpResponse add(@RequestParam String utoken, @RequestParam String leader) {
-        if (StringUtils.isBlank(utoken) || StringUtils.isBlank(leader)) return MomiaHttpResponse.BAD_REQUEST;
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (StringUtils.isBlank(leader)) return MomiaHttpResponse.BAD_REQUEST;
 
         JSONObject leaderJson = JSON.parseObject(leader);
         leaderJson.put("userId", UserServiceApi.USER.get(utoken).getId());
@@ -84,7 +87,8 @@ public class LeaderV1Api extends AbstractV1Api {
 
     @RequestMapping(value = "/update", method = RequestMethod.POST)
     public MomiaHttpResponse update(@RequestParam String utoken, @RequestParam String leader) {
-        if (StringUtils.isBlank(utoken) || StringUtils.isBlank(leader)) return MomiaHttpResponse.BAD_REQUEST;
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (StringUtils.isBlank(leader)) return MomiaHttpResponse.BAD_REQUEST;
 
         JSONObject leaderJson = JSON.parseObject(leader);
         leaderJson.put("userId", UserServiceApi.USER.get(utoken).getId());
@@ -95,7 +99,7 @@ public class LeaderV1Api extends AbstractV1Api {
 
     @RequestMapping(value = "/delete", method = RequestMethod.POST)
     public MomiaHttpResponse delete(@RequestParam String utoken) {
-        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.BAD_REQUEST;
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
 
         UserServiceApi.LEADER.delete(utoken);
         return MomiaHttpResponse.SUCCESS;

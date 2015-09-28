@@ -17,7 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class ParticipantV1Api extends AbstractV1Api {
     @RequestMapping(method = RequestMethod.POST)
     public MomiaHttpResponse add(@RequestParam String utoken, @RequestParam String participant) {
-        if (StringUtils.isBlank(utoken) || StringUtils.isBlank(participant)) return MomiaHttpResponse.BAD_REQUEST;
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (StringUtils.isBlank(participant)) return MomiaHttpResponse.BAD_REQUEST;
 
         JSONObject paticipantJson = JSON.parseObject(participant);
         paticipantJson.put("userId", UserServiceApi.USER.get(utoken).getId());
@@ -28,13 +29,16 @@ public class ParticipantV1Api extends AbstractV1Api {
 
     @RequestMapping(method = RequestMethod.GET)
     public MomiaHttpResponse get(@RequestParam String utoken, @RequestParam long id) {
-        if (StringUtils.isBlank(utoken) || id <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
+
         return MomiaHttpResponse.SUCCESS(UserServiceApi.PARTICIPANT.get(utoken, id));
     }
 
     @RequestMapping(value = "/update", method = RequestMethod.POST)
     public MomiaHttpResponse update(@RequestParam String utoken, @RequestParam String participant) {
-        if (StringUtils.isBlank(utoken) || StringUtils.isBlank(participant)) return MomiaHttpResponse.BAD_REQUEST;
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (StringUtils.isBlank(participant)) return MomiaHttpResponse.BAD_REQUEST;
 
         JSONObject paticipantJson = JSON.parseObject(participant);
         paticipantJson.put("userId", UserServiceApi.USER.get(utoken).getId());
@@ -45,7 +49,8 @@ public class ParticipantV1Api extends AbstractV1Api {
 
     @RequestMapping(value = "/delete", method = RequestMethod.POST)
     public MomiaHttpResponse delete(@RequestParam String utoken, @RequestParam long id) {
-        if (StringUtils.isBlank(utoken) || id <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
         UserServiceApi.PARTICIPANT.delete(utoken, id);
         return MomiaHttpResponse.SUCCESS;
@@ -53,7 +58,7 @@ public class ParticipantV1Api extends AbstractV1Api {
 
     @RequestMapping(value = "/list", method = RequestMethod.GET)
     public MomiaHttpResponse list(@RequestParam String utoken) {
-        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.BAD_REQUEST;
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         return MomiaHttpResponse.SUCCESS(UserServiceApi.PARTICIPANT.list(utoken));
     }
 }
