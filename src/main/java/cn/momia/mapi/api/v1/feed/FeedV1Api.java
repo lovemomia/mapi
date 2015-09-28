@@ -27,9 +27,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class FeedV1Api extends AbstractV1Api {
     @RequestMapping(value = "/follow", method = RequestMethod.POST)
     public MomiaHttpResponse follow(@RequestParam String utoken, @RequestParam(value = "fuid") long followedId) {
-        if (StringUtils.isBlank(utoken) || followedId < 0) return MomiaHttpResponse.BAD_REQUEST;
-        // FIXME
-        if (!UserServiceApi.USER.get(followedId).exists()) return MomiaHttpResponse.FAILED("关注的用户不存在");
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (followedId < 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (!UserServiceApi.USER.exists(followedId)) return MomiaHttpResponse.FAILED("关注的用户不存在");
 
         UserDto user = UserServiceApi.USER.get(utoken);
         FeedServiceApi.FEED.follow(user.getId(), followedId);
