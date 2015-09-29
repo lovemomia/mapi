@@ -31,7 +31,7 @@ public class FeedV1Api extends AbstractV1Api {
     @RequestMapping(value = "/follow", method = RequestMethod.POST)
     public MomiaHttpResponse follow(@RequestParam String utoken, @RequestParam(value = "fuid") long followedId) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (followedId < 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (followedId <= 0) return MomiaHttpResponse.BAD_REQUEST;
         if (!UserServiceApi.USER.exists(followedId)) return MomiaHttpResponse.FAILED("关注的用户不存在");
 
         UserDto user = UserServiceApi.USER.get(utoken);
@@ -126,8 +126,8 @@ public class FeedV1Api extends AbstractV1Api {
     public MomiaHttpResponse detail(@RequestParam(defaultValue = "") String utoken, @RequestParam long id) {
         if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        UserDto user = UserServiceApi.USER.get(utoken);
-        FeedDto feed = FeedServiceApi.FEED.get(user.getId(), id);
+        long userId = StringUtils.isBlank(utoken) ? 0 : UserServiceApi.USER.get(utoken).getId();
+        FeedDto feed = FeedServiceApi.FEED.get(userId, id);
         PagedList<FeedStarDto> stars = processPagedFeedStars(FeedServiceApi.FEED.listStars(id, 0, Configuration.getInt("PageSize.Feed.Detail.Star")));
         PagedList<FeedCommentDto> comments = processPagedFeedComments(FeedServiceApi.FEED.listComments(id, 0, Configuration.getInt("PageSize.Feed.Detail.Comment")));
 
