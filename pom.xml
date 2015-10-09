@@ -21,6 +21,11 @@
         </dependency>
         <dependency>
             <groupId>cn.momia</groupId>
+            <artifactId>duola-api-event</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>cn.momia</groupId>
             <artifactId>duola-api-feed</artifactId>
             <version>1.0.0</version>
         </dependency>

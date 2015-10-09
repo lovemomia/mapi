@@ -1,10 +1,11 @@
 package cn.momia.mapi.api.v1.home;
 
+import cn.momia.api.event.EventServiceApi;
+import cn.momia.api.event.dto.BannerDto;
 import cn.momia.api.product.dto.ProductDto;
 import cn.momia.common.api.dto.PagedList;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.api.product.ProductServiceApi;
-import cn.momia.api.product.dto.BannerDto;
 import cn.momia.common.webapp.config.Configuration;
 import cn.momia.image.api.ImageFile;
 import cn.momia.mapi.api.v1.AbstractV1Api;
@@ -31,7 +32,7 @@ public class HomeV1Api extends AbstractV1Api {
         final int count = pageSize;
 
         List<BannerDto> banners = null;
-        if (start== 0) banners = ProductServiceApi.TOPIC.listBanners(cityId, Configuration.getInt("PageSize.Banner"));
+        if (start== 0) banners = EventServiceApi.EVENT.listBanners(cityId, Configuration.getInt("PageSize.Banner"));
         PagedList<ProductDto> products = ProductServiceApi.PRODUCT.list(cityId, start, count);
 
         return MomiaHttpResponse.SUCCESS(buildHomeResponse(banners, products, pageIndex, getClientType(request)));
