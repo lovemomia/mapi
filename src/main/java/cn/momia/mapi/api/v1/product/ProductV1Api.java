@@ -114,7 +114,7 @@ public class ProductV1Api extends AbstractV1Api {
             productJson.put("comments", processPagedComments(ProductServiceApi.COMMENT.list(id, 0, Configuration.getInt("PageSize.ProductDetailComment"))));
 
             long userId = StringUtils.isBlank(utoken) ? 0 : UserServiceApi.USER.get(utoken).getId();
-            if (ProductServiceApi.PRODUCT.favored(userId, id)) productJson.put("favored", true);
+            if (ProductServiceApi.FAVORITE.favored(userId, id)) productJson.put("favored", true);
         } catch (Exception e) {
             LOGGER.error("exception!!", e);
         }
@@ -226,7 +226,7 @@ public class ProductV1Api extends AbstractV1Api {
         if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
         UserDto user = UserServiceApi.USER.get(utoken);
-        ProductServiceApi.PRODUCT.favor(user.getId(), id);
+        ProductServiceApi.FAVORITE.favor(user.getId(), id);
 
         return MomiaHttpResponse.SUCCESS;
     }
@@ -237,7 +237,7 @@ public class ProductV1Api extends AbstractV1Api {
         if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
         UserDto user = UserServiceApi.USER.get(utoken);
-        ProductServiceApi.PRODUCT.unfavor(user.getId(), id);
+        ProductServiceApi.FAVORITE.unfavor(user.getId(), id);
 
         return MomiaHttpResponse.SUCCESS;
     }
