@@ -1,8 +1,11 @@
 package cn.momia.mapi.api.v1.index;
 
+import cn.momia.api.course.CourseServiceApi;
+import cn.momia.api.course.dto.CourseDto;
 import cn.momia.api.event.EventServiceApi;
 import cn.momia.api.event.dto.BannerDto;
 import cn.momia.api.event.dto.EventDto;
+import cn.momia.common.api.dto.PagedList;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.common.webapp.config.Configuration;
 import cn.momia.image.api.ImageFile;
@@ -21,6 +24,8 @@ import java.util.List;
 @RequestMapping("/v1/index")
 public class IndexV1Api extends AbstractV1Api {
     @Autowired private EventServiceApi eventServiceApi;
+    @Autowired private CourseServiceApi courseServiceApi;
+
     @Autowired private IconService iconService;
 
     @RequestMapping(method = RequestMethod.GET)
@@ -72,7 +77,12 @@ public class IndexV1Api extends AbstractV1Api {
         return events;
     }
 
-    private Object getCourses(int cityId, int start) {
-        return null;
+    private PagedList<CourseDto> getCourses(int cityId, int start) {
+        PagedList<CourseDto> pagedCourses = courseServiceApi.listRecommend(cityId, start, Configuration.getInt("PageSize.CourseRecommend"));
+        for (CourseDto course : pagedCourses.getList()) {
+            course.setCover(ImageFile.largeUrl(course.getCover()));
+        }
+
+        return pagedCourses;
     }
 }

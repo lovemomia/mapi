@@ -14,6 +14,7 @@
 
     <Service>
         <Base>http://localhost:7070</Base>
+        <Course>http://localhost:7070</Course>
         <Event>http://localhost:7070</Event>
         <User>http://localhost:7070</User>
     </Service>
@@ -26,9 +27,15 @@
         </Tongqu>
     </Database>
 
+    <AppConf>
+        <Name>duola</Name>
+        <WapDomain>http://m.momia.cn</WapDomain>
+    </AppConf>
+
     <PageSize>
         <Banner>3</Banner>
         <Event>4</Event>
+        <CourseRecommend>20</CourseRecommend>
 
         <Product>20</Product>
         <ProductDetailComment>3</ProductDetailComment>
