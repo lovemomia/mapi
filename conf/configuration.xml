@@ -14,30 +14,22 @@
 
     <Service>
         <Base>http://localhost:7070</Base>
-        <Deal>http://localhost:7070</Deal>
         <Event>http://localhost:7070</Event>
-        <Feed>http://localhost:7070</Feed>
-        <Product>http://localhost:7070</Product>
         <User>http://localhost:7070</User>
-        <Im>http://localhost:7070</Im>
     </Service>
 
     <Database>
         <Tongqu>
-            <JdbcUrl><![CDATA[jdbc:mysql://120.55.102.12:3306/tongqu?characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull]]></JdbcUrl>
-            <Username>tongqu</Username>
-            <Password>Tongqu!@#456</Password>
+            <JdbcUrl><![CDATA[jdbc:mysql://120.55.102.12:3306/sogokids?characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull]]></JdbcUrl>
+            <Username>sogokids</Username>
+            <Password>SogoKids</Password>
         </Tongqu>
     </Database>
 
-    <AppConf>
-        <Name>duola</Name>
-        <ShowLeader>true</ShowLeader>
-        <WapDomain>http://m.momia.cn</WapDomain>
-    </AppConf>
-
     <PageSize>
         <Banner>3</Banner>
+        <Event>4</Event>
+
         <Product>20</Product>
         <ProductDetailComment>3</ProductDetailComment>
         <ProductComment>20</ProductComment>
@@ -59,42 +51,4 @@
             <Product>20</Product>
         </Leader>
     </PageSize>
-
-    <Product>
-        <StockAlert>10</StockAlert>
-        <Url>http://m.momia.cn/actsDetail.html</Url>
-    </Product>
-
-    <Leader>
-        <Desc>
-            <![CDATA[
-                {
-                    "content": [
-                        {
-                            "title": "成为领队有啥好处？"\,
-                            "body": [
-                                {"text": "作为领队，你参与的亲子活动\n a、活动费用100元以下的，你家宝贝都可以免费参加；\n b、活动费用大于100元的，按照一定比例返现；"}\,
-                                {"text": "如申请成为1元公益活动的领队，你家宝贝则可以优先参加，同时可获得100元红包奖励。"}
-                            ]
-                        }\,
-                        {
-                            "title": "领队要做什么？"\,
-                            "body": [
-                                {"text": "积极招募会员，使活动成团；"}\,
-                                {"text": "活动开始前，建立会员微信群，提醒时间地点等注意事项；"}\,
-                                {"text": "活动过程中组织大家签到，活跃气氛（破冰），维持现场秩序，拍集体照。"}
-                            ]
-                        }\,
-                        {
-                            "title": "如何成为领队？"\,
-                            "body": [
-                                {"text": "只要你对孩子和生活充满热情，是亲子活动的积极参与者，都可以申请成为领队；"}\,
-                                {"text": "成为领队后，免费参加价值5000元的亲子沟通技巧，亲子活动组织的专业培训，结业便可成为松果亲子的领队啦。"}
-                            ]
-                        }
-                    ]
-                }
-            ]]>
-        </Desc>
-    </Leader>
 </Configuration>
