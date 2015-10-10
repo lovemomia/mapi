@@ -11,7 +11,7 @@ import java.util.List;
 public class IconService extends DbAccessService {
     public List<Icon> list(int cityId) {
         final List<Icon> icons = new ArrayList<Icon>();
-        String sql = "SELECT Title, Img, Action FROM SG_Icon WHERE CityId=? AND Status=1 ORDER BY Weight DESC, AddTime DESC";
+        String sql = "SELECT Title, Img, Action FROM SG_Icon WHERE (CityId=? OR CityId=0) AND Status=1 ORDER BY Weight DESC, AddTime DESC";
         jdbcTemplate.query(sql, new Object[] { cityId }, new RowCallbackHandler() {
             @Override
             public void processRow(ResultSet rs) throws SQLException {

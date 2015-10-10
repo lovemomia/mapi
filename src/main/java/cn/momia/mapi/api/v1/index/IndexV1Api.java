@@ -56,6 +56,7 @@ public class IndexV1Api extends AbstractV1Api {
         List<Icon> icons = iconService.list(cityId);
         for (Icon icon : icons) {
             icon.setImg(ImageFile.url(icon.getImg()));
+            icon.setAction(buildLink(icon.getAction(), clientType));
         }
 
         return icons;
