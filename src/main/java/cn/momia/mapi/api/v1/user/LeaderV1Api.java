@@ -84,24 +84,4 @@ public class LeaderV1Api extends AbstractV1Api {
 
         return MomiaHttpResponse.SUCCESS;
     }
-
-    @RequestMapping(value = "/update", method = RequestMethod.POST)
-    public MomiaHttpResponse update(@RequestParam String utoken, @RequestParam String leader) {
-        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (StringUtils.isBlank(leader)) return MomiaHttpResponse.BAD_REQUEST;
-
-        JSONObject leaderJson = JSON.parseObject(leader);
-        leaderJson.put("userId", UserServiceApi.USER.get(utoken).getId());
-        UserServiceApi.LEADER.update(JSON.toJavaObject(leaderJson, LeaderDto.class));
-
-        return MomiaHttpResponse.SUCCESS;
-    }
-
-    @RequestMapping(value = "/delete", method = RequestMethod.POST)
-    public MomiaHttpResponse delete(@RequestParam String utoken) {
-        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-
-        UserServiceApi.LEADER.delete(utoken);
-        return MomiaHttpResponse.SUCCESS;
-    }
 }
