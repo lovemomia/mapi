@@ -1,6 +1,6 @@
 package cn.momia.mapi.api.v1.user;
 
-import cn.momia.api.base.BaseServiceApi;
+import cn.momia.api.base.SmsServiceApi;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.api.product.DealServiceApi;
 import cn.momia.api.user.dto.UserDto;
@@ -10,6 +10,7 @@ import cn.momia.mapi.api.v1.AbstractV1Api;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -20,11 +21,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthV1Api extends AbstractV1Api {
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthV1Api.class);
 
-    @RequestMapping(value = "/send", method = RequestMethod.POST)
-    public MomiaHttpResponse send(@RequestParam String mobile, @RequestParam(defaultValue = "login") String type)  {
-        if (MobileUtil.isInvalid(mobile)) return MomiaHttpResponse.FAILED("无效的手机号码");
+    @Autowired private SmsServiceApi smsServiceApi;
 
-        if (!BaseServiceApi.SMS.send(mobile, type)) return MomiaHttpResponse.FAILED("发送短信验证码失败");
+    @RequestMapping(value = "/send", method = RequestMethod.POST)
+    public MomiaHttpResponse send(@RequestParam String mobile)  {
+        if (MobileUtil.isInvalid(mobile)) return MomiaHttpResponse.FAILED("无效的手机号码");
+        if (!smsServiceApi.send(mobile)) return MomiaHttpResponse.FAILED("发送短信验证码失败");
+
         return MomiaHttpResponse.SUCCESS;
     }
 

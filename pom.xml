@@ -6,7 +6,7 @@
 
     <groupId>cn.momia</groupId>
     <artifactId>duola-mapi</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
     <packaging>jar</packaging>
 
     <name>Momia MAPI</name>
@@ -17,6 +17,11 @@
         <dependency>
             <groupId>cn.momia</groupId>
             <artifactId>duola-api-base</artifactId>
+            <version>1.1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>cn.momia</groupId>
+            <artifactId>duola-api-course</artifactId>
             <version>1.0.0</version>
         </dependency>
         <dependency>
@@ -54,7 +59,7 @@
         <dependency>
             <groupId>cn.momia</groupId>
             <artifactId>duola-common-webapp</artifactId>
-            <version>1.0.0</version>
+            <version>1.1.0</version>
         </dependency>
 
         <!-- Test -->
