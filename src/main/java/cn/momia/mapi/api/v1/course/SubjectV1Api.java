@@ -7,6 +7,9 @@ import cn.momia.api.course.CourseServiceApi;
 import cn.momia.api.course.SubjectServiceApi;
 import cn.momia.api.course.dto.CourseDto;
 import cn.momia.api.course.dto.SubjectDto;
+import cn.momia.api.course.dto.SubjectSkuDto;
+import cn.momia.api.user.UserServiceApi;
+import cn.momia.api.user.dto.ContactDto;
 import cn.momia.common.api.dto.PagedList;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.common.webapp.config.Configuration;
@@ -18,11 +21,14 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/v1/subject")
 public class SubjectV1Api extends AbstractV1Api {
     @Autowired private CourseServiceApi courseServiceApi;
     @Autowired private SubjectServiceApi subjectServiceApi;
+    @Autowired private UserServiceApi userServiceApi;
 
     @RequestMapping(method = RequestMethod.GET)
     public MomiaHttpResponse get(@RequestParam long id) {
@@ -54,5 +60,22 @@ public class SubjectV1Api extends AbstractV1Api {
         responseJson.put("courses", processPagedCourses(courses));
 
         return MomiaHttpResponse.SUCCESS(responseJson);
+    }
+
+    @RequestMapping(value = "/order", method = RequestMethod.GET)
+    public MomiaHttpResponse order(@RequestParam String utoken, @RequestParam long id) {
+        List<SubjectSkuDto> skus = subjectServiceApi.listSkus(id);
+        ContactDto contact = userServiceApi.getContact(utoken);
+
+        JSONObject responseJson = new JSONObject();
+        responseJson.put("skus", skus);
+        responseJson.put("contact", contact);
+
+        return MomiaHttpResponse.SUCCESS(responseJson);
+    }
+
+    @RequestMapping(value = "/order", method = RequestMethod.POST)
+    public MomiaHttpResponse order(@RequestParam String utoken, @RequestParam String order) {
+        return null;
     }
 }
