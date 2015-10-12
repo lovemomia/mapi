@@ -78,11 +78,7 @@ public class IndexV1Api extends AbstractV1Api {
     }
 
     private PagedList<CourseDto> getCourses(int cityId, int start) {
-        PagedList<CourseDto> pagedCourses = courseServiceApi.listRecommend(cityId, start, Configuration.getInt("PageSize.CourseRecommend"));
-        for (CourseDto course : pagedCourses.getList()) {
-            course.setCover(ImageFile.largeUrl(course.getCover()));
-        }
-
-        return pagedCourses;
+        PagedList<CourseDto> courses = courseServiceApi.listRecommend(cityId, start, Configuration.getInt("PageSize.CourseRecommend"));
+        return processPagedCourses(courses);
     }
 }
