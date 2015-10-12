@@ -1,11 +1,15 @@
 package cn.momia.mapi.api.v1.course;
 
+import cn.momia.api.base.MetaUtil;
+import cn.momia.api.base.dto.AgeRangeDto;
+import cn.momia.api.base.dto.SortTypeDto;
 import cn.momia.api.course.CourseServiceApi;
 import cn.momia.api.course.SubjectServiceApi;
 import cn.momia.api.course.dto.CourseDto;
 import cn.momia.api.course.dto.SubjectDto;
 import cn.momia.common.api.dto.PagedList;
 import cn.momia.common.api.http.MomiaHttpResponse;
+import cn.momia.common.webapp.config.Configuration;
 import cn.momia.mapi.api.v1.AbstractV1Api;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +32,26 @@ public class SubjectV1Api extends AbstractV1Api {
         JSONObject responseJson = new JSONObject();
         responseJson.put("subject", subject);
         responseJson.put("courses", courses);
+
+        return MomiaHttpResponse.SUCCESS(responseJson);
+    }
+
+    @RequestMapping(value = "/course", method = RequestMethod.GET)
+    public MomiaHttpResponse listCourses(@RequestParam long id,
+                                         @RequestParam(required = false, defaultValue = "0") int age,
+                                         @RequestParam(required = false, defaultValue = "0") int sort,
+                                         @RequestParam int start) {
+        AgeRangeDto ageRange = MetaUtil.getAgeRange(age);
+        SortTypeDto sortType = MetaUtil.getSortType(sort);
+
+        PagedList<CourseDto> courses = courseServiceApi.query(id, ageRange.getMin(), ageRange.getMax(), sortType.getId(), start, Configuration.getInt("PageSize.Course"));
+
+        JSONObject responseJson = new JSONObject();
+        responseJson.put("ages", MetaUtil.listAgeRanges());
+        responseJson.put("sorts", MetaUtil.listSortTypes());
+        responseJson.put("currentAge", ageRange.getId());
+        responseJson.put("currentSort", sortType.getId());
+        responseJson.put("courses", processPagedCourses(courses));
 
         return MomiaHttpResponse.SUCCESS(responseJson);
     }
