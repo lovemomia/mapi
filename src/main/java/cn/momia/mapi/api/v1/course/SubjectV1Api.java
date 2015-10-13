@@ -153,4 +153,9 @@ public class SubjectV1Api extends AbstractV1Api {
             return "<xml><return_code>" + return_code + "</return_code><return_msg>" + return_msg + "</return_msg></xml>";
         }
     }
+
+    @RequestMapping(value = "/payment/check", method = RequestMethod.POST)
+    public MomiaHttpResponse check(@RequestParam String utoken, @RequestParam(value = "oid") long orderId) {
+        return MomiaHttpResponse.SUCCESS(subjectServiceApi.checkPayment(utoken, orderId));
+    }
 }
