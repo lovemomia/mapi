@@ -13,8 +13,12 @@ public abstract class AbstractApi extends BaseController {
         return StringUtils.isBlank(request.getParameter("terminal")) ? ClientType.WAP : ClientType.APP;
     }
 
-    protected String buildLink(String uri, int clientType) {
-        if (ClientType.isApp(clientType)) return Configuration.getString("AppConf.Name") + "://web?url=" + URLEncoder.encode(buildFullUrl(uri));
+    protected String buildAction(String uri, int clientType) {
+        if (ClientType.isApp(clientType)) {
+            if (uri.startsWith("http")) return Configuration.getString("AppConf.Name") + "://web?url=" + URLEncoder.encode(uri);
+            return Configuration.getString("AppConf.Name") + "://" + URLEncoder.encode(uri);
+        }
+
         return buildFullUrl(uri);
     }
 

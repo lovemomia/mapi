@@ -51,7 +51,7 @@ public class IndexV1Api extends AbstractV1Api {
         List<BannerDto> banners = eventServiceApi.listBanners(cityId, Configuration.getInt("PageSize.Banner"));
         for (BannerDto banner : banners) {
             banner.setCover(ImageFile.url(banner.getCover()));
-            banner.setAction(buildLink(banner.getAction(), clientType));
+            banner.setAction(buildAction(banner.getAction(), clientType));
         }
 
         return banners;
@@ -61,7 +61,7 @@ public class IndexV1Api extends AbstractV1Api {
         List<Icon> icons = iconService.list(cityId);
         for (Icon icon : icons) {
             icon.setImg(ImageFile.url(icon.getImg()));
-            icon.setAction(buildLink(icon.getAction(), clientType));
+            icon.setAction(buildAction(icon.getAction(), clientType));
         }
 
         return icons;
@@ -71,7 +71,7 @@ public class IndexV1Api extends AbstractV1Api {
         List<EventDto> events = eventServiceApi.listEvents(cityId, Configuration.getInt("PageSize.Event"));
         for (EventDto event : events) {
             event.setImg(ImageFile.url(event.getImg()));
-            event.setAction(buildLink(event.getAction(), clientType));
+            event.setAction(buildAction(event.getAction(), clientType));
         }
 
         return events;
