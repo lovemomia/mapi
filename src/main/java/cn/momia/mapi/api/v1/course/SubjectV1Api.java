@@ -10,10 +10,12 @@ import cn.momia.api.course.dto.SubjectDto;
 import cn.momia.api.course.dto.SubjectSkuDto;
 import cn.momia.api.user.UserServiceApi;
 import cn.momia.api.user.dto.ContactDto;
+import cn.momia.api.user.dto.UserDto;
 import cn.momia.common.api.dto.PagedList;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.common.webapp.config.Configuration;
 import cn.momia.mapi.api.v1.AbstractV1Api;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -76,6 +78,10 @@ public class SubjectV1Api extends AbstractV1Api {
 
     @RequestMapping(value = "/order", method = RequestMethod.POST)
     public MomiaHttpResponse order(@RequestParam String utoken, @RequestParam String order) {
-        return null;
+        UserDto user = userServiceApi.get(utoken);
+        JSONObject orderJson = JSON.parseObject(order);
+        orderJson.put("userId", user.getId());
+
+        return MomiaHttpResponse.SUCCESS(subjectServiceApi.placeOrder(orderJson));
     }
 }
