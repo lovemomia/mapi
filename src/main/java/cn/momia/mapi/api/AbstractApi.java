@@ -16,7 +16,7 @@ public abstract class AbstractApi extends BaseController {
     protected String buildAction(String uri, int clientType) {
         if (ClientType.isApp(clientType)) {
             if (uri.startsWith("http")) return Configuration.getString("AppConf.Name") + "://web?url=" + URLEncoder.encode(uri);
-            return Configuration.getString("AppConf.Name") + "://" + URLEncoder.encode(uri);
+            return Configuration.getString("AppConf.Name") + "://" + uri;
         }
 
         return buildFullUrl(uri);
