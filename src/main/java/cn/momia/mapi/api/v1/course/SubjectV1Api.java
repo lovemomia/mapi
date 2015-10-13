@@ -84,4 +84,19 @@ public class SubjectV1Api extends AbstractV1Api {
 
         return MomiaHttpResponse.SUCCESS(subjectServiceApi.placeOrder(orderJson));
     }
+
+    @RequestMapping(value = "/payment/prepay/alipay", method = RequestMethod.POST)
+    public MomiaHttpResponse prepay(@RequestParam String utoken,
+                                    @RequestParam(value = "oid") long orderId,
+                                    @RequestParam(defaultValue = "app") String type) {
+        return MomiaHttpResponse.SUCCESS(subjectServiceApi.prepayAlipay(utoken, orderId, type));
+    }
+
+    @RequestMapping(value = "/payment/prepay/weixin", method = RequestMethod.POST)
+    public MomiaHttpResponse prepay(@RequestParam String utoken,
+                                    @RequestParam(value = "oid") long orderId,
+                                    @RequestParam(defaultValue = "app") final String type,
+                                    @RequestParam(required = false) String code) {
+        return MomiaHttpResponse.SUCCESS(subjectServiceApi.prepayWeixin(utoken, orderId, type, code));
+    }
 }
