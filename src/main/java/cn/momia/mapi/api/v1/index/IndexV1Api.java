@@ -70,7 +70,7 @@ public class IndexV1Api extends AbstractV1Api {
     private List<EventDto> getEvents(int cityId, int clientType) {
         List<EventDto> events = eventServiceApi.listEvents(cityId, Configuration.getInt("PageSize.Event"));
         for (EventDto event : events) {
-            event.setImg(ImageFile.smallUrl(event.getImg()));
+            event.setImg(ImageFile.url(event.getImg()));
             event.setAction(buildLink(event.getAction(), clientType));
         }
 
