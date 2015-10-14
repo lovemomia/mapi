@@ -1,7 +1,9 @@
 package cn.momia.mapi.api.v1.index;
 
 import cn.momia.api.course.CourseServiceApi;
+import cn.momia.api.course.SubjectServiceApi;
 import cn.momia.api.course.dto.CourseDto;
+import cn.momia.api.course.dto.SubjectDto;
 import cn.momia.api.event.EventServiceApi;
 import cn.momia.api.event.dto.BannerDto;
 import cn.momia.api.event.dto.EventDto;
@@ -24,7 +26,7 @@ import java.util.List;
 @RequestMapping("/v1/index")
 public class IndexV1Api extends AbstractV1Api {
     @Autowired private EventServiceApi eventServiceApi;
-    @Autowired private CourseServiceApi courseServiceApi;
+    @Autowired private SubjectServiceApi subjectServiceApi;
 
     @Autowired private IconService iconService;
 
@@ -42,7 +44,7 @@ public class IndexV1Api extends AbstractV1Api {
             indexJson.put("icons", getIcons(cityId, clientType));
             indexJson.put("events", getEvents(cityId, clientType));
         }
-        indexJson.put("courses", getCourses(cityId, start));
+        indexJson.put("subjects", getFreeSubjects(cityId, start));
 
         return MomiaHttpResponse.SUCCESS(indexJson);
     }
@@ -77,8 +79,8 @@ public class IndexV1Api extends AbstractV1Api {
         return events;
     }
 
-    private PagedList<CourseDto> getCourses(int cityId, int start) {
-        PagedList<CourseDto> courses = courseServiceApi.listRecommend(cityId, start, Configuration.getInt("PageSize.CourseRecommend"));
-        return processPagedCourses(courses);
+    private PagedList<SubjectDto> getFreeSubjects(int cityId, int start) {
+        PagedList<SubjectDto> subjects = subjectServiceApi.listFree(cityId, start, Configuration.getInt("PageSize.FreeSubject"));
+        return processPagedSubjects(subjects);
     }
 }

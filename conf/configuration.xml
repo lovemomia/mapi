@@ -35,7 +35,7 @@
     <PageSize>
         <Banner>3</Banner>
         <Event>4</Event>
-        <CourseRecommend>20</CourseRecommend>
+        <FreeSubject>20</FreeSubject>
         <Course>20</Course>
         <Order>20</Order>
 

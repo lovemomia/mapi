@@ -37,6 +37,14 @@ public class AbstractV1Api extends AbstractApi {
         }
     }
 
+    protected PagedList<SubjectDto> processPagedSubjects(PagedList<SubjectDto> subjects) {
+        for (SubjectDto subject : subjects.getList()) {
+            subject.setCover(ImageFile.largeUrl(subject.getCover()));
+        }
+
+        return subjects;
+    }
+
     protected PagedList<CourseDto> processPagedCourses(PagedList<CourseDto> courses) {
         for (CourseDto course : courses.getList()) {
             processCourse(course);
