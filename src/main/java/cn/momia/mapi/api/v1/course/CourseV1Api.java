@@ -28,4 +28,14 @@ public class CourseV1Api extends AbstractV1Api {
     public MomiaHttpResponse listWeekSkus(@RequestParam long id, @RequestParam int month) {
         return MomiaHttpResponse.SUCCESS(courseServiceApi.listMonthSkus(id, month));
     }
+
+    @RequestMapping(value = "/sku/more", method = RequestMethod.GET)
+    public MomiaHttpResponse listMoreSkus(@RequestParam long id, @RequestParam String date, @RequestParam String excludes) {
+        return MomiaHttpResponse.SUCCESS(courseServiceApi.listMoreSkus(id, date, excludes));
+    }
+//
+//    @RequestMapping(value = "/booking", method = RequestMethod.POST)
+//    public MomiaHttpResponse booking(@RequestParam String utoken, @RequestParam() String order) {
+//        return MomiaHttpResponse.SUCCESS(courseServiceApi.booking());
+//    }
 }
