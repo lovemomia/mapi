@@ -37,6 +37,7 @@
         <Event>4</Event>
         <CourseRecommend>20</CourseRecommend>
         <Course>20</Course>
+        <Order>20</Order>
 
         <Product>20</Product>
         <ProductDetailComment>3</ProductDetailComment>
@@ -45,7 +46,6 @@
         <PlaymateSku>20</PlaymateSku>
         <Coupon>20</Coupon>
         <Favorite>20</Favorite>
-        <Order>20</Order>
         <Feed>
             <List>20</List>
             <Detail>

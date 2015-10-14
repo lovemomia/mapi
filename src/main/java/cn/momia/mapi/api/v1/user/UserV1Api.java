@@ -1,8 +1,12 @@
 package cn.momia.mapi.api.v1.user;
 
+import cn.momia.api.course.SubjectServiceApi;
+import cn.momia.api.course.dto.OrderDto;
+import cn.momia.common.api.dto.PagedList;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.api.user.UserServiceApi;
 import cn.momia.common.util.SexUtil;
+import cn.momia.common.webapp.config.Configuration;
 import cn.momia.mapi.api.v1.AbstractV1Api;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +21,7 @@ import java.util.Date;
 @RestController
 @RequestMapping("/v1/user")
 public class UserV1Api extends AbstractV1Api {
+    @Autowired private SubjectServiceApi subjectServiceApi;
     @Autowired private UserServiceApi userServiceApi;
 
     @RequestMapping(method = RequestMethod.GET)
@@ -87,5 +92,14 @@ public class UserV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(address)) return MomiaHttpResponse.FAILED("地址不能为空");
 
         return MomiaHttpResponse.SUCCESS(processUser(userServiceApi.updateAddress(utoken, address)));
+    }
+
+    @RequestMapping(value = "/order", method = RequestMethod.GET)
+    public MomiaHttpResponse listOrders(@RequestParam String utoken, @RequestParam int status, @RequestParam int start) {
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (status <= 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
+
+        PagedList<OrderDto> orders = processPagedOrders(subjectServiceApi.listOrders(utoken, status, start, Configuration.getInt("PageSize.Order")));
+        return MomiaHttpResponse.SUCCESS(orders);
     }
 }
