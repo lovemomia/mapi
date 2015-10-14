@@ -102,4 +102,13 @@ public class UserV1Api extends AbstractV1Api {
         PagedList<OrderDto> orders = processPagedOrders(subjectServiceApi.listOrders(utoken, status, start, Configuration.getInt("PageSize.Order")));
         return MomiaHttpResponse.SUCCESS(orders);
     }
+
+    @RequestMapping(value = "/order/bookable", method = RequestMethod.GET)
+    public MomiaHttpResponse listBookableOrders(@RequestParam String utoken, @RequestParam int start) {
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (start < 0) return MomiaHttpResponse.BAD_REQUEST;
+
+        PagedList<OrderDto> orders = processPagedOrders(subjectServiceApi.listBookableOrders(utoken, start, Configuration.getInt("PageSize.Order")));
+        return MomiaHttpResponse.SUCCESS(orders);
+    }
 }
