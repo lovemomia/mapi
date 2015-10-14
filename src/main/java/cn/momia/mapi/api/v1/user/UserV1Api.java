@@ -1,7 +1,9 @@
 package cn.momia.mapi.api.v1.user;
 
+import cn.momia.api.course.CourseServiceApi;
 import cn.momia.api.course.SubjectServiceApi;
 import cn.momia.api.course.dto.OrderDto;
+import cn.momia.api.user.dto.UserDto;
 import cn.momia.common.api.dto.PagedList;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.api.user.UserServiceApi;
@@ -21,6 +23,7 @@ import java.util.Date;
 @RestController
 @RequestMapping("/v1/user")
 public class UserV1Api extends AbstractV1Api {
+    @Autowired private CourseServiceApi courseServiceApi;
     @Autowired private SubjectServiceApi subjectServiceApi;
     @Autowired private UserServiceApi userServiceApi;
 
@@ -110,5 +113,17 @@ public class UserV1Api extends AbstractV1Api {
 
         PagedList<OrderDto> orders = processPagedOrders(subjectServiceApi.listBookableOrders(utoken, start, Configuration.getInt("PageSize.Order")));
         return MomiaHttpResponse.SUCCESS(orders);
+    }
+
+    @RequestMapping(value = "/course.notfinished", method = RequestMethod.GET)
+    public MomiaHttpResponse listNotFinished(@RequestParam String utoken) {
+        UserDto user = userServiceApi.get(utoken);
+        return MomiaHttpResponse.SUCCESS(courseServiceApi.queryNotFinishedByUser(user.getId()));
+    }
+
+    @RequestMapping(value = "/course/finished", method = RequestMethod.GET)
+    public MomiaHttpResponse listFinished(@RequestParam String utoken) {
+        UserDto user = userServiceApi.get(utoken);
+        return MomiaHttpResponse.SUCCESS(courseServiceApi.queryFinishedByUser(user.getId()));
     }
 }
