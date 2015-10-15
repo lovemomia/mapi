@@ -4,6 +4,7 @@ import cn.momia.api.course.dto.CourseBookDto;
 import cn.momia.api.course.dto.CourseDto;
 import cn.momia.api.course.dto.OrderDto;
 import cn.momia.api.course.dto.SubjectDto;
+import cn.momia.api.user.dto.UserChildDto;
 import cn.momia.common.api.dto.PagedList;
 import cn.momia.image.api.ImageFile;
 import cn.momia.mapi.api.AbstractApi;
@@ -98,6 +99,18 @@ public class AbstractV1Api extends AbstractApi {
 
     protected UserDto processUser(UserDto user) {
         user.setAvatar(ImageFile.smallUrl(user.getAvatar()));
+        processChildren(user.getChildren());
+
         return user;
+    }
+
+    protected List<UserChildDto> processChildren(List<UserChildDto> children) {
+        for (UserChildDto child : children) processChild(child);
+        return children;
+    }
+
+    private UserChildDto processChild(UserChildDto child) {
+        child.setAvatar(ImageFile.url(child.getAvatar()));
+        return child;
     }
 }

@@ -72,7 +72,7 @@ public class SubjectV1Api extends AbstractV1Api {
         return MomiaHttpResponse.SUCCESS(responseJson);
     }
 
-    @RequestMapping(value = "/order", method = RequestMethod.GET)
+    @RequestMapping(value = "/sku", method = RequestMethod.GET)
     public MomiaHttpResponse order(@RequestParam String utoken, @RequestParam long id) {
         List<SubjectSkuDto> skus = subjectServiceApi.listSkus(id);
         ContactDto contact = userServiceApi.getContact(utoken);
