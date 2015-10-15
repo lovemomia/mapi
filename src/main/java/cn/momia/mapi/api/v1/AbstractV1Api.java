@@ -109,7 +109,7 @@ public class AbstractV1Api extends AbstractApi {
         return children;
     }
 
-    private UserChildDto processChild(UserChildDto child) {
+    protected UserChildDto processChild(UserChildDto child) {
         child.setAvatar(ImageFile.url(child.getAvatar()));
         return child;
     }
