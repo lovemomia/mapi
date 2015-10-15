@@ -43,7 +43,7 @@ public class SubjectV1Api extends AbstractV1Api {
     @RequestMapping(method = RequestMethod.GET)
     public MomiaHttpResponse get(@RequestParam long id) {
         SubjectDto subject = processSubject(subjectServiceApi.get(id));
-        PagedList<CourseDto> courses = processPagedCourses(courseServiceApi.listBySubject(id, 0, 2));
+        PagedList<CourseDto> courses = processPagedCourses(courseServiceApi.query(id, 0, 2));
 
         JSONObject responseJson = new JSONObject();
         responseJson.put("subject", subject);
