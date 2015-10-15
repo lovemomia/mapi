@@ -79,6 +79,7 @@ public class AbstractV1Api extends AbstractApi {
     }
 
     protected SubjectDto processSubject(SubjectDto subject) {
+        subject.setCover(ImageFile.largeUrl(subject.getCover()));
         List<String> imgs = subject.getImgs();
         for (int i = 0; i < imgs.size(); i++) {
             imgs.set(i, ImageFile.largeUrl(imgs.get(i)));
