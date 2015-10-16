@@ -17,6 +17,7 @@ import cn.momia.common.util.XmlUtil;
 import cn.momia.common.webapp.config.Configuration;
 import cn.momia.mapi.api.v1.AbstractV1Api;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -28,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -86,9 +88,19 @@ public class SubjectV1Api extends AbstractV1Api {
 
     @RequestMapping(value = "/order", method = RequestMethod.POST)
     public MomiaHttpResponse order(@RequestParam String utoken, @RequestParam String order) {
-        UserDto user = userServiceApi.get(utoken);
         JSONObject orderJson = JSON.parseObject(order);
+
+        UserDto user = userServiceApi.get(utoken);
         orderJson.put("userId", user.getId());
+
+        Map<Long, Integer> counts = new HashMap<Long, Integer>();
+        JSONArray skusJson = orderJson.getJSONArray("skus");
+        for (int i = 0; i < skusJson.size(); i++) {
+            JSONObject skuJson = skusJson.getJSONObject(i);
+            orderJson.put("subjectId", skuJson.getLong("subjectId"));
+            counts.put(skuJson.getLong("id"), skuJson.getInteger("count"));
+        }
+        orderJson.put("counts", counts);
 
         return MomiaHttpResponse.SUCCESS(subjectServiceApi.placeOrder(orderJson));
     }
