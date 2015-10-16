@@ -117,12 +117,16 @@ public class UserV1Api extends AbstractV1Api {
 
     @RequestMapping(value = "/course.notfinished", method = RequestMethod.GET)
     public MomiaHttpResponse listNotFinished(@RequestParam String utoken) {
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+
         UserDto user = userServiceApi.get(utoken);
         return MomiaHttpResponse.SUCCESS(courseServiceApi.queryNotFinishedByUser(user.getId()));
     }
 
     @RequestMapping(value = "/course/finished", method = RequestMethod.GET)
     public MomiaHttpResponse listFinished(@RequestParam String utoken) {
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+
         UserDto user = userServiceApi.get(utoken);
         return MomiaHttpResponse.SUCCESS(courseServiceApi.queryFinishedByUser(user.getId()));
     }

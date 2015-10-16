@@ -4,6 +4,7 @@ import cn.momia.api.course.dto.CourseBookDto;
 import cn.momia.api.course.dto.CourseDto;
 import cn.momia.api.course.dto.OrderDto;
 import cn.momia.api.course.dto.SubjectDto;
+import cn.momia.api.course.dto.TeacherDto;
 import cn.momia.api.user.dto.UserChildDto;
 import cn.momia.common.api.dto.PagedList;
 import cn.momia.image.api.ImageFile;
@@ -52,6 +53,16 @@ public class AbstractV1Api extends AbstractApi {
         return subjects;
     }
 
+    protected SubjectDto processSubject(SubjectDto subject) {
+        subject.setCover(ImageFile.largeUrl(subject.getCover()));
+        List<String> imgs = subject.getImgs();
+        for (int i = 0; i < imgs.size(); i++) {
+            imgs.set(i, ImageFile.largeUrl(imgs.get(i)));
+        }
+
+        return subject;
+    }
+
     protected PagedList<CourseDto> processPagedCourses(PagedList<CourseDto> courses) {
         for (CourseDto course : courses.getList()) {
             processCourse(course);
@@ -85,14 +96,12 @@ public class AbstractV1Api extends AbstractApi {
         return book;
     }
 
-    protected SubjectDto processSubject(SubjectDto subject) {
-        subject.setCover(ImageFile.largeUrl(subject.getCover()));
-        List<String> imgs = subject.getImgs();
-        for (int i = 0; i < imgs.size(); i++) {
-            imgs.set(i, ImageFile.largeUrl(imgs.get(i)));
+    protected List<TeacherDto> processTeachers(List<TeacherDto> teachers) {
+        for (TeacherDto teacher : teachers) {
+            teacher.setAvatar(ImageFile.smallUrl(teacher.getAvatar()));
         }
 
-        return subject;
+        return teachers;
     }
 
     protected PagedList<OrderDto> processPagedOrders(PagedList<OrderDto> orders) {
@@ -111,12 +120,15 @@ public class AbstractV1Api extends AbstractApi {
     }
 
     protected List<UserChildDto> processChildren(List<UserChildDto> children) {
-        for (UserChildDto child : children) processChild(child);
+        for (UserChildDto child : children) {
+            processChild(child);
+        }
+
         return children;
     }
 
     protected UserChildDto processChild(UserChildDto child) {
-        child.setAvatar(ImageFile.url(child.getAvatar()));
+        child.setAvatar(ImageFile.smallUrl(child.getAvatar()));
         return child;
     }
 }

@@ -5,6 +5,7 @@ import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.common.util.XmlUtil;
 import cn.momia.mapi.api.v1.AbstractV1Api;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,9 @@ public class PaymentV1Api extends AbstractV1Api {
     public MomiaHttpResponse prepayAlipay(@RequestParam String utoken,
                                           @RequestParam(value = "oid") long orderId,
                                           @RequestParam(defaultValue = "app") String type) {
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (orderId <= 0 || StringUtils.isBlank(type)) return MomiaHttpResponse.BAD_REQUEST;
+
         return MomiaHttpResponse.SUCCESS(paymentServiceApi.prepayAlipay(utoken, orderId, type));
     }
 
@@ -35,6 +39,9 @@ public class PaymentV1Api extends AbstractV1Api {
                                           @RequestParam(value = "oid") long orderId,
                                           @RequestParam(defaultValue = "app") final String type,
                                           @RequestParam(required = false) String code) {
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (orderId <= 0 || StringUtils.isBlank(type)) return MomiaHttpResponse.BAD_REQUEST;
+
         return MomiaHttpResponse.SUCCESS(paymentServiceApi.prepayWeixin(utoken, orderId, type, code));
     }
 
@@ -86,6 +93,9 @@ public class PaymentV1Api extends AbstractV1Api {
 
     @RequestMapping(value = "/check", method = RequestMethod.POST)
     public MomiaHttpResponse check(@RequestParam String utoken, @RequestParam(value = "oid") long orderId) {
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (orderId <= 0) return MomiaHttpResponse.BAD_REQUEST;
+
         return MomiaHttpResponse.SUCCESS(paymentServiceApi.checkPayment(utoken, orderId));
     }
 }

@@ -18,6 +18,7 @@ import cn.momia.mapi.api.v1.AbstractV1Api;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -37,12 +38,14 @@ public class SubjectV1Api extends AbstractV1Api {
 
     @RequestMapping(method = RequestMethod.GET)
     public MomiaHttpResponse get(@RequestParam long id) {
+        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
+
         SubjectDto subject = processSubject(subjectServiceApi.get(id));
         PagedList<CourseDto> courses = processPagedCourses(courseServiceApi.query(id, 0, 2));
 
         JSONObject responseJson = new JSONObject();
         responseJson.put("subject", subject);
-        responseJson.put("courses", courses);
+        if (courses.getTotalCount() > 0) responseJson.put("courses", courses);
 
         return MomiaHttpResponse.SUCCESS(responseJson);
     }
@@ -52,6 +55,8 @@ public class SubjectV1Api extends AbstractV1Api {
                                          @RequestParam(required = false, defaultValue = "0") int age,
                                          @RequestParam(required = false, defaultValue = "0") int sort,
                                          @RequestParam int start) {
+        if (id <= 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
+
         AgeRangeDto ageRange = MetaUtil.getAgeRange(age);
         SortTypeDto sortType = MetaUtil.getSortType(sort);
 
@@ -69,7 +74,10 @@ public class SubjectV1Api extends AbstractV1Api {
 
     @RequestMapping(value = "/sku", method = RequestMethod.GET)
     public MomiaHttpResponse order(@RequestParam String utoken, @RequestParam long id) {
-        List<SubjectSkuDto> skus = subjectServiceApi.listSkus(id);
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
+
+        List<SubjectSkuDto> skus = subjectServiceApi.querySkus(id);
         ContactDto contact = userServiceApi.getContact(utoken);
 
         JSONObject responseJson = new JSONObject();
@@ -81,6 +89,9 @@ public class SubjectV1Api extends AbstractV1Api {
 
     @RequestMapping(value = "/order", method = RequestMethod.POST)
     public MomiaHttpResponse order(@RequestParam String utoken, @RequestParam String order) {
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (StringUtils.isBlank(order)) return MomiaHttpResponse.BAD_REQUEST;
+
         JSONObject orderJson = JSON.parseObject(order);
 
         UserDto user = userServiceApi.get(utoken);

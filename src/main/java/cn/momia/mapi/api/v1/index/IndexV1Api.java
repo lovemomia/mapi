@@ -1,8 +1,6 @@
 package cn.momia.mapi.api.v1.index;
 
-import cn.momia.api.course.CourseServiceApi;
 import cn.momia.api.course.SubjectServiceApi;
-import cn.momia.api.course.dto.CourseDto;
 import cn.momia.api.course.dto.SubjectDto;
 import cn.momia.api.event.EventServiceApi;
 import cn.momia.api.event.dto.BannerDto;

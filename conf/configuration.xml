@@ -20,11 +20,11 @@
     </Service>
 
     <Database>
-        <Tongqu>
+        <SogoKids>
             <JdbcUrl><![CDATA[jdbc:mysql://120.55.102.12:3306/sogokids?characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull]]></JdbcUrl>
             <Username>sogokids</Username>
             <Password>SogoKids</Password>
-        </Tongqu>
+        </SogoKids>
     </Database>
 
     <AppConf>
@@ -37,26 +37,8 @@
         <Event>4</Event>
         <FreeSubject>20</FreeSubject>
         <Course>20</Course>
+        <CourseTeacher>4</CourseTeacher>
+        <Teacher>20</Teacher>
         <Order>20</Order>
-
-        <Product>20</Product>
-        <ProductDetailComment>3</ProductDetailComment>
-        <ProductComment>20</ProductComment>
-        <ProductCustomer>6</ProductCustomer>
-        <PlaymateSku>20</PlaymateSku>
-        <Coupon>20</Coupon>
-        <Favorite>20</Favorite>
-        <Feed>
-            <List>20</List>
-            <Detail>
-                <Star>5</Star>
-                <Comment>3</Comment>
-            </Detail>
-            <Comment>20</Comment>
-            <Topic>20</Topic>
-        </Feed>
-        <Leader>
-            <Product>20</Product>
-        </Leader>
     </PageSize>
 </Configuration>
