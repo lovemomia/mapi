@@ -14,28 +14,34 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AbstractV1Api extends AbstractApi {
-    private void processLargeImgs(List<String> imgs) {
-        if (imgs == null) return;
+    protected List<String> processLargeImgs(List<String> imgs) {
+        if (imgs == null) return imgs;
 
         for (int i = 0; i < imgs.size(); i++) {
             imgs.set(i, ImageFile.largeUrl(imgs.get(i)));
         }
+
+        return imgs;
     }
 
-    private void processMiddleImgs(List<String> imgs) {
-        if (imgs == null) return;
+    protected List<String> processMiddleImgs(List<String> imgs) {
+        if (imgs == null) return imgs;
 
         for (int i = 0; i < imgs.size(); i++) {
             imgs.set(i, ImageFile.middleUrl(imgs.get(i)));
         }
+
+        return imgs;
     }
 
-    private void processSmallImgs(List<String> imgs) {
-        if (imgs == null) return;
+    protected List<String> processSmallImgs(List<String> imgs) {
+        if (imgs == null) return imgs;
 
         for (int i = 0; i < imgs.size(); i++) {
             imgs.set(i, ImageFile.smallUrl(imgs.get(i)));
         }
+
+        return imgs;
     }
 
     protected PagedList<SubjectDto> processPagedSubjects(PagedList<SubjectDto> subjects) {
