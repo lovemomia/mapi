@@ -55,7 +55,7 @@ public class ValidationFilter implements Filter {
 
     private boolean needParamsValidation(HttpServletRequest request) {
         String uri = request.getRequestURI();
-        return !(uri.startsWith("/subject/payment/callback") || uri.startsWith("/m/"));
+        return !(uri.startsWith("/payment/callback") || uri.startsWith("/m/"));
     }
 
     private boolean isParamMissing(HttpServletRequest httpRequest) {
