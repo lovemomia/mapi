@@ -5,6 +5,7 @@ import cn.momia.api.course.dto.CourseDto;
 import cn.momia.api.course.dto.TeacherDto;
 import cn.momia.api.user.UserServiceApi;
 import cn.momia.api.user.dto.UserDto;
+import cn.momia.common.api.dto.PagedList;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.common.webapp.config.Configuration;
 import cn.momia.mapi.api.v1.AbstractV1Api;
@@ -36,10 +37,10 @@ public class CourseV1Api extends AbstractV1Api {
             courseJson.put("favored", courseServiceApi.isFavored(user.getId(), id));
         }
 
-        List<TeacherDto> teachers = processTeachers(courseServiceApi.queryTeachers(id, 0, Configuration.getInt("PageSize.CourseTeacher")));
+        List<TeacherDto> teachers = processTeachers(courseServiceApi.queryTeachers(id, 0, Configuration.getInt("PageSize.CourseTeacher")).getList());
         if (!teachers.isEmpty()) courseJson.put("teachers", teachers);
 
-        return MomiaHttpResponse.SUCCESS(course);
+        return MomiaHttpResponse.SUCCESS(courseJson);
     }
 
     @RequestMapping(value = "/sku/week", method = RequestMethod.GET)
@@ -61,9 +62,23 @@ public class CourseV1Api extends AbstractV1Api {
     }
 
     @RequestMapping(value = "/book", method = RequestMethod.GET)
-    public MomiaHttpResponse book(@RequestParam long id) {
-        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
-        return MomiaHttpResponse.SUCCESS(processLargeImgs(courseServiceApi.book(id)));
+    public MomiaHttpResponse book(@RequestParam long id, @RequestParam int start) {
+        if (id <= 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
+
+        PagedList<String> book = courseServiceApi.book(id, start, Configuration.getInt("PageSize.BookImg"));
+        processLargeImgs(book.getList());
+
+        return MomiaHttpResponse.SUCCESS(book);
+    }
+
+    @RequestMapping(value = "/teacher", method = RequestMethod.GET)
+    public MomiaHttpResponse teacher(@RequestParam long id, @RequestParam int start) {
+        if (id <= 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
+
+        PagedList<TeacherDto> teachers = courseServiceApi.queryTeachers(id, start, Configuration.getInt("PageSize.Teacher"));
+        processTeachers(teachers.getList());
+
+        return MomiaHttpResponse.SUCCESS(teachers);
     }
 
     @RequestMapping(value = "/favor", method = RequestMethod.POST)

@@ -38,6 +38,7 @@
         <FreeSubject>20</FreeSubject>
         <Course>20</Course>
         <CourseTeacher>4</CourseTeacher>
+        <BookImg>20</BookImg>
         <Teacher>20</Teacher>
         <Order>20</Order>
     </PageSize>
