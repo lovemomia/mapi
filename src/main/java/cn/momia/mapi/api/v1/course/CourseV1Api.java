@@ -55,12 +55,6 @@ public class CourseV1Api extends AbstractV1Api {
         return MomiaHttpResponse.SUCCESS(courseServiceApi.listMonthSkus(id, month));
     }
 
-    @RequestMapping(value = "/sku/more", method = RequestMethod.GET)
-    public MomiaHttpResponse listMoreSkus(@RequestParam long id, @RequestParam String date, @RequestParam String excludes) {
-        if (id <= 0 || StringUtils.isBlank(date) || StringUtils.isBlank(excludes)) return MomiaHttpResponse.BAD_REQUEST;
-        return MomiaHttpResponse.SUCCESS(courseServiceApi.listMoreSkus(id, date, excludes));
-    }
-
     @RequestMapping(value = "/book", method = RequestMethod.GET)
     public MomiaHttpResponse book(@RequestParam long id, @RequestParam int start) {
         if (id <= 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;

@@ -2,6 +2,7 @@ package cn.momia.mapi.api.v1.user;
 
 import cn.momia.api.course.CourseServiceApi;
 import cn.momia.api.course.SubjectServiceApi;
+import cn.momia.api.course.dto.OrderSkuDto;
 import cn.momia.api.course.dto.OrderDto;
 import cn.momia.api.user.dto.UserDto;
 import cn.momia.common.api.dto.PagedList;
@@ -106,28 +107,28 @@ public class UserV1Api extends AbstractV1Api {
         return MomiaHttpResponse.SUCCESS(orders);
     }
 
-    @RequestMapping(value = "/order/bookable", method = RequestMethod.GET)
+    @RequestMapping(value = "/bookable", method = RequestMethod.GET)
     public MomiaHttpResponse listBookableOrders(@RequestParam String utoken, @RequestParam int start) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        PagedList<OrderDto> orders = processPagedOrders(subjectServiceApi.listBookableOrders(utoken, start, Configuration.getInt("PageSize.Order")));
-        return MomiaHttpResponse.SUCCESS(orders);
+        PagedList<OrderSkuDto> subjects = processPagedOrderSkus(subjectServiceApi.listBookableOrders(utoken, start, Configuration.getInt("PageSize.Subject")));
+        return MomiaHttpResponse.SUCCESS(subjects);
     }
 
-    @RequestMapping(value = "/course.notfinished", method = RequestMethod.GET)
-    public MomiaHttpResponse listNotFinished(@RequestParam String utoken) {
+    @RequestMapping(value = "/course/notfinished", method = RequestMethod.GET)
+    public MomiaHttpResponse listNotFinished(@RequestParam String utoken, @RequestParam int start) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
 
         UserDto user = userServiceApi.get(utoken);
-        return MomiaHttpResponse.SUCCESS(courseServiceApi.queryNotFinishedByUser(user.getId()));
+        return MomiaHttpResponse.SUCCESS(courseServiceApi.queryNotFinishedByUser(user.getId(), start, Configuration.getInt("PageSize.Course")));
     }
 
     @RequestMapping(value = "/course/finished", method = RequestMethod.GET)
-    public MomiaHttpResponse listFinished(@RequestParam String utoken) {
+    public MomiaHttpResponse listFinished(@RequestParam String utoken, @RequestParam int start) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
 
         UserDto user = userServiceApi.get(utoken);
-        return MomiaHttpResponse.SUCCESS(courseServiceApi.queryFinishedByUser(user.getId()));
+        return MomiaHttpResponse.SUCCESS(courseServiceApi.queryFinishedByUser(user.getId(), start, Configuration.getInt("PageSize.Course")));
     }
 }

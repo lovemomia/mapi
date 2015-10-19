@@ -1,5 +1,6 @@
 package cn.momia.mapi.api.v1;
 
+import cn.momia.api.course.dto.OrderSkuDto;
 import cn.momia.api.course.dto.CourseBookDto;
 import cn.momia.api.course.dto.CourseDto;
 import cn.momia.api.course.dto.OrderDto;
@@ -61,6 +62,14 @@ public class AbstractV1Api extends AbstractApi {
         }
 
         return subject;
+    }
+
+    protected PagedList<OrderSkuDto> processPagedOrderSkus(PagedList<OrderSkuDto> subjects) {
+        for (OrderSkuDto subject : subjects.getList()) {
+            subject.setCover(ImageFile.largeUrl(subject.getCover()));
+        }
+
+        return subjects;
     }
 
     protected PagedList<CourseDto> processPagedCourses(PagedList<CourseDto> courses) {

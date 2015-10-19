@@ -41,5 +41,6 @@
         <BookImg>20</BookImg>
         <Teacher>20</Teacher>
         <Order>20</Order>
+        <Subject>20</Subject>
     </PageSize>
 </Configuration>
