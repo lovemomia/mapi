@@ -6,7 +6,6 @@ import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.common.api.util.CastUtil;
 import cn.momia.common.util.SexUtil;
 import cn.momia.mapi.api.v1.AbstractV1Api;
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
