@@ -3,6 +3,7 @@ package cn.momia.mapi.api.v1.user;
 import cn.momia.api.user.UserServiceApi;
 import cn.momia.api.user.dto.UserChildDto;
 import cn.momia.common.api.http.MomiaHttpResponse;
+import cn.momia.common.api.util.CastUtil;
 import cn.momia.common.util.SexUtil;
 import cn.momia.mapi.api.v1.AbstractV1Api;
 import com.alibaba.fastjson.JSON;
@@ -33,7 +34,7 @@ public class ChildV1Api extends AbstractV1Api {
         List<UserChildDto> childDtos = new ArrayList<UserChildDto>();
         JSONArray childrenJson = JSONArray.parseArray(children);
         for (int i = 0; i < childrenJson.size(); i++) {
-            UserChildDto childDto = JSON.toJavaObject(childrenJson.getJSONObject(i), UserChildDto.class);
+            UserChildDto childDto = CastUtil.toObject(childrenJson.getJSONObject(i), UserChildDto.class);
             childDto.setUserId(userId);
             childDtos.add(childDto);
         }
