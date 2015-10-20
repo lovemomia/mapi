@@ -138,6 +138,17 @@ public class CourseV1Api extends AbstractV1Api {
         return MomiaHttpResponse.SUCCESS(courseServiceApi.listMonthSkus(id, month));
     }
 
+    @RequestMapping(value = "/booking", method = RequestMethod.POST)
+    public MomiaHttpResponse booking(@RequestParam String utoken,
+                                     @RequestParam(value = "pkgid") long packageId,
+                                     @RequestParam(value = "sid") long skuId) {
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (packageId <= 0 || skuId <= 0) return MomiaHttpResponse.BAD_REQUEST;
+
+        if (!courseServiceApi.booking(utoken, packageId, skuId)) return MomiaHttpResponse.FAILED("选课失败");
+        return MomiaHttpResponse.SUCCESS;
+    }
+
     @RequestMapping(value = "/favor", method = RequestMethod.POST)
     public MomiaHttpResponse favor(@RequestParam String utoken, @RequestParam long id) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
