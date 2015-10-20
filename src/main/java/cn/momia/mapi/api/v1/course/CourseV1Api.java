@@ -79,6 +79,12 @@ public class CourseV1Api extends AbstractV1Api {
         return teachers;
     }
 
+    @RequestMapping(value = "/detail", method = RequestMethod.GET)
+    public MomiaHttpResponse detail(@RequestParam long id) {
+        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        return MomiaHttpResponse.SUCCESS(courseServiceApi.detail(id));
+    }
+
     @RequestMapping(value = "/sku/week", method = RequestMethod.GET)
     public MomiaHttpResponse listWeekSkus(@RequestParam long id) {
         if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
