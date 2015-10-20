@@ -1,6 +1,7 @@
 package cn.momia.mapi.api.v1.course;
 
 import cn.momia.api.course.CourseServiceApi;
+import cn.momia.api.course.dto.CourseBookDto;
 import cn.momia.api.course.dto.CourseDto;
 import cn.momia.api.course.dto.TeacherDto;
 import cn.momia.api.user.UserServiceApi;
@@ -8,6 +9,7 @@ import cn.momia.api.user.dto.UserDto;
 import cn.momia.common.api.dto.PagedList;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.common.webapp.config.Configuration;
+import cn.momia.image.api.ImageFile;
 import cn.momia.mapi.api.v1.AbstractV1Api;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -41,6 +44,39 @@ public class CourseV1Api extends AbstractV1Api {
         if (!teachers.isEmpty()) courseJson.put("teachers", teachers);
 
         return MomiaHttpResponse.SUCCESS(courseJson);
+    }
+
+    protected CourseDto processCourse(CourseDto course) {
+        course.setCover(ImageFile.largeUrl(course.getCover()));
+
+        processLargeImgs(course.getImgs());
+        processCourseBook(course.getBook());
+
+        return course;
+    }
+
+    private CourseBookDto processCourseBook(CourseBookDto book) {
+        if (book == null) return null;
+
+        List<String> imgs = new ArrayList<String>();
+        List<String> largeImgs = new ArrayList<String>();
+        for (String img : book.getImgs()) {
+            imgs.add(ImageFile.smallUrl(img));
+            largeImgs.add(ImageFile.largeUrl(img));
+        }
+
+        book.setImgs(imgs);
+        book.setLargeImgs(largeImgs);
+
+        return book;
+    }
+
+    private List<TeacherDto> processTeachers(List<TeacherDto> teachers) {
+        for (TeacherDto teacher : teachers) {
+            teacher.setAvatar(ImageFile.smallUrl(teacher.getAvatar()));
+        }
+
+        return teachers;
     }
 
     @RequestMapping(value = "/sku/week", method = RequestMethod.GET)

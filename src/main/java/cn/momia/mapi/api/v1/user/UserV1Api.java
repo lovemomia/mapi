@@ -98,24 +98,6 @@ public class UserV1Api extends AbstractV1Api {
         return MomiaHttpResponse.SUCCESS(processUser(userServiceApi.updateAddress(utoken, address)));
     }
 
-    @RequestMapping(value = "/order", method = RequestMethod.GET)
-    public MomiaHttpResponse listOrders(@RequestParam String utoken, @RequestParam int status, @RequestParam int start) {
-        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (status <= 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
-
-        PagedList<OrderDto> orders = processPagedOrders(subjectServiceApi.listOrders(utoken, status, start, Configuration.getInt("PageSize.Order")));
-        return MomiaHttpResponse.SUCCESS(orders);
-    }
-
-    @RequestMapping(value = "/bookable", method = RequestMethod.GET)
-    public MomiaHttpResponse listBookableOrders(@RequestParam String utoken, @RequestParam int start) {
-        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (start < 0) return MomiaHttpResponse.BAD_REQUEST;
-
-        PagedList<OrderSkuDto> subjects = processPagedOrderSkus(subjectServiceApi.listBookableOrders(utoken, start, Configuration.getInt("PageSize.Subject")));
-        return MomiaHttpResponse.SUCCESS(subjects);
-    }
-
     @RequestMapping(value = "/course/notfinished", method = RequestMethod.GET)
     public MomiaHttpResponse listNotFinished(@RequestParam String utoken, @RequestParam int start) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
@@ -130,5 +112,23 @@ public class UserV1Api extends AbstractV1Api {
 
         UserDto user = userServiceApi.get(utoken);
         return MomiaHttpResponse.SUCCESS(courseServiceApi.queryFinishedByUser(user.getId(), start, Configuration.getInt("PageSize.Course")));
+    }
+
+    @RequestMapping(value = "/bookable", method = RequestMethod.GET)
+    public MomiaHttpResponse listBookableOrders(@RequestParam String utoken, @RequestParam int start) {
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (start < 0) return MomiaHttpResponse.BAD_REQUEST;
+
+        PagedList<OrderSkuDto> subjects = processPagedOrderSkus(subjectServiceApi.listBookableOrders(utoken, start, Configuration.getInt("PageSize.Subject")));
+        return MomiaHttpResponse.SUCCESS(subjects);
+    }
+
+    @RequestMapping(value = "/order", method = RequestMethod.GET)
+    public MomiaHttpResponse listOrders(@RequestParam String utoken, @RequestParam int status, @RequestParam int start) {
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (status <= 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
+
+        PagedList<OrderDto> orders = processPagedOrders(subjectServiceApi.listOrders(utoken, status, start, Configuration.getInt("PageSize.Order")));
+        return MomiaHttpResponse.SUCCESS(orders);
     }
 }

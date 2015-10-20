@@ -107,6 +107,10 @@ public class SubjectV1Api extends AbstractV1Api {
         UserDto user = userServiceApi.get(utoken);
         orderJson.put("userId", user.getId());
 
+        JSONObject contactJson = orderJson.getJSONObject("contact");
+        orderJson.put("contact", contactJson.getString("name"));
+        orderJson.put("mobile", contactJson.getString("mobile"));
+
         Map<Long, Integer> counts = new HashMap<Long, Integer>();
         JSONArray skusJson = orderJson.getJSONArray("skus");
         for (int i = 0; i < skusJson.size(); i++) {
