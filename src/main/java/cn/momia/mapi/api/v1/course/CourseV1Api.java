@@ -2,7 +2,9 @@ package cn.momia.mapi.api.v1.course;
 
 import cn.momia.api.course.CourseServiceApi;
 import cn.momia.api.course.dto.CourseBookDto;
+import cn.momia.api.course.dto.CourseDetailDto;
 import cn.momia.api.course.dto.CourseDto;
+import cn.momia.api.course.dto.InstitutionDto;
 import cn.momia.api.course.dto.TeacherDto;
 import cn.momia.api.user.UserServiceApi;
 import cn.momia.api.user.dto.UserDto;
@@ -12,6 +14,7 @@ import cn.momia.common.webapp.config.Configuration;
 import cn.momia.image.api.ImageFile;
 import cn.momia.mapi.api.v1.AbstractV1Api;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,19 +85,15 @@ public class CourseV1Api extends AbstractV1Api {
     @RequestMapping(value = "/detail", method = RequestMethod.GET)
     public MomiaHttpResponse detail(@RequestParam long id) {
         if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
-        return MomiaHttpResponse.SUCCESS(courseServiceApi.detail(id));
-    }
 
-    @RequestMapping(value = "/sku/week", method = RequestMethod.GET)
-    public MomiaHttpResponse listWeekSkus(@RequestParam long id) {
-        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
-        return MomiaHttpResponse.SUCCESS(courseServiceApi.listWeekSkus(id));
-    }
+        CourseDetailDto courseDetail = courseServiceApi.detail(id);
+        JSONArray detail = courseDetail.getDetail();
+        for (int i = 0; i < detail.size(); i++) {
+            JSONObject block = detail.getJSONObject(i);
+            if (block.containsKey("img")) block.put("img", ImageFile.largeUrl(block.getString("img")));
+        }
 
-    @RequestMapping(value = "/sku/month", method = RequestMethod.GET)
-    public MomiaHttpResponse listWeekSkus(@RequestParam long id, @RequestParam int month) {
-        if (id <= 0 || month <= 0 || month > 12) return MomiaHttpResponse.BAD_REQUEST;
-        return MomiaHttpResponse.SUCCESS(courseServiceApi.listMonthSkus(id, month));
+        return MomiaHttpResponse.SUCCESS(courseDetail);
     }
 
     @RequestMapping(value = "/book", method = RequestMethod.GET)
@@ -115,6 +114,28 @@ public class CourseV1Api extends AbstractV1Api {
         processTeachers(teachers.getList());
 
         return MomiaHttpResponse.SUCCESS(teachers);
+    }
+
+    @RequestMapping(value = "/institution", method = RequestMethod.GET)
+    public MomiaHttpResponse institution(@RequestParam long id) {
+        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
+
+        InstitutionDto institution = courseServiceApi.institution(id);
+        institution.setCover(ImageFile.largeUrl(institution.getCover()));
+
+        return MomiaHttpResponse.SUCCESS(institution);
+    }
+
+    @RequestMapping(value = "/sku/week", method = RequestMethod.GET)
+    public MomiaHttpResponse listWeekSkus(@RequestParam long id) {
+        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        return MomiaHttpResponse.SUCCESS(courseServiceApi.listWeekSkus(id));
+    }
+
+    @RequestMapping(value = "/sku/month", method = RequestMethod.GET)
+    public MomiaHttpResponse listWeekSkus(@RequestParam long id, @RequestParam int month) {
+        if (id <= 0 || month <= 0 || month > 12) return MomiaHttpResponse.BAD_REQUEST;
+        return MomiaHttpResponse.SUCCESS(courseServiceApi.listMonthSkus(id, month));
     }
 
     @RequestMapping(value = "/favor", method = RequestMethod.POST)
