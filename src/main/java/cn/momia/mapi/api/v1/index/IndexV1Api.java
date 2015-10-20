@@ -5,12 +5,15 @@ import cn.momia.api.course.dto.SubjectDto;
 import cn.momia.api.event.EventServiceApi;
 import cn.momia.api.event.dto.BannerDto;
 import cn.momia.api.event.dto.EventDto;
+import cn.momia.api.event.dto.IconDto;
 import cn.momia.common.api.dto.PagedList;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.common.webapp.config.Configuration;
 import cn.momia.image.api.ImageFile;
 import cn.momia.mapi.api.v1.AbstractV1Api;
 import com.alibaba.fastjson.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -23,10 +26,10 @@ import java.util.List;
 @RestController
 @RequestMapping("/v1/index")
 public class IndexV1Api extends AbstractV1Api {
+    private static final Logger LOGGER = LoggerFactory.getLogger(IndexV1Api.class);
+
     @Autowired private EventServiceApi eventServiceApi;
     @Autowired private SubjectServiceApi subjectServiceApi;
-
-    @Autowired private IconService iconService;
 
     @RequestMapping(method = RequestMethod.GET)
     public MomiaHttpResponse index(@RequestParam(value = "city") int cityId,
@@ -57,9 +60,9 @@ public class IndexV1Api extends AbstractV1Api {
         return banners;
     }
 
-    private List<Icon> getIcons(int cityId, int clientType) {
-        List<Icon> icons = iconService.list(cityId);
-        for (Icon icon : icons) {
+    private List<IconDto> getIcons(int cityId, int clientType) {
+        List<IconDto> icons = eventServiceApi.listIcons(cityId, Configuration.getInt("PageSize.Icon"));
+        for (IconDto icon : icons) {
             icon.setImg(ImageFile.url(icon.getImg()));
             icon.setAction(buildAction(icon.getAction(), clientType));
         }
@@ -78,7 +81,16 @@ public class IndexV1Api extends AbstractV1Api {
     }
 
     private PagedList<SubjectDto> getFreeSubjects(int cityId, int start) {
-        PagedList<SubjectDto> subjects = subjectServiceApi.listFree(cityId, start, Configuration.getInt("PageSize.FreeSubject"));
-        return processPagedSubjects(subjects);
+        try {
+            PagedList<SubjectDto> subjects = subjectServiceApi.listFree(cityId, start, Configuration.getInt("PageSize.FreeSubject"));
+            for (SubjectDto subject : subjects.getList()) {
+                subject.setCover(ImageFile.largeUrl(subject.getCover()));
+            }
+
+            return subjects;
+        } catch (Exception e) {
+            LOGGER.error("fail to list free subjects", e);
+            return PagedList.EMPTY;
+        }
     }
 }
