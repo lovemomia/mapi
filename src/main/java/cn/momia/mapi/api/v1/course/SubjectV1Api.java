@@ -14,6 +14,7 @@ import cn.momia.api.user.dto.UserDto;
 import cn.momia.common.api.dto.PagedList;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.common.webapp.config.Configuration;
+import cn.momia.image.api.ImageFile;
 import cn.momia.mapi.api.v1.AbstractV1Api;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -40,8 +41,14 @@ public class SubjectV1Api extends AbstractV1Api {
     public MomiaHttpResponse get(@RequestParam long id) {
         if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        SubjectDto subject = processSubject(subjectServiceApi.get(id));
-        PagedList<CourseDto> courses = processPagedCourses(courseServiceApi.query(id, 0, 2));
+        SubjectDto subject = subjectServiceApi.get(id);
+        subject.setCover(ImageFile.largeUrl(subject.getCover()));
+        processLargeImgs(subject.getImgs());
+
+        PagedList<CourseDto> courses = courseServiceApi.query(id, 0, 2);
+        for (CourseDto course : courses.getList()) {
+            course.setCover(ImageFile.middleUrl(course.getCover()));
+        }
 
         JSONObject responseJson = new JSONObject();
         responseJson.put("subject", subject);
@@ -61,13 +68,16 @@ public class SubjectV1Api extends AbstractV1Api {
         SortTypeDto sortType = MetaUtil.getSortType(sort);
 
         PagedList<CourseDto> courses = courseServiceApi.query(id, ageRange.getMin(), ageRange.getMax(), sortType.getId(), start, Configuration.getInt("PageSize.Course"));
+        for (CourseDto course : courses.getList()) {
+            course.setCover(ImageFile.middleUrl(course.getCover()));
+        }
 
         JSONObject responseJson = new JSONObject();
         responseJson.put("ages", MetaUtil.listAgeRanges());
         responseJson.put("sorts", MetaUtil.listSortTypes());
         responseJson.put("currentAge", ageRange.getId());
         responseJson.put("currentSort", sortType.getId());
-        responseJson.put("courses", processPagedCourses(courses));
+        responseJson.put("courses", courses);
 
         return MomiaHttpResponse.SUCCESS(responseJson);
     }
