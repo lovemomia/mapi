@@ -130,11 +130,13 @@ public class UserV1Api extends AbstractV1Api {
     }
 
     @RequestMapping(value = "/bookable", method = RequestMethod.GET)
-    public MomiaHttpResponse listBookableOrders(@RequestParam String utoken, @RequestParam int start) {
+    public MomiaHttpResponse listBookableOrders(@RequestParam String utoken,
+                                                @RequestParam(value = "oid", required = false, defaultValue = "0") long orderId,
+                                                @RequestParam int start) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        PagedList<OrderPackageDto> packages = subjectServiceApi.listBookableOrders(utoken, start, Configuration.getInt("PageSize.Subject"));
+        PagedList<OrderPackageDto> packages = subjectServiceApi.listBookableOrders(utoken, orderId, start, Configuration.getInt("PageSize.Subject"));
         for (OrderPackageDto orderPackage : packages.getList()) {
             orderPackage.setCover(ImageFile.middleUrl(orderPackage.getCover()));
         }
