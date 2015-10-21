@@ -111,14 +111,19 @@ public class SubjectV1Api extends AbstractV1Api {
         orderJson.put("contact", contactJson.getString("name"));
         orderJson.put("mobile", contactJson.getString("mobile"));
 
-        Map<Long, Integer> counts = new HashMap<Long, Integer>();
+        JSONArray packagesJson = new JSONArray();
         JSONArray skusJson = orderJson.getJSONArray("skus");
         for (int i = 0; i < skusJson.size(); i++) {
             JSONObject skuJson = skusJson.getJSONObject(i);
             orderJson.put("subjectId", skuJson.getLong("subjectId"));
-            counts.put(skuJson.getLong("id"), skuJson.getInteger("count"));
+            int count = skuJson.getInteger("count");
+            for (int j = 0; j < count; j++) {
+                JSONObject packageJson = new JSONObject();
+                packageJson.put("skuId", skuJson.getLong("id"));
+                packagesJson.add(packageJson);
+            }
         }
-        orderJson.put("counts", counts);
+        orderJson.put("packages", packagesJson);
 
         return MomiaHttpResponse.SUCCESS(subjectServiceApi.placeOrder(orderJson));
     }
