@@ -142,7 +142,7 @@ public class CourseV1Api extends AbstractV1Api {
 
     @RequestMapping(value = "/booking", method = RequestMethod.POST)
     public MomiaHttpResponse booking(@RequestParam String utoken,
-                                     @RequestParam(value = "pkgid") long packageId,
+                                     @RequestParam(value = "pid") long packageId,
                                      @RequestParam(value = "sid") long skuId) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (packageId <= 0 || skuId <= 0) return MomiaHttpResponse.BAD_REQUEST;
