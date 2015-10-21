@@ -52,7 +52,7 @@ public class SubjectV1Api extends AbstractV1Api {
 
         JSONObject responseJson = new JSONObject();
         responseJson.put("subject", subject);
-        if (courses.getTotalCount() > 0) responseJson.put("courses", courses);
+        responseJson.put("courses", courses);
 
         return MomiaHttpResponse.SUCCESS(responseJson);
     }
