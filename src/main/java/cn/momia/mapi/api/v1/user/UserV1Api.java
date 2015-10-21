@@ -2,6 +2,7 @@ package cn.momia.mapi.api.v1.user;
 
 import cn.momia.api.course.CourseServiceApi;
 import cn.momia.api.course.SubjectServiceApi;
+import cn.momia.api.course.dto.CourseDto;
 import cn.momia.api.course.dto.OrderPackageDto;
 import cn.momia.api.course.dto.OrderDto;
 import cn.momia.api.user.dto.UserDto;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Date;
+import java.util.List;
 
 @RestController
 @RequestMapping("/v1/user")
@@ -104,7 +106,16 @@ public class UserV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
 
         UserDto user = userServiceApi.get(utoken);
-        return MomiaHttpResponse.SUCCESS(courseServiceApi.queryNotFinishedByUser(user.getId(), start, Configuration.getInt("PageSize.Course")));
+        PagedList<CourseDto> pagedCourses = courseServiceApi.queryNotFinishedByUser(user.getId(), start, Configuration.getInt("PageSize.Course"));
+        processCourses(pagedCourses.getList());
+
+        return MomiaHttpResponse.SUCCESS(pagedCourses);
+    }
+
+    private void processCourses(List<CourseDto> courses) {
+        for (CourseDto course : courses) {
+            course.setCover(ImageFile.middleUrl(course.getCover()));
+        }
     }
 
     @RequestMapping(value = "/course/finished", method = RequestMethod.GET)
@@ -112,7 +123,10 @@ public class UserV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
 
         UserDto user = userServiceApi.get(utoken);
-        return MomiaHttpResponse.SUCCESS(courseServiceApi.queryFinishedByUser(user.getId(), start, Configuration.getInt("PageSize.Course")));
+        PagedList<CourseDto> pagedCourses = courseServiceApi.queryFinishedByUser(user.getId(), start, Configuration.getInt("PageSize.Course"));
+        processCourses(pagedCourses.getList());
+
+        return MomiaHttpResponse.SUCCESS(pagedCourses);
     }
 
     @RequestMapping(value = "/bookable", method = RequestMethod.GET)
@@ -133,7 +147,11 @@ public class UserV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (status <= 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        PagedList<OrderDto> orders = processPagedOrders(subjectServiceApi.listOrders(utoken, status, start, Configuration.getInt("PageSize.Order")));
+        PagedList<OrderDto> orders = subjectServiceApi.listOrders(utoken, status, start, Configuration.getInt("PageSize.Order"));
+        for (OrderDto order : orders.getList()) {
+            order.setCover(ImageFile.middleUrl(order.getCover()));
+        }
+
         return MomiaHttpResponse.SUCCESS(orders);
     }
 }
