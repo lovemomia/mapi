@@ -2,7 +2,7 @@ package cn.momia.mapi.api.v1.user;
 
 import cn.momia.api.course.CourseServiceApi;
 import cn.momia.api.course.SubjectServiceApi;
-import cn.momia.api.course.dto.OrderSkuDto;
+import cn.momia.api.course.dto.OrderPackageDto;
 import cn.momia.api.course.dto.OrderDto;
 import cn.momia.api.user.dto.UserDto;
 import cn.momia.common.api.dto.PagedList;
@@ -10,6 +10,7 @@ import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.api.user.UserServiceApi;
 import cn.momia.common.util.SexUtil;
 import cn.momia.common.webapp.config.Configuration;
+import cn.momia.image.api.ImageFile;
 import cn.momia.mapi.api.v1.AbstractV1Api;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -119,8 +120,12 @@ public class UserV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        PagedList<OrderSkuDto> subjects = processPagedOrderSkus(subjectServiceApi.listBookableOrders(utoken, start, Configuration.getInt("PageSize.Subject")));
-        return MomiaHttpResponse.SUCCESS(subjects);
+        PagedList<OrderPackageDto> packages = subjectServiceApi.listBookableOrders(utoken, start, Configuration.getInt("PageSize.Subject"));
+        for (OrderPackageDto orderPackage : packages.getList()) {
+            orderPackage.setCover(ImageFile.middleUrl(orderPackage.getCover()));
+        }
+
+        return MomiaHttpResponse.SUCCESS(packages);
     }
 
     @RequestMapping(value = "/order", method = RequestMethod.GET)
