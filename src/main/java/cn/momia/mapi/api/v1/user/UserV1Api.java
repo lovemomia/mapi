@@ -106,10 +106,10 @@ public class UserV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
 
         UserDto user = userServiceApi.get(utoken);
-        PagedList<CourseDto> pagedCourses = courseServiceApi.queryNotFinishedByUser(user.getId(), start, Configuration.getInt("PageSize.Course"));
-        processCourses(pagedCourses.getList());
+        PagedList<CourseDto> courses = courseServiceApi.queryNotFinishedByUser(user.getId(), start, Configuration.getInt("PageSize.Course"));
+        processCourses(courses.getList());
 
-        return MomiaHttpResponse.SUCCESS(pagedCourses);
+        return MomiaHttpResponse.SUCCESS(courses);
     }
 
     private void processCourses(List<CourseDto> courses) {
@@ -123,10 +123,10 @@ public class UserV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
 
         UserDto user = userServiceApi.get(utoken);
-        PagedList<CourseDto> pagedCourses = courseServiceApi.queryFinishedByUser(user.getId(), start, Configuration.getInt("PageSize.Course"));
-        processCourses(pagedCourses.getList());
+        PagedList<CourseDto> courses = courseServiceApi.queryFinishedByUser(user.getId(), start, Configuration.getInt("PageSize.Course"));
+        processCourses(courses.getList());
 
-        return MomiaHttpResponse.SUCCESS(pagedCourses);
+        return MomiaHttpResponse.SUCCESS(courses);
     }
 
     @RequestMapping(value = "/bookable", method = RequestMethod.GET)

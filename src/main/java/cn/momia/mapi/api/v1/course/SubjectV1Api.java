@@ -26,9 +26,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/v1/subject")
@@ -46,15 +44,19 @@ public class SubjectV1Api extends AbstractV1Api {
         processLargeImgs(subject.getImgs());
 
         PagedList<CourseDto> courses = courseServiceApi.query(id, 0, 2);
-        for (CourseDto course : courses.getList()) {
-            course.setCover(ImageFile.middleUrl(course.getCover()));
-        }
+        processCourses(courses.getList());
 
         JSONObject responseJson = new JSONObject();
         responseJson.put("subject", subject);
         responseJson.put("courses", courses);
 
         return MomiaHttpResponse.SUCCESS(responseJson);
+    }
+
+    private void processCourses(List<CourseDto> courses) {
+        for (CourseDto course : courses) {
+            course.setCover(ImageFile.middleUrl(course.getCover()));
+        }
     }
 
     @RequestMapping(value = "/course", method = RequestMethod.GET)
@@ -68,9 +70,7 @@ public class SubjectV1Api extends AbstractV1Api {
         SortTypeDto sortType = MetaUtil.getSortType(sort);
 
         PagedList<CourseDto> courses = courseServiceApi.query(id, ageRange.getMin(), ageRange.getMax(), sortType.getId(), start, Configuration.getInt("PageSize.Course"));
-        for (CourseDto course : courses.getList()) {
-            course.setCover(ImageFile.middleUrl(course.getCover()));
-        }
+        processCourses(courses.getList());
 
         JSONObject responseJson = new JSONObject();
         responseJson.put("ages", MetaUtil.listAgeRanges());
