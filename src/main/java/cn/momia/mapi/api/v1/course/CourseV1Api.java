@@ -151,6 +151,15 @@ public class CourseV1Api extends AbstractV1Api {
         return MomiaHttpResponse.SUCCESS;
     }
 
+    @RequestMapping(value = "/cancel", method = RequestMethod.POST)
+    public MomiaHttpResponse cancel(@RequestParam String utoken, @RequestParam(value = "bid") long bookingId) {
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (bookingId <= 0) return MomiaHttpResponse.BAD_REQUEST;
+
+        if (!courseServiceApi.cancel(utoken, bookingId)) return MomiaHttpResponse.FAILED("取消选课失败");
+        return MomiaHttpResponse.SUCCESS;
+    }
+
     @RequestMapping(value = "/favor", method = RequestMethod.POST)
     public MomiaHttpResponse favor(@RequestParam String utoken, @RequestParam long id) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;

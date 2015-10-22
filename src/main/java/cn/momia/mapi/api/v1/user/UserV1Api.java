@@ -2,6 +2,7 @@ package cn.momia.mapi.api.v1.user;
 
 import cn.momia.api.course.CourseServiceApi;
 import cn.momia.api.course.SubjectServiceApi;
+import cn.momia.api.course.dto.BookedCourseDto;
 import cn.momia.api.course.dto.CourseDto;
 import cn.momia.api.course.dto.OrderPackageDto;
 import cn.momia.api.course.dto.OrderDto;
@@ -106,13 +107,13 @@ public class UserV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
 
         UserDto user = userServiceApi.get(utoken);
-        PagedList<CourseDto> courses = courseServiceApi.queryNotFinishedByUser(user.getId(), start, Configuration.getInt("PageSize.Course"));
+        PagedList<BookedCourseDto> courses = courseServiceApi.queryNotFinishedByUser(user.getId(), start, Configuration.getInt("PageSize.Course"));
         processCourses(courses.getList());
 
         return MomiaHttpResponse.SUCCESS(courses);
     }
 
-    private void processCourses(List<CourseDto> courses) {
+    private void processCourses(List<? extends CourseDto> courses) {
         for (CourseDto course : courses) {
             course.setCover(ImageFile.middleUrl(course.getCover()));
         }
@@ -123,7 +124,7 @@ public class UserV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
 
         UserDto user = userServiceApi.get(utoken);
-        PagedList<CourseDto> courses = courseServiceApi.queryFinishedByUser(user.getId(), start, Configuration.getInt("PageSize.Course"));
+        PagedList<BookedCourseDto> courses = courseServiceApi.queryFinishedByUser(user.getId(), start, Configuration.getInt("PageSize.Course"));
         processCourses(courses.getList());
 
         return MomiaHttpResponse.SUCCESS(courses);
