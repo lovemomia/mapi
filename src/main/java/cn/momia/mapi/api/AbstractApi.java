@@ -26,6 +26,6 @@ public abstract class AbstractApi extends BaseController {
         if (uri.startsWith("http")) return uri;
 
         if (!uri.startsWith("/")) uri = "/" + uri;
-        return Configuration.getString("AppConf.WapDomain") + uri;
+        return uri;
     }
 }
