@@ -67,7 +67,7 @@ public class CourseV1Api extends AbstractV1Api {
         List<String> largeImgs = new ArrayList<String>();
         for (String img : book.getImgs()) {
             imgs.add(ImageFile.smallUrl(img));
-            largeImgs.add(ImageFile.largeUrl(img));
+            largeImgs.add(ImageFile.url(img));
         }
 
         book.setImgs(imgs);
@@ -103,7 +103,7 @@ public class CourseV1Api extends AbstractV1Api {
         if (id <= 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
         PagedList<String> book = courseServiceApi.book(id, start, Configuration.getInt("PageSize.BookImg"));
-        processLargeImgs(book.getList());
+        processImgs(book.getList());
 
         return MomiaHttpResponse.SUCCESS(book);
     }

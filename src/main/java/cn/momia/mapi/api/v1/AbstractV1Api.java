@@ -8,6 +8,16 @@ import cn.momia.api.user.dto.UserDto;
 import java.util.List;
 
 public class AbstractV1Api extends AbstractApi {
+    protected List<String> processImgs(List<String> imgs) {
+        if (imgs == null) return imgs;
+
+        for (int i = 0; i < imgs.size(); i++) {
+            imgs.set(i, ImageFile.url(imgs.get(i)));
+        }
+
+        return imgs;
+    }
+
     protected List<String> processLargeImgs(List<String> imgs) {
         if (imgs == null) return imgs;
 
