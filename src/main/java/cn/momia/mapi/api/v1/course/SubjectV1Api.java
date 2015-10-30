@@ -83,7 +83,7 @@ public class SubjectV1Api extends AbstractV1Api {
     }
 
     @RequestMapping(value = "/sku", method = RequestMethod.GET)
-    public MomiaHttpResponse order(@RequestParam String utoken, @RequestParam long id) {
+    public MomiaHttpResponse sku(@RequestParam String utoken, @RequestParam long id) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
