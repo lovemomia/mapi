@@ -2,6 +2,7 @@ package cn.momia.mapi.api.v1.course;
 
 import cn.momia.api.course.CourseServiceApi;
 import cn.momia.api.course.dto.CourseBookDto;
+import cn.momia.api.course.dto.CourseCommentDto;
 import cn.momia.api.course.dto.CourseDto;
 import cn.momia.api.course.dto.InstitutionDto;
 import cn.momia.api.course.dto.TeacherDto;
@@ -161,6 +162,23 @@ public class CourseV1Api extends AbstractV1Api {
 
         if (!courseServiceApi.comment(commentJson)) return MomiaHttpResponse.FAILED("发表评论失败");
         return MomiaHttpResponse.SUCCESS;
+    }
+    @RequestMapping(value = "/comment/list", method = RequestMethod.GET)
+    public MomiaHttpResponse listComment(@RequestParam long id, @RequestParam int start) {
+        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        PagedList<CourseCommentDto> pagedComments = courseServiceApi.listComment(id, start, Configuration.getInt("PageSize.CourseComment"));
+        processCourseComments(pagedComments.getList());
+
+        return MomiaHttpResponse.SUCCESS(pagedComments);
+    }
+
+    private void processCourseComments(List<CourseCommentDto> comments) {
+        for (CourseCommentDto comment : comments) {
+            comment.setAvatar(ImageFile.smallUrl(comment.getAvatar()));
+            List<String> imgs = comment.getImgs();
+            comment.setImgs(processSmallImgs(imgs));
+            comment.setLargeImgs(processLargeImgs(imgs));
+        }
     }
 
     @RequestMapping(value = "/favor", method = RequestMethod.POST)

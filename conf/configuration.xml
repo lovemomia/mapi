@@ -31,6 +31,7 @@
         <FreeSubject>20</FreeSubject>
         <Course>20</Course>
         <CourseTeacher>6</CourseTeacher>
+        <CourseComment>20</CourseComment>
         <BookImg>20</BookImg>
         <Teacher>20</Teacher>
         <Order>20</Order>
