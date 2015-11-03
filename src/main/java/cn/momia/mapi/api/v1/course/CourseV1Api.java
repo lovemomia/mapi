@@ -57,7 +57,7 @@ public class CourseV1Api extends AbstractV1Api {
     private CourseDto processCourse(CourseDto course) {
         course.setCover(ImageFile.largeUrl(course.getCover()));
 
-        processLargeImgs(course.getImgs());
+        course.setImgs(completeLargeImgs(course.getImgs()));
         processCourseBook(course.getBook());
 
         return course;
@@ -91,8 +91,8 @@ public class CourseV1Api extends AbstractV1Api {
         for (CourseCommentDto comment : comments) {
             comment.setAvatar(ImageFile.smallUrl(comment.getAvatar()));
             List<String> imgs = comment.getImgs();
-            comment.setImgs(processSmallImgs(imgs));
-            comment.setLargeImgs(processLargeImgs(imgs));
+            comment.setImgs(completeSmallImgs(imgs));
+            comment.setLargeImgs(completeLargeImgs(imgs));
         }
     }
 
@@ -107,7 +107,7 @@ public class CourseV1Api extends AbstractV1Api {
         if (id <= 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
         PagedList<String> book = courseServiceApi.book(id, start, Configuration.getInt("PageSize.BookImg"));
-        processImgs(book.getList());
+        book.setList(completeImgs(book.getList()));
 
         return MomiaHttpResponse.SUCCESS(book);
     }

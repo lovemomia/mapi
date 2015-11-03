@@ -42,7 +42,7 @@ public class SubjectV1Api extends AbstractV1Api {
 
         SubjectDto subject = subjectServiceApi.get(id);
         subject.setCover(ImageFile.largeUrl(subject.getCover()));
-        processLargeImgs(subject.getImgs());
+        subject.setImgs(completeLargeImgs(subject.getImgs()));
 
         PagedList<CourseDto> courses = courseServiceApi.query(id, 0, 2);
         processCourses(courses.getList());
@@ -68,8 +68,8 @@ public class SubjectV1Api extends AbstractV1Api {
         for (CourseCommentDto comment : comments) {
             comment.setAvatar(ImageFile.smallUrl(comment.getAvatar()));
             List<String> imgs = comment.getImgs();
-            comment.setImgs(processSmallImgs(imgs));
-            comment.setLargeImgs(processLargeImgs(imgs));
+            comment.setImgs(completeSmallImgs(imgs));
+            comment.setLargeImgs(completeLargeImgs(imgs));
         }
     }
 

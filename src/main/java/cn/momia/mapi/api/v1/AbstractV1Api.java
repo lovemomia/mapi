@@ -5,47 +5,52 @@ import cn.momia.image.api.ImageFile;
 import cn.momia.mapi.api.AbstractApi;
 import cn.momia.api.user.dto.UserDto;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class AbstractV1Api extends AbstractApi {
-    protected List<String> processImgs(List<String> imgs) {
-        if (imgs == null) return imgs;
+    protected List<String> completeImgs(List<String> imgs) {
+        if (imgs == null) return null;
 
-        for (int i = 0; i < imgs.size(); i++) {
-            imgs.set(i, ImageFile.url(imgs.get(i)));
+        List<String> completedImgs = new ArrayList<String>();
+        for (String img : imgs) {
+            completedImgs.add(ImageFile.url(img));
         }
 
-        return imgs;
+        return completedImgs;
     }
 
-    protected List<String> processLargeImgs(List<String> imgs) {
-        if (imgs == null) return imgs;
+    protected List<String> completeLargeImgs(List<String> imgs) {
+        if (imgs == null) return null;
 
-        for (int i = 0; i < imgs.size(); i++) {
-            imgs.set(i, ImageFile.largeUrl(imgs.get(i)));
+        List<String> completedImgs = new ArrayList<String>();
+        for (String img : imgs) {
+            completedImgs.add(ImageFile.largeUrl(img));
         }
 
-        return imgs;
+        return completedImgs;
     }
 
-    protected List<String> processMiddleImgs(List<String> imgs) {
-        if (imgs == null) return imgs;
+    protected List<String> completeMiddleImgs(List<String> imgs) {
+        if (imgs == null) return null;
 
-        for (int i = 0; i < imgs.size(); i++) {
-            imgs.set(i, ImageFile.middleUrl(imgs.get(i)));
+        List<String> completedImgs = new ArrayList<String>();
+        for (String img : imgs) {
+            completedImgs.add(ImageFile.middleUrl(img));
         }
 
-        return imgs;
+        return completedImgs;
     }
 
-    protected List<String> processSmallImgs(List<String> imgs) {
-        if (imgs == null) return imgs;
+    protected List<String> completeSmallImgs(List<String> imgs) {
+        if (imgs == null) return null;
 
-        for (int i = 0; i < imgs.size(); i++) {
-            imgs.set(i, ImageFile.smallUrl(imgs.get(i)));
+        List<String> completedImgs = new ArrayList<String>();
+        for (String img : imgs) {
+            completedImgs.add(ImageFile.smallUrl(img));
         }
 
-        return imgs;
+        return completedImgs;
     }
 
     protected UserDto processUser(UserDto user) {
