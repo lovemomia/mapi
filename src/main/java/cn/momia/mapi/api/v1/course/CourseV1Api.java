@@ -150,6 +150,19 @@ public class CourseV1Api extends AbstractV1Api {
         return MomiaHttpResponse.SUCCESS;
     }
 
+    @RequestMapping(value = "/comment", method = RequestMethod.POST)
+    public MomiaHttpResponse comment(String utoken, String comment) {
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (StringUtils.isBlank(comment)) return MomiaHttpResponse.BAD_REQUEST;
+
+        UserDto user = userServiceApi.get(utoken);
+        JSONObject commentJson = JSON.parseObject(comment);
+        commentJson.put("userId", user.getId());
+
+        if (!courseServiceApi.comment(commentJson)) return MomiaHttpResponse.FAILED("发表评论失败");
+        return MomiaHttpResponse.SUCCESS;
+    }
+
     @RequestMapping(value = "/favor", method = RequestMethod.POST)
     public MomiaHttpResponse favor(@RequestParam String utoken, @RequestParam long id) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
