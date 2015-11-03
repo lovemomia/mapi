@@ -47,10 +47,14 @@ public class CourseV1Api extends AbstractV1Api {
         List<TeacherDto> teachers = processTeachers(courseServiceApi.queryTeachers(id, 0, Configuration.getInt("PageSize.CourseTeacher")).getList());
         if (!teachers.isEmpty()) courseJson.put("teachers", teachers);
 
+        PagedList<CourseCommentDto> pagedComments = courseServiceApi.listComment(id, 0, 1);
+        processCourseComments(pagedComments.getList());
+        if (!pagedComments.getList().isEmpty()) courseJson.put("comments", pagedComments);
+
         return MomiaHttpResponse.SUCCESS(courseJson);
     }
 
-    protected CourseDto processCourse(CourseDto course) {
+    private CourseDto processCourse(CourseDto course) {
         course.setCover(ImageFile.largeUrl(course.getCover()));
 
         processLargeImgs(course.getImgs());
@@ -81,6 +85,15 @@ public class CourseV1Api extends AbstractV1Api {
         }
 
         return teachers;
+    }
+
+    private void processCourseComments(List<CourseCommentDto> comments) {
+        for (CourseCommentDto comment : comments) {
+            comment.setAvatar(ImageFile.smallUrl(comment.getAvatar()));
+            List<String> imgs = comment.getImgs();
+            comment.setImgs(processSmallImgs(imgs));
+            comment.setLargeImgs(processLargeImgs(imgs));
+        }
     }
 
     @RequestMapping(value = "/detail", method = RequestMethod.GET)
@@ -170,15 +183,6 @@ public class CourseV1Api extends AbstractV1Api {
         processCourseComments(pagedComments.getList());
 
         return MomiaHttpResponse.SUCCESS(pagedComments);
-    }
-
-    private void processCourseComments(List<CourseCommentDto> comments) {
-        for (CourseCommentDto comment : comments) {
-            comment.setAvatar(ImageFile.smallUrl(comment.getAvatar()));
-            List<String> imgs = comment.getImgs();
-            comment.setImgs(processSmallImgs(imgs));
-            comment.setLargeImgs(processLargeImgs(imgs));
-        }
     }
 
     @RequestMapping(value = "/favor", method = RequestMethod.POST)
