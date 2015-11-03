@@ -5,6 +5,7 @@ import cn.momia.api.base.dto.AgeRangeDto;
 import cn.momia.api.base.dto.SortTypeDto;
 import cn.momia.api.course.CourseServiceApi;
 import cn.momia.api.course.SubjectServiceApi;
+import cn.momia.api.course.dto.CourseCommentDto;
 import cn.momia.api.course.dto.CourseDto;
 import cn.momia.api.course.dto.SubjectDto;
 import cn.momia.api.course.dto.SubjectSkuDto;
@@ -46,9 +47,13 @@ public class SubjectV1Api extends AbstractV1Api {
         PagedList<CourseDto> courses = courseServiceApi.query(id, 0, 2);
         processCourses(courses.getList());
 
+        PagedList<CourseCommentDto> comments = courseServiceApi.queryCommentsBySubject(id, 0, 1);
+        processCourseComments(comments.getList());
+
         JSONObject responseJson = new JSONObject();
         responseJson.put("subject", subject);
         responseJson.put("courses", courses);
+        if (!comments.getList().isEmpty()) responseJson.put("comments", comments);
 
         return MomiaHttpResponse.SUCCESS(responseJson);
     }
@@ -56,6 +61,15 @@ public class SubjectV1Api extends AbstractV1Api {
     private void processCourses(List<CourseDto> courses) {
         for (CourseDto course : courses) {
             course.setCover(ImageFile.middleUrl(course.getCover()));
+        }
+    }
+
+    private void processCourseComments(List<CourseCommentDto> comments) {
+        for (CourseCommentDto comment : comments) {
+            comment.setAvatar(ImageFile.smallUrl(comment.getAvatar()));
+            List<String> imgs = comment.getImgs();
+            comment.setImgs(processSmallImgs(imgs));
+            comment.setLargeImgs(processLargeImgs(imgs));
         }
     }
 

@@ -47,7 +47,7 @@ public class CourseV1Api extends AbstractV1Api {
         List<TeacherDto> teachers = processTeachers(courseServiceApi.queryTeachers(id, 0, Configuration.getInt("PageSize.CourseTeacher")).getList());
         if (!teachers.isEmpty()) courseJson.put("teachers", teachers);
 
-        PagedList<CourseCommentDto> pagedComments = courseServiceApi.listComment(id, 0, 1);
+        PagedList<CourseCommentDto> pagedComments = courseServiceApi.queryCommentsByCourse(id, 0, 1);
         processCourseComments(pagedComments.getList());
         if (!pagedComments.getList().isEmpty()) courseJson.put("comments", pagedComments);
 
@@ -179,7 +179,7 @@ public class CourseV1Api extends AbstractV1Api {
     @RequestMapping(value = "/comment/list", method = RequestMethod.GET)
     public MomiaHttpResponse listComment(@RequestParam long id, @RequestParam int start) {
         if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
-        PagedList<CourseCommentDto> pagedComments = courseServiceApi.listComment(id, start, Configuration.getInt("PageSize.CourseComment"));
+        PagedList<CourseCommentDto> pagedComments = courseServiceApi.queryCommentsByCourse(id, start, Configuration.getInt("PageSize.CourseComment"));
         processCourseComments(pagedComments.getList());
 
         return MomiaHttpResponse.SUCCESS(pagedComments);
