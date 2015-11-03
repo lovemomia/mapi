@@ -1,185 +1,26 @@
 package cn.momia.mapi.api.v1;
 
-import cn.momia.api.feed.Feed;
-import cn.momia.api.feed.PagedFeeds;
-import cn.momia.api.product.comment.Comment;
-import cn.momia.api.product.comment.PagedComments;
-import cn.momia.api.user.UserServiceApi;
-import cn.momia.common.webapp.config.Configuration;
+import cn.momia.api.user.dto.ChildDto;
 import cn.momia.image.api.ImageFile;
 import cn.momia.mapi.api.AbstractApi;
-import cn.momia.api.deal.order.Order;
-import cn.momia.api.deal.order.PagedOrders;
-import cn.momia.api.deal.order.Playmate;
-import cn.momia.api.deal.order.SkuPlaymates;
-import cn.momia.api.feed.comment.FeedComment;
-import cn.momia.api.feed.comment.PagedFeedComments;
-import cn.momia.api.feed.star.FeedStar;
-import cn.momia.api.feed.star.PagedFeedStars;
-import cn.momia.api.product.PagedProducts;
-import cn.momia.api.product.Product;
-import cn.momia.api.product.ProductGroup;
-import cn.momia.api.product.topic.Banner;
-import cn.momia.api.product.topic.TopicGroup;
-import cn.momia.api.product.topic.Topic;
-import cn.momia.api.user.User;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.lang3.StringUtils;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import cn.momia.api.user.dto.UserDto;
 
-import java.net.URLEncoder;
 import java.util.List;
 
 public class AbstractV1Api extends AbstractApi {
-    private static Logger LOGGER = LoggerFactory.getLogger(AbstractApi.class);
+    protected List<String> processImgs(List<String> imgs) {
+        if (imgs == null) return imgs;
 
-    protected PagedOrders processPagedOrders(PagedOrders orders) {
-        for (Order order : orders.getList()) {
-            processOrder(order);
+        for (int i = 0; i < imgs.size(); i++) {
+            imgs.set(i, ImageFile.url(imgs.get(i)));
         }
 
-        return orders;
+        return imgs;
     }
 
-    protected Order processOrder(Order order) {
-        order.setCover(ImageFile.middleUrl(order.getCover()));
+    protected List<String> processLargeImgs(List<String> imgs) {
+        if (imgs == null) return imgs;
 
-        return order;
-    }
-
-    protected List<SkuPlaymates> processPlaymates(List<SkuPlaymates> playmates) {
-        for (SkuPlaymates skuPlaymates : playmates) {
-            for (Playmate playmate : skuPlaymates.getPlaymates()) {
-                playmate.setAvatar(ImageFile.smallUrl(playmate.getAvatar()));
-            }
-        }
-
-        return playmates;
-    }
-
-    protected PagedFeeds processPagedFeeds(PagedFeeds feeds) {
-        for (Feed feed : feeds.getList()) {
-            processFeed(feed);
-        }
-
-        return feeds;
-    }
-
-    protected Feed processFeed(Feed feed) {
-        feed.setAvatar(ImageFile.smallUrl(feed.getAvatar()));
-        if (feed.getImgs() != null) {
-            for (int i = 0; i < feed.getImgs().size(); i++) {
-                feed.getImgs().set(i, ImageFile.middleUrl(feed.getImgs().get(i)));
-            }
-        }
-
-        return feed;
-    }
-
-    protected PagedFeedComments processPagedFeedComments(PagedFeedComments comments) {
-        for (FeedComment feedComment : comments.getList()) {
-            feedComment.setAvatar(ImageFile.smallUrl(feedComment.getAvatar()));
-        }
-
-        return comments;
-    }
-
-    protected PagedFeedStars processPagedFeedStars(PagedFeedStars stars) {
-        for (FeedStar feedStar : stars.getList()) {
-            feedStar.setAvatar(ImageFile.smallUrl(feedStar.getAvatar()));
-        }
-
-        return stars;
-    }
-
-    protected List<Banner> processBanners(List<Banner> banners, int clientType) {
-        for (Banner banner : banners) {
-            processBanner(banner, clientType);
-        }
-
-        return banners;
-    }
-
-    private Banner processBanner(Banner banner, int clientType) {
-        banner.setCover(ImageFile.url(banner.getCover()));
-        banner.setAction(buildLink(banner.getAction(), clientType));
-
-        return banner;
-    }
-
-    private String buildLink(String link, int clientType) {
-        if (clientType == CLIENT_TYPE_APP) return Configuration.getString("AppConf.Name") + "://web?url=" + URLEncoder.encode(fullUrl(link, clientType));
-        return fullUrl(link, clientType);
-    }
-
-    private String fullUrl(String link, int clientType) {
-        if (link.startsWith("/")) {
-            if (clientType == CLIENT_TYPE_APP) return Configuration.getString("AppConf.WapDomain") + link;
-            return Configuration.getString("AppConf.WapDomain") + "/m" + link;
-        }
-
-        return link;
-    }
-
-    protected Topic processTopic(Topic topic) {
-        topic.setCover(ImageFile.url(topic.getCover()));
-
-        for (TopicGroup topicGroup : topic.getGroups()) {
-            processProducts(topicGroup.getProducts());
-        }
-
-        return topic;
-    }
-
-    protected Product processProduct(Product product) {
-        return processProduct(product, IMAGE_LARGE);
-    }
-
-    protected Product processProduct(Product product, int size) {
-        return processProduct(product, size, CLIENT_TYPE_WAP);
-    }
-
-    protected Product processProduct(Product product, int size, int clientType) {
-        product.setUrl(buildUrl(product.getId()));
-        product.setThumb(ImageFile.smallUrl(product.getThumb()));
-
-        if (!StringUtils.isBlank(product.getCover())) {
-            if (size == IMAGE_LARGE) product.setCover(ImageFile.largeUrl(product.getCover()));
-            else if (size == IMAGE_MIDDLE) product.setCover(ImageFile.middleUrl(product.getCover()));
-            else product.setCover(ImageFile.smallUrl(product.getCover()));
-        }
-
-        if (product.getImgs() != null) processImgs(product.getImgs());
-        if (product.getContent() != null) processContent(product.getContent(), clientType);
-
-        return product;
-    }
-
-    protected Product processProduct(Product product, String utoken) {
-        return processProduct(product, utoken, CLIENT_TYPE_WAP);
-    }
-
-    protected Product processProduct(Product product, String utoken, int clientType) {
-        Product processedProduct = processProduct(product, IMAGE_LARGE, clientType);
-        try {
-            if (!StringUtils.isBlank(utoken)) {
-                String inviteCode = UserServiceApi.USER.getInviteCode(utoken);
-                if (!StringUtils.isBlank(inviteCode)) processedProduct.setUrl(processedProduct.getUrl() + "&invite=" + inviteCode);
-            }
-        } catch (Exception e) {
-            LOGGER.error("fail to generate invite url");
-        }
-
-        return processedProduct;
-    }
-
-    private List<String> processImgs(List<String> imgs) {
         for (int i = 0; i < imgs.size(); i++) {
             imgs.set(i, ImageFile.largeUrl(imgs.get(i)));
         }
@@ -187,100 +28,43 @@ public class AbstractV1Api extends AbstractApi {
         return imgs;
     }
 
-    private JSONArray processContent(JSONArray contentJson, int clientType) {
-        for (int i = 0; i < contentJson.size(); i++) {
-            JSONObject contentBlockJson = contentJson.getJSONObject(i);
-            JSONArray bodyJson = contentBlockJson.getJSONArray("body");
-            for (int j = 0; j < bodyJson.size(); j++) {
-                JSONObject bodyBlockJson = bodyJson.getJSONObject(j);
-                String img = bodyBlockJson.getString("img");
-                if (!StringUtils.isBlank(img)) bodyBlockJson.put("img", ImageFile.largeUrl(img));
+    protected List<String> processMiddleImgs(List<String> imgs) {
+        if (imgs == null) return imgs;
 
-                String link = bodyBlockJson.getString("link");
-                if (!StringUtils.isBlank(link)) bodyBlockJson.put("link", buildLink(link, clientType));
-            }
+        for (int i = 0; i < imgs.size(); i++) {
+            imgs.set(i, ImageFile.middleUrl(imgs.get(i)));
         }
 
-        return contentJson;
+        return imgs;
     }
 
-    protected List<Product> processProducts(List<Product> products) {
-        return processProducts(products, IMAGE_LARGE);
-    }
+    protected List<String> processSmallImgs(List<String> imgs) {
+        if (imgs == null) return imgs;
 
-    protected List<Product> processProducts(List<Product> products, int size) {
-        for (Product product : products) {
-            processProduct(product, size);
+        for (int i = 0; i < imgs.size(); i++) {
+            imgs.set(i, ImageFile.smallUrl(imgs.get(i)));
         }
 
-        return products;
+        return imgs;
     }
 
-    protected PagedProducts processPagedProducts(PagedProducts products) {
-        return processPagedProducts(products, IMAGE_LARGE);
-    }
-
-    protected PagedProducts processPagedProducts(PagedProducts products, int size) {
-        processProducts(products.getList(), size);
-
-        return products;
-    }
-
-    protected List<ProductGroup> processGroupedProducts(List<ProductGroup> products) {
-        return processGroupedProducts(products, IMAGE_LARGE);
-    }
-
-    protected List<ProductGroup> processGroupedProducts(List<ProductGroup> products, int size) {
-        for (ProductGroup productGroup : products) {
-            processProducts(productGroup.getProducts(), size);
-        }
-
-        return products;
-    }
-
-    protected String processProductDetail(String detail) {
-        Document detailDoc = Jsoup.parse(detail);
-        Elements imgs = detailDoc.select("img[src]");
-        for (Element element : imgs) {
-            String imgUrl = element.attr("src");
-            element.attr("src", ImageFile.largeUrl(imgUrl));
-        }
-
-        return detailDoc.toString();
-    }
-
-    protected PagedComments processPagedComments(PagedComments pagedComments) {
-        for (Comment comment : pagedComments.getList()) {
-            processComment(comment);
-        }
-
-        return pagedComments;
-    }
-
-    private Comment processComment(Comment comment) {
-        for (int i = 0; i < comment.getImgs().size(); i++) {
-            comment.getImgs().set(i, ImageFile.middleUrl(comment.getImgs().get(i)));
-        }
-
-        return comment;
-    }
-
-    protected User processUser(User user) {
-        String avatar = user.getAvatar();
-        if (!StringUtils.isBlank(avatar)) user.setAvatar(ImageFile.smallUrl(avatar));
+    protected UserDto processUser(UserDto user) {
+        user.setAvatar(ImageFile.smallUrl(user.getAvatar()));
+        processChildren(user.getChildren());
 
         return user;
     }
 
-    protected List<String> processAvatars(List<String> avatars) {
-        for (int i = 0; i < avatars.size(); i++) {
-            avatars.set(i, ImageFile.smallUrl(avatars.get(i)));
+    protected List<ChildDto> processChildren(List<ChildDto> children) {
+        for (ChildDto child : children) {
+            processChild(child);
         }
 
-        return avatars;
+        return children;
     }
 
-    private String buildUrl(long id) {
-        return Configuration.getString("Product.Url") + "?id=" + id;
+    protected ChildDto processChild(ChildDto child) {
+        child.setAvatar(ImageFile.smallUrl(child.getAvatar()));
+        return child;
     }
 }

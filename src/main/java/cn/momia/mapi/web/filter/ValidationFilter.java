@@ -50,14 +50,12 @@ public class ValidationFilter implements Filter {
 
     private boolean isUserAgentMissing(HttpServletRequest httpRequest) {
         String userAgent = httpRequest.getHeader("user-agent");
-
         return StringUtils.isBlank(userAgent);
     }
 
     private boolean needParamsValidation(HttpServletRequest request) {
         String uri = request.getRequestURI();
-
-        return !(uri.startsWith("/callback") || uri.startsWith("/m/"));
+        return !(uri.startsWith("/payment/callback/") || uri.startsWith("/m/"));
     }
 
     private boolean isParamMissing(HttpServletRequest httpRequest) {
@@ -80,9 +78,7 @@ public class ValidationFilter implements Filter {
 
     private boolean isInvalidUri(HttpServletRequest request) {
         String uri = request.getRequestURI();
-
-        if (VERSION_PATTERN.matcher(uri).find()) return true;
-        return false;
+        return VERSION_PATTERN.matcher(uri).find();
     }
 
     private boolean isInvalidSign(HttpServletRequest httpRequest) {
