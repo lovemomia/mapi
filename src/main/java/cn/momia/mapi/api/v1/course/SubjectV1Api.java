@@ -141,4 +141,13 @@ public class SubjectV1Api extends AbstractV1Api {
 
         return MomiaHttpResponse.SUCCESS(subjectServiceApi.placeOrder(orderJson));
     }
+
+    @RequestMapping(value = "/order/delete", method = RequestMethod.POST)
+    public MomiaHttpResponse deleteOrder(@RequestParam String utoken, @RequestParam(value = "oid") long orderId) {
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (orderId <= 0) return MomiaHttpResponse.BAD_REQUEST;
+
+        if (!subjectServiceApi.deleteOrder(utoken, orderId)) return MomiaHttpResponse.FAILED("删除订单失败");
+        return MomiaHttpResponse.SUCCESS;
+    }
 }
