@@ -36,5 +36,6 @@
         <Teacher>20</Teacher>
         <Order>20</Order>
         <Subject>20</Subject>
+        <Favorite>20</Favorite>
     </PageSize>
 </Configuration>

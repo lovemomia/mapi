@@ -4,6 +4,7 @@ import cn.momia.api.course.CourseServiceApi;
 import cn.momia.api.course.SubjectServiceApi;
 import cn.momia.api.course.dto.BookedCourseDto;
 import cn.momia.api.course.dto.CourseDto;
+import cn.momia.api.course.dto.FavoriteDto;
 import cn.momia.api.course.dto.OrderPackageDto;
 import cn.momia.api.course.dto.OrderDto;
 import cn.momia.api.user.dto.UserDto;
@@ -156,5 +157,32 @@ public class UserV1Api extends AbstractV1Api {
         }
 
         return MomiaHttpResponse.SUCCESS(orders);
+    }
+
+    @RequestMapping(value = "/favorite", method = RequestMethod.GET)
+    public MomiaHttpResponse listFavorites(@RequestParam String utoken, @RequestParam(defaultValue = "1") int type, @RequestParam int start) {
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (start < 0) return MomiaHttpResponse.BAD_REQUEST;
+
+        PagedList<FavoriteDto> favorites;
+        switch (type) {
+            case FavoriteDto.Type.SUBJECT:
+                favorites = subjectServiceApi.listFavorites(utoken, start, Configuration.getInt("PageSize.Favorite"));
+                processSubjectFavorites(favorites);
+                break;
+            default:
+                favorites = courseServiceApi.listFavorites(utoken, start, Configuration.getInt("PageSize.Favorite"));
+                processCourseFavorites(favorites);
+        }
+
+        return MomiaHttpResponse.SUCCESS(favorites);
+    }
+
+    private void processSubjectFavorites(PagedList<FavoriteDto> favorites) {
+        // TODO
+    }
+
+    private void processCourseFavorites(PagedList<FavoriteDto> favorites) {
+        // TODO
     }
 }
