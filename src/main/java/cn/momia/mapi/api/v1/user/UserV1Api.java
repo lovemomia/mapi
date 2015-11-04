@@ -15,6 +15,7 @@ import cn.momia.common.util.SexUtil;
 import cn.momia.common.webapp.config.Configuration;
 import cn.momia.image.api.ImageFile;
 import cn.momia.mapi.api.v1.AbstractV1Api;
+import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -168,21 +169,20 @@ public class UserV1Api extends AbstractV1Api {
         switch (type) {
             case FavoriteDto.Type.SUBJECT:
                 favorites = subjectServiceApi.listFavorites(utoken, start, Configuration.getInt("PageSize.Favorite"));
-                processSubjectFavorites(favorites);
+                processFavorites(favorites);
                 break;
             default:
                 favorites = courseServiceApi.listFavorites(utoken, start, Configuration.getInt("PageSize.Favorite"));
-                processCourseFavorites(favorites);
+                processFavorites(favorites);
         }
 
         return MomiaHttpResponse.SUCCESS(favorites);
     }
 
-    private void processSubjectFavorites(PagedList<FavoriteDto> favorites) {
-        // TODO
-    }
-
-    private void processCourseFavorites(PagedList<FavoriteDto> favorites) {
-        // TODO
+    private void processFavorites(PagedList<FavoriteDto> favorites) {
+        for (FavoriteDto favorite : favorites.getList()) {
+            JSONObject ref = favorite.getRef();
+            ref.put("cover", ImageFile.middleUrl(ref.getString("cover")));
+        }
     }
 }
