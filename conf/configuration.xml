@@ -37,5 +37,6 @@
         <Order>20</Order>
         <Subject>20</Subject>
         <Favorite>20</Favorite>
+        <Feed>20</Feed>
     </PageSize>
 </Configuration>
