@@ -9,8 +9,6 @@ import cn.momia.api.course.dto.CourseCommentDto;
 import cn.momia.api.course.dto.CourseDto;
 import cn.momia.api.course.dto.SubjectDto;
 import cn.momia.api.course.dto.SubjectSkuDto;
-import cn.momia.api.feed.FeedServiceApi;
-import cn.momia.api.feed.dto.FeedDto;
 import cn.momia.api.user.UserServiceApi;
 import cn.momia.api.user.dto.ContactDto;
 import cn.momia.api.user.dto.UserDto;
@@ -36,7 +34,6 @@ import java.util.List;
 public class SubjectV1Api extends AbstractV1Api {
     @Autowired private CourseServiceApi courseServiceApi;
     @Autowired private SubjectServiceApi subjectServiceApi;
-    @Autowired private FeedServiceApi feedServiceApi;
     @Autowired private UserServiceApi userServiceApi;
 
     @RequestMapping(method = RequestMethod.GET)
@@ -50,17 +47,13 @@ public class SubjectV1Api extends AbstractV1Api {
         PagedList<CourseDto> courses = courseServiceApi.query(id, 0, 2);
         processCourses(courses.getList());
 
-        PagedList<CourseCommentDto> comments = courseServiceApi.queryCommentsBySubject(id, 0, 1);
+        PagedList<CourseCommentDto> comments = courseServiceApi.queryCommentsBySubject(id, 0, 2);
         processCourseComments(comments.getList());
-
-        PagedList<FeedDto> liveFeeds = feedServiceApi.queryLiveFeedsBySubject(id, 0, 1);
-        processFeeds(liveFeeds.getList());
 
         JSONObject responseJson = new JSONObject();
         responseJson.put("subject", subject);
         responseJson.put("courses", courses);
         if (!comments.getList().isEmpty()) responseJson.put("comments", comments);
-        if (!liveFeeds.getList().isEmpty()) responseJson.put("live", liveFeeds);
 
         return MomiaHttpResponse.SUCCESS(responseJson);
     }
