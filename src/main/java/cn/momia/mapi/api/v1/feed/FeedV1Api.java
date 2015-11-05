@@ -48,4 +48,15 @@ public class FeedV1Api extends AbstractV1Api {
             feed.setAvatar(ImageFile.smallUrl(feed.getAvatar()));
         }
     }
+
+    @RequestMapping(value = "/delete", method = RequestMethod.POST)
+    public MomiaHttpResponse delete(@RequestParam String utoken, @RequestParam long id) {
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
+
+        UserDto user = userServiceApi.get(utoken);
+        if (!feedServiceApi.delete(user.getId(), id)) return MomiaHttpResponse.FAILED("删除Feed失败");
+
+        return MomiaHttpResponse.SUCCESS;
+    }
 }
