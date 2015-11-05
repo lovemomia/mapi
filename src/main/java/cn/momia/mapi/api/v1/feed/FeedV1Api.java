@@ -7,6 +7,7 @@ import cn.momia.api.user.dto.UserDto;
 import cn.momia.common.api.dto.PagedList;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.common.webapp.config.Configuration;
+import cn.momia.image.api.ImageFile;
 import cn.momia.mapi.api.v1.AbstractV1Api;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +40,12 @@ public class FeedV1Api extends AbstractV1Api {
         return MomiaHttpResponse.SUCCESS(pagedFeeds);
     }
 
-    private void processFeeds(List<FeedDto> pagedFeedsList) {
-
+    private void processFeeds(List<FeedDto> feeds) {
+        for (FeedDto feed : feeds) {
+            List<String> imgs = feed.getImgs();
+            feed.setImgs(completeMiddleImgs(imgs));
+            feed.setLargeImgs(completeLargeImgs(imgs));
+            feed.setAvatar(ImageFile.smallUrl(feed.getAvatar()));
+        }
     }
 }
