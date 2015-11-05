@@ -39,5 +39,6 @@
         <Subject>20</Subject>
         <Favorite>20</Favorite>
         <Feed>20</Feed>
+        <FeedComment>20</FeedComment>
     </PageSize>
 </Configuration>
