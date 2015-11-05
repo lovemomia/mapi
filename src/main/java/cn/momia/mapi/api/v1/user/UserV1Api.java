@@ -165,14 +165,15 @@ public class UserV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
+        UserDto user = userServiceApi.get(utoken);
         PagedList<FavoriteDto> favorites;
         switch (type) {
             case FavoriteDto.Type.SUBJECT:
-                favorites = subjectServiceApi.listFavorites(utoken, start, Configuration.getInt("PageSize.Favorite"));
+                favorites = subjectServiceApi.listFavorites(user.getId(), start, Configuration.getInt("PageSize.Favorite"));
                 processFavorites(favorites);
                 break;
             default:
-                favorites = courseServiceApi.listFavorites(utoken, start, Configuration.getInt("PageSize.Favorite"));
+                favorites = courseServiceApi.listFavorites(user.getId(), start, Configuration.getInt("PageSize.Favorite"));
                 processFavorites(favorites);
         }
 
