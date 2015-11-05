@@ -40,5 +40,7 @@
         <Favorite>20</Favorite>
         <Feed>20</Feed>
         <FeedComment>20</FeedComment>
+        <FeedDetailStar>20</FeedDetailStar>
+        <FeedDetailComment>20</FeedDetailComment>
     </PageSize>
 </Configuration>
