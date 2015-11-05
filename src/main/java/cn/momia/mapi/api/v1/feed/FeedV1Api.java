@@ -80,7 +80,7 @@ public class FeedV1Api extends AbstractV1Api {
         JSONObject courseFeedsJson = new JSONObject();
 
         if (start == 0) {
-            CourseDto course = courseServiceApi.get(courseId);
+            CourseDto course = courseServiceApi.get(courseId, CourseDto.Type.BASE);
             course.setCover(ImageFile.largeUrl(course.getCover()));
             courseFeedsJson.put("course", course);
         }
@@ -106,7 +106,7 @@ public class FeedV1Api extends AbstractV1Api {
         PagedList<FeedCommentDto> comments = feedServiceApi.listComments(id, 0, Configuration.getInt("PageSize.FeedDetailComment"));
         processComments(comments.getList());
 
-        CourseDto course = courseServiceApi.get(feed.getCourseId());
+        CourseDto course = courseServiceApi.get(feed.getCourseId(), CourseDto.Type.BASE);
         course.setCover(ImageFile.largeUrl(course.getCover()));
 
         JSONObject feedDetailJson = new JSONObject();
