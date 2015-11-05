@@ -1,5 +1,6 @@
 package cn.momia.mapi.api.v1;
 
+import cn.momia.api.feed.dto.FeedDto;
 import cn.momia.api.user.dto.ChildDto;
 import cn.momia.image.api.ImageFile;
 import cn.momia.mapi.api.AbstractApi;
@@ -51,6 +52,19 @@ public class AbstractV1Api extends AbstractApi {
         }
 
         return completedImgs;
+    }
+
+    protected void processFeeds(List<FeedDto> feeds) {
+        for (FeedDto feed : feeds) {
+            processFeed(feed);
+        }
+    }
+
+    protected void processFeed(FeedDto feed) {
+        List<String> imgs = feed.getImgs();
+        feed.setImgs(completeMiddleImgs(imgs));
+        feed.setLargeImgs(completeLargeImgs(imgs));
+        feed.setAvatar(ImageFile.smallUrl(feed.getAvatar()));
     }
 
     protected UserDto processUser(UserDto user) {

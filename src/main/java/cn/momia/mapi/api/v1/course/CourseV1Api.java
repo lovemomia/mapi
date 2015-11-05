@@ -6,6 +6,8 @@ import cn.momia.api.course.dto.CourseCommentDto;
 import cn.momia.api.course.dto.CourseDto;
 import cn.momia.api.course.dto.InstitutionDto;
 import cn.momia.api.course.dto.TeacherDto;
+import cn.momia.api.feed.FeedServiceApi;
+import cn.momia.api.feed.dto.FeedDto;
 import cn.momia.api.user.UserServiceApi;
 import cn.momia.api.user.dto.UserDto;
 import cn.momia.common.api.dto.PagedList;
@@ -29,6 +31,7 @@ import java.util.List;
 @RequestMapping(value = "/v1/course")
 public class CourseV1Api extends AbstractV1Api {
     @Autowired private CourseServiceApi courseServiceApi;
+    @Autowired private FeedServiceApi feedServiceApi;
     @Autowired private UserServiceApi userServiceApi;
 
     @RequestMapping(method = RequestMethod.GET)
@@ -46,6 +49,10 @@ public class CourseV1Api extends AbstractV1Api {
 
         List<TeacherDto> teachers = processTeachers(courseServiceApi.queryTeachers(id, 0, Configuration.getInt("PageSize.CourseTeacher")).getList());
         if (!teachers.isEmpty()) courseJson.put("teachers", teachers);
+
+        PagedList<FeedDto> homeworkFeeds = feedServiceApi.queryHomeworkFeedsByCourse(id, 0, 1);
+        processFeeds(homeworkFeeds.getList());
+        if (!homeworkFeeds.getList().isEmpty()) courseJson.put("homework", homeworkFeeds);
 
         PagedList<CourseCommentDto> pagedComments = courseServiceApi.queryCommentsByCourse(id, 0, 1);
         processCourseComments(pagedComments.getList());

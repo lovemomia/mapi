@@ -59,19 +59,6 @@ public class FeedV1Api extends AbstractV1Api {
         return MomiaHttpResponse.SUCCESS(pagedFeeds);
     }
 
-    private void processFeeds(List<FeedDto> feeds) {
-        for (FeedDto feed : feeds) {
-            processFeed(feed);
-        }
-    }
-
-    private void processFeed(FeedDto feed) {
-        List<String> imgs = feed.getImgs();
-        feed.setImgs(completeMiddleImgs(imgs));
-        feed.setLargeImgs(completeLargeImgs(imgs));
-        feed.setAvatar(ImageFile.smallUrl(feed.getAvatar()));
-    }
-
     @RequestMapping(value = "/course", method = RequestMethod.GET)
     public MomiaHttpResponse topic(@RequestParam(defaultValue = "") String utoken,
                                    @RequestParam(value = "coid") long courseId,
