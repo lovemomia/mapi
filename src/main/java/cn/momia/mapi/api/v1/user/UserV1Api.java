@@ -4,6 +4,7 @@ import cn.momia.api.course.CourseServiceApi;
 import cn.momia.api.course.SubjectServiceApi;
 import cn.momia.api.course.dto.BookedCourseDto;
 import cn.momia.api.course.dto.CourseDto;
+import cn.momia.api.course.dto.FavoriteDto;
 import cn.momia.api.course.dto.OrderPackageDto;
 import cn.momia.api.course.dto.OrderDto;
 import cn.momia.api.user.dto.UserDto;
@@ -14,6 +15,7 @@ import cn.momia.common.util.SexUtil;
 import cn.momia.common.webapp.config.Configuration;
 import cn.momia.image.api.ImageFile;
 import cn.momia.mapi.api.v1.AbstractV1Api;
+import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -156,5 +158,32 @@ public class UserV1Api extends AbstractV1Api {
         }
 
         return MomiaHttpResponse.SUCCESS(orders);
+    }
+
+    @RequestMapping(value = "/favorite", method = RequestMethod.GET)
+    public MomiaHttpResponse listFavorites(@RequestParam String utoken, @RequestParam(defaultValue = "1") int type, @RequestParam int start) {
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (start < 0) return MomiaHttpResponse.BAD_REQUEST;
+
+        UserDto user = userServiceApi.get(utoken);
+        PagedList<FavoriteDto> favorites;
+        switch (type) {
+            case FavoriteDto.Type.SUBJECT:
+                favorites = subjectServiceApi.listFavorites(user.getId(), start, Configuration.getInt("PageSize.Favorite"));
+                processFavorites(favorites);
+                break;
+            default:
+                favorites = courseServiceApi.listFavorites(user.getId(), start, Configuration.getInt("PageSize.Favorite"));
+                processFavorites(favorites);
+        }
+
+        return MomiaHttpResponse.SUCCESS(favorites);
+    }
+
+    private void processFavorites(PagedList<FavoriteDto> favorites) {
+        for (FavoriteDto favorite : favorites.getList()) {
+            JSONObject ref = favorite.getRef();
+            ref.put("cover", ImageFile.middleUrl(ref.getString("cover")));
+        }
     }
 }

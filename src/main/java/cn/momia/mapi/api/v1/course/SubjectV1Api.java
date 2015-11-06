@@ -5,6 +5,7 @@ import cn.momia.api.base.dto.AgeRangeDto;
 import cn.momia.api.base.dto.SortTypeDto;
 import cn.momia.api.course.CourseServiceApi;
 import cn.momia.api.course.SubjectServiceApi;
+import cn.momia.api.course.dto.CourseCommentDto;
 import cn.momia.api.course.dto.CourseDto;
 import cn.momia.api.course.dto.SubjectDto;
 import cn.momia.api.course.dto.SubjectSkuDto;
@@ -41,14 +42,18 @@ public class SubjectV1Api extends AbstractV1Api {
 
         SubjectDto subject = subjectServiceApi.get(id);
         subject.setCover(ImageFile.largeUrl(subject.getCover()));
-        processLargeImgs(subject.getImgs());
+        subject.setImgs(completeLargeImgs(subject.getImgs()));
 
         PagedList<CourseDto> courses = courseServiceApi.query(id, 0, 2);
         processCourses(courses.getList());
 
+        PagedList<CourseCommentDto> comments = courseServiceApi.queryCommentsBySubject(id, 0, 2);
+        processCourseComments(comments.getList());
+
         JSONObject responseJson = new JSONObject();
         responseJson.put("subject", subject);
         responseJson.put("courses", courses);
+        if (!comments.getList().isEmpty()) responseJson.put("comments", comments);
 
         return MomiaHttpResponse.SUCCESS(responseJson);
     }
@@ -56,6 +61,15 @@ public class SubjectV1Api extends AbstractV1Api {
     private void processCourses(List<CourseDto> courses) {
         for (CourseDto course : courses) {
             course.setCover(ImageFile.middleUrl(course.getCover()));
+        }
+    }
+
+    private void processCourseComments(List<CourseCommentDto> comments) {
+        for (CourseCommentDto comment : comments) {
+            comment.setAvatar(ImageFile.smallUrl(comment.getAvatar()));
+            List<String> imgs = comment.getImgs();
+            comment.setImgs(completeSmallImgs(imgs));
+            comment.setLargeImgs(completeLargeImgs(imgs));
         }
     }
 
@@ -126,5 +140,34 @@ public class SubjectV1Api extends AbstractV1Api {
         orderJson.put("packages", packagesJson);
 
         return MomiaHttpResponse.SUCCESS(subjectServiceApi.placeOrder(orderJson));
+    }
+
+    @RequestMapping(value = "/order/delete", method = RequestMethod.POST)
+    public MomiaHttpResponse deleteOrder(@RequestParam String utoken, @RequestParam(value = "oid") long orderId) {
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (orderId <= 0) return MomiaHttpResponse.BAD_REQUEST;
+
+        if (!subjectServiceApi.deleteOrder(utoken, orderId)) return MomiaHttpResponse.FAILED("删除订单失败");
+        return MomiaHttpResponse.SUCCESS;
+    }
+
+    @RequestMapping(value = "/favor", method = RequestMethod.POST)
+    public MomiaHttpResponse favor(@RequestParam String utoken, @RequestParam long id) {
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
+
+        UserDto user = userServiceApi.get(utoken);
+        if (!subjectServiceApi.favor(user.getId(), id)) return MomiaHttpResponse.FAILED("添加收藏失败");
+        return MomiaHttpResponse.SUCCESS;
+    }
+
+    @RequestMapping(value = "/unfavor", method = RequestMethod.POST)
+    public MomiaHttpResponse unfavor(@RequestParam String utoken, @RequestParam long id) {
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
+
+        UserDto user = userServiceApi.get(utoken);
+        if (!subjectServiceApi.unfavor(user.getId(), id)) return MomiaHttpResponse.FAILED("取消收藏失败");
+        return MomiaHttpResponse.SUCCESS;
     }
 }
