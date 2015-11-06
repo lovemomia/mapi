@@ -96,6 +96,12 @@ public class SubjectV1Api extends AbstractV1Api {
         return MomiaHttpResponse.SUCCESS(responseJson);
     }
 
+    @RequestMapping(value = "/comment", method = RequestMethod.GET)
+    public MomiaHttpResponse listComments(@RequestParam long id, @RequestParam int start) {
+        if (id <= 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
+        return MomiaHttpResponse.SUCCESS(courseServiceApi.queryCommentsBySubject(id, start, Configuration.getInt("PageSize.CourseComment")));
+    }
+
     @RequestMapping(value = "/sku", method = RequestMethod.GET)
     public MomiaHttpResponse sku(@RequestParam String utoken, @RequestParam long id) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
