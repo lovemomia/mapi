@@ -81,6 +81,11 @@ public class FeedV1Api extends AbstractV1Api {
         return MomiaHttpResponse.SUCCESS(courseFeedsJson);
     }
 
+    @RequestMapping(value = "/tag", method = RequestMethod.GET)
+    public MomiaHttpResponse listTags() {
+        return MomiaHttpResponse.SUCCESS(feedServiceApi.listTags(Configuration.getInt("PageSize.FeedTag")));
+    }
+
     @RequestMapping(value = "/add", method = RequestMethod.POST)
     public MomiaHttpResponse add(@RequestParam String utoken, @RequestParam String feed) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
