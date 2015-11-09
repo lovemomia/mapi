@@ -29,7 +29,7 @@
         <Banner>3</Banner>
         <Icon>8</Icon>
         <Event>4</Event>
-        <FreeSubject>20</FreeSubject>
+        <TrialSubject>20</TrialSubject>
         <Course>20</Course>
         <CourseTeacher>6</CourseTeacher>
         <CourseComment>20</CourseComment>
