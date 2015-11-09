@@ -42,5 +42,6 @@
         <FeedComment>20</FeedComment>
         <FeedDetailStar>20</FeedDetailStar>
         <FeedDetailComment>20</FeedDetailComment>
+        <FeedTag>10</FeedTag>
     </PageSize>
 </Configuration>

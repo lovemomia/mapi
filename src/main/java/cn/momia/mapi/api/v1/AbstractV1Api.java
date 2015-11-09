@@ -1,5 +1,6 @@
 package cn.momia.mapi.api.v1;
 
+import cn.momia.api.course.dto.CourseCommentDto;
 import cn.momia.api.feed.dto.FeedDto;
 import cn.momia.api.user.dto.ChildDto;
 import cn.momia.image.api.ImageFile;
@@ -52,6 +53,15 @@ public class AbstractV1Api extends AbstractApi {
         }
 
         return completedImgs;
+    }
+
+    protected void processCourseComments(List<CourseCommentDto> comments) {
+        for (CourseCommentDto comment : comments) {
+            comment.setAvatar(ImageFile.smallUrl(comment.getAvatar()));
+            List<String> imgs = comment.getImgs();
+            comment.setImgs(completeSmallImgs(imgs));
+            comment.setLargeImgs(completeLargeImgs(imgs));
+        }
     }
 
     protected void processFeeds(List<FeedDto> feeds) {

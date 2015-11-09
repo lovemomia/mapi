@@ -64,15 +64,6 @@ public class SubjectV1Api extends AbstractV1Api {
         }
     }
 
-    private void processCourseComments(List<CourseCommentDto> comments) {
-        for (CourseCommentDto comment : comments) {
-            comment.setAvatar(ImageFile.smallUrl(comment.getAvatar()));
-            List<String> imgs = comment.getImgs();
-            comment.setImgs(completeSmallImgs(imgs));
-            comment.setLargeImgs(completeLargeImgs(imgs));
-        }
-    }
-
     @RequestMapping(value = "/course", method = RequestMethod.GET)
     public MomiaHttpResponse listCourses(@RequestParam long id,
                                          @RequestParam(required = false, defaultValue = "0") int age,
@@ -94,6 +85,16 @@ public class SubjectV1Api extends AbstractV1Api {
         responseJson.put("courses", courses);
 
         return MomiaHttpResponse.SUCCESS(responseJson);
+    }
+
+    @RequestMapping(value = "/comment/list", method = RequestMethod.GET)
+    public MomiaHttpResponse listComments(@RequestParam long id, @RequestParam int start) {
+        if (id <= 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
+
+        PagedList<CourseCommentDto> pageComments = courseServiceApi.queryCommentsBySubject(id, start, Configuration.getInt("PageSize.CourseComment"));
+        processCourseComments(pageComments.getList());
+
+        return MomiaHttpResponse.SUCCESS(pageComments);
     }
 
     @RequestMapping(value = "/sku", method = RequestMethod.GET)

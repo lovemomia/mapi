@@ -87,15 +87,6 @@ public class CourseV1Api extends AbstractV1Api {
         return teachers;
     }
 
-    private void processCourseComments(List<CourseCommentDto> comments) {
-        for (CourseCommentDto comment : comments) {
-            comment.setAvatar(ImageFile.smallUrl(comment.getAvatar()));
-            List<String> imgs = comment.getImgs();
-            comment.setImgs(completeSmallImgs(imgs));
-            comment.setLargeImgs(completeLargeImgs(imgs));
-        }
-    }
-
     @RequestMapping(value = "/detail", method = RequestMethod.GET)
     public MomiaHttpResponse detail(@RequestParam long id) {
         if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
