@@ -66,6 +66,7 @@ public class SubjectV1Api extends AbstractV1Api {
 
     @RequestMapping(value = "/course", method = RequestMethod.GET)
     public MomiaHttpResponse listCourses(@RequestParam long id,
+                                         @RequestParam(value = "pid", required = false, defaultValue = "0") long packageId,
                                          @RequestParam(required = false, defaultValue = "0") int age,
                                          @RequestParam(required = false, defaultValue = "0") int sort,
                                          @RequestParam int start) {
@@ -74,7 +75,7 @@ public class SubjectV1Api extends AbstractV1Api {
         AgeRangeDto ageRange = MetaUtil.getAgeRange(age);
         SortTypeDto sortType = MetaUtil.getSortType(sort);
 
-        PagedList<CourseDto> courses = courseServiceApi.query(id, ageRange.getMin(), ageRange.getMax(), sortType.getId(), start, Configuration.getInt("PageSize.Course"));
+        PagedList<CourseDto> courses = courseServiceApi.query(id, packageId, ageRange.getMin(), ageRange.getMax(), sortType.getId(), start, Configuration.getInt("PageSize.Course"));
         processCourses(courses.getList());
 
         JSONObject responseJson = new JSONObject();
