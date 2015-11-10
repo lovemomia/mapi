@@ -153,6 +153,15 @@ public class SubjectV1Api extends AbstractV1Api {
         return MomiaHttpResponse.SUCCESS;
     }
 
+    @RequestMapping(value = "/order/refund", method = RequestMethod.POST)
+    public MomiaHttpResponse refund(@RequestParam String utoken, @RequestParam(value = "oid") long orderId) {
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (orderId <= 0) return MomiaHttpResponse.BAD_REQUEST;
+
+        if (!subjectServiceApi.refundOrder(utoken, orderId)) return MomiaHttpResponse.FAILED("申请退款失败");
+        return MomiaHttpResponse.SUCCESS;
+    }
+
     @RequestMapping(value = "/favor", method = RequestMethod.POST)
     public MomiaHttpResponse favor(@RequestParam String utoken, @RequestParam long id) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
