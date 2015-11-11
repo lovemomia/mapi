@@ -27,22 +27,24 @@ public class PaymentV1Api extends AbstractV1Api {
     @RequestMapping(value = "/prepay/alipay", method = RequestMethod.POST)
     public MomiaHttpResponse prepayAlipay(@RequestParam String utoken,
                                           @RequestParam(value = "oid") long orderId,
-                                          @RequestParam(defaultValue = "app") String type) {
+                                          @RequestParam(defaultValue = "app") String type,
+                                          @RequestParam(value = "coupon", required = false, defaultValue = "0") long userCouponId) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (orderId <= 0 || StringUtils.isBlank(type)) return MomiaHttpResponse.BAD_REQUEST;
 
-        return MomiaHttpResponse.SUCCESS(paymentServiceApi.prepayAlipay(utoken, orderId, type));
+        return MomiaHttpResponse.SUCCESS(paymentServiceApi.prepayAlipay(utoken, orderId, type, userCouponId));
     }
 
     @RequestMapping(value = "/prepay/weixin", method = RequestMethod.POST)
     public MomiaHttpResponse prepayWeixin(@RequestParam String utoken,
                                           @RequestParam(value = "oid") long orderId,
                                           @RequestParam(defaultValue = "app") final String type,
-                                          @RequestParam(required = false) String code) {
+                                          @RequestParam(required = false) String code,
+                                          @RequestParam(value = "coupon", required = false, defaultValue = "0") long userCouponId) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (orderId <= 0 || StringUtils.isBlank(type)) return MomiaHttpResponse.BAD_REQUEST;
 
-        return MomiaHttpResponse.SUCCESS(paymentServiceApi.prepayWeixin(utoken, orderId, type, code));
+        return MomiaHttpResponse.SUCCESS(paymentServiceApi.prepayWeixin(utoken, orderId, type, code, userCouponId));
     }
 
     @RequestMapping(value = "/callback/alipay", method = RequestMethod.POST, produces = "text/plain")
