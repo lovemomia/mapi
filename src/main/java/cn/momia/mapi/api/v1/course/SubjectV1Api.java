@@ -162,6 +162,16 @@ public class SubjectV1Api extends AbstractV1Api {
         return MomiaHttpResponse.SUCCESS;
     }
 
+    @RequestMapping(value = "/order/coupon", method = RequestMethod.GET)
+    public MomiaHttpResponse coupon(@RequestParam String utoken,
+                                    @RequestParam(value = "oid") long orderId,
+                                    @RequestParam(value = "coupon") long userCouponId) {
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (orderId <= 0 || userCouponId <= 0) return MomiaHttpResponse.BAD_REQUEST;
+
+        return MomiaHttpResponse.SUCCESS(subjectServiceApi.coupon(utoken, orderId, userCouponId));
+    }
+
     @RequestMapping(value = "/favor", method = RequestMethod.POST)
     public MomiaHttpResponse favor(@RequestParam String utoken, @RequestParam long id) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
