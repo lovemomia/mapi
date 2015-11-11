@@ -7,6 +7,7 @@ import cn.momia.api.course.dto.CourseDto;
 import cn.momia.api.course.dto.FavoriteDto;
 import cn.momia.api.course.dto.OrderPackageDto;
 import cn.momia.api.course.dto.OrderDto;
+import cn.momia.api.course.dto.UserCouponDto;
 import cn.momia.api.user.dto.UserDto;
 import cn.momia.common.api.dto.PagedList;
 import cn.momia.common.api.http.MomiaHttpResponse;
@@ -158,6 +159,17 @@ public class UserV1Api extends AbstractV1Api {
         }
 
         return MomiaHttpResponse.SUCCESS(orders);
+    }
+
+    @RequestMapping(value = "/coupon", method = RequestMethod.GET)
+    public MomiaHttpResponse listCoupons(@RequestParam String utoken,
+                                         @RequestParam(required = false, defaultValue = "0") int status,
+                                         @RequestParam int start) {
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (status < 0 || status > 3 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
+
+        PagedList<UserCouponDto> userCoupons = subjectServiceApi.listUserCoupons(utoken, status, start, Configuration.getInt("PageSize.UserCoupon"));
+        return MomiaHttpResponse.SUCCESS(userCoupons);
     }
 
     @RequestMapping(value = "/favorite", method = RequestMethod.GET)
