@@ -221,4 +221,20 @@ public class UserV1Api extends AbstractV1Api {
 
         return MomiaHttpResponse.SUCCESS(pagedFeeds);
     }
+
+    @RequestMapping(value = "/info", method = RequestMethod.GET)
+    public MomiaHttpResponse getInfo(@RequestParam(value = "uid") long userId, @RequestParam int start) {
+        JSONObject infoJson = new JSONObject();
+
+        if (start == 0) {
+            UserDto user = userServiceApi.get(userId);
+            infoJson.put("user", processUser(user));
+        }
+
+        PagedList<FeedDto> pagedFeeds = feedServiceApi.listFeedsOfUser(userId, start, Configuration.getInt("PageSize.Feed"));
+        processFeeds(pagedFeeds.getList());
+        infoJson.put("feeds", pagedFeeds);
+
+        return MomiaHttpResponse.SUCCESS(infoJson);
+    }
 }
