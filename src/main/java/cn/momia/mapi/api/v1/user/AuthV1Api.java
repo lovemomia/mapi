@@ -1,10 +1,14 @@
 package cn.momia.mapi.api.v1.user;
 
 import cn.momia.api.base.SmsServiceApi;
+import cn.momia.api.course.SubjectServiceApi;
+import cn.momia.api.user.dto.UserDto;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.api.user.UserServiceApi;
 import cn.momia.common.util.MobileUtil;
 import cn.momia.mapi.api.v1.AbstractV1Api;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/v1/auth")
 public class AuthV1Api extends AbstractV1Api {
+    @Autowired private SubjectServiceApi subjectServiceApi;
     @Autowired private SmsServiceApi smsServiceApi;
     @Autowired private UserServiceApi userServiceApi;
 
@@ -36,7 +41,10 @@ public class AuthV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(password)) return MomiaHttpResponse.FAILED("密码不能为空");
         if (StringUtils.isBlank(code)) return MomiaHttpResponse.FAILED("验证码不能为空");
 
-        return MomiaHttpResponse.SUCCESS(processUser(userServiceApi.register(nickName, mobile, password, code)));
+        JSONObject userJson = (JSONObject) JSON.toJSON(processUser(userServiceApi.register(nickName, mobile, password, code)));
+        if (subjectServiceApi.hasRegisterCoupon(userJson.getString("token"))) userJson.put("hasRegisterCoupon", true);
+
+        return MomiaHttpResponse.SUCCESS(userJson);
     }
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
