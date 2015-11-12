@@ -8,6 +8,8 @@ import cn.momia.api.course.dto.FavoriteDto;
 import cn.momia.api.course.dto.OrderPackageDto;
 import cn.momia.api.course.dto.OrderDto;
 import cn.momia.api.course.dto.UserCouponDto;
+import cn.momia.api.feed.FeedServiceApi;
+import cn.momia.api.feed.dto.FeedDto;
 import cn.momia.api.user.dto.UserDto;
 import cn.momia.common.api.dto.PagedList;
 import cn.momia.common.api.http.MomiaHttpResponse;
@@ -33,6 +35,7 @@ import java.util.List;
 public class UserV1Api extends AbstractV1Api {
     @Autowired private CourseServiceApi courseServiceApi;
     @Autowired private SubjectServiceApi subjectServiceApi;
+    @Autowired private FeedServiceApi feedServiceApi;
     @Autowired private UserServiceApi userServiceApi;
 
     @RequestMapping(method = RequestMethod.GET)
@@ -205,5 +208,17 @@ public class UserV1Api extends AbstractV1Api {
             JSONObject ref = favorite.getRef();
             ref.put("cover", ImageFile.middleUrl(ref.getString("cover")));
         }
+    }
+
+    @RequestMapping(value = "/feed", method = RequestMethod.GET)
+    public MomiaHttpResponse listFeeds(@RequestParam String utoken, @RequestParam int start) {
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (start < 0) return MomiaHttpResponse.BAD_REQUEST;
+
+        UserDto user = userServiceApi.get(utoken);
+        PagedList<FeedDto> pagedFeeds = feedServiceApi.listFeedsOfUser(user.getId(), start, Configuration.getInt("PageSize.Feed"));
+        processFeeds(pagedFeeds.getList());
+
+        return MomiaHttpResponse.SUCCESS(pagedFeeds);
     }
 }
