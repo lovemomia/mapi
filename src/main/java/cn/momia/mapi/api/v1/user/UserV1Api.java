@@ -175,14 +175,6 @@ public class UserV1Api extends AbstractV1Api {
         return MomiaHttpResponse.SUCCESS(userCoupons);
     }
 
-    @RequestMapping(value = "/coupon/register", method = RequestMethod.POST)
-    public MomiaHttpResponse getRegisterCoupon(@RequestParam String utoken) {
-        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-
-        subjectServiceApi.getRegisterCoupon(utoken);
-        return MomiaHttpResponse.SUCCESS;
-    }
-
     @RequestMapping(value = "/favorite", method = RequestMethod.GET)
     public MomiaHttpResponse listFavorites(@RequestParam String utoken, @RequestParam(defaultValue = "1") int type, @RequestParam int start) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
