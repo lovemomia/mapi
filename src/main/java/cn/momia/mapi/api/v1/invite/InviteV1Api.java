@@ -22,7 +22,7 @@ public class InviteV1Api extends AbstractV1Api {
     public MomiaHttpResponse inviteCoupon(@RequestParam String mobile, @RequestParam(value = "invite") String inviteCode) {
         if (MobileUtil.isInvalid(mobile)) return MomiaHttpResponse.FAILED("无效的手机号码");
         if (StringUtils.isBlank(inviteCode)) return MomiaHttpResponse.BAD_REQUEST;
-        if (userServiceApi.exists(mobile)) return MomiaHttpResponse.FAILED("该手机号已经注册过，只有新用户才能领取");
+        if (userServiceApi.getByMobile(mobile).exists()) return MomiaHttpResponse.FAILED("该手机号已经注册过，只有新用户才能领取");
 
         subjectServiceApi.inviteCoupon(mobile, inviteCode);
         return MomiaHttpResponse.SUCCESS;

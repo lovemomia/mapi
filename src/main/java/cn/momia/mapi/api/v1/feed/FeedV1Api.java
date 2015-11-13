@@ -35,7 +35,9 @@ public class FeedV1Api extends AbstractV1Api {
     public MomiaHttpResponse follow(@RequestParam String utoken, @RequestParam(value = "fuid") long followedId) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (followedId <= 0) return MomiaHttpResponse.BAD_REQUEST;
-        if (!userServiceApi.exists(followedId)) return MomiaHttpResponse.FAILED("关注的用户不存在");
+
+        UserDto followedUser = userServiceApi.get(followedId);
+        if (!followedUser.exists()) return MomiaHttpResponse.FAILED("关注的用户不存在");
 
         UserDto user = userServiceApi.get(utoken);
         feedServiceApi.follow(user.getId(), followedId);
