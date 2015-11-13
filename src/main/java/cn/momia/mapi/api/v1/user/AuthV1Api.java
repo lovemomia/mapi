@@ -1,6 +1,7 @@
 package cn.momia.mapi.api.v1.user;
 
 import cn.momia.api.base.SmsServiceApi;
+import cn.momia.api.course.CouponServiceApi;
 import cn.momia.api.course.SubjectServiceApi;
 import cn.momia.api.user.dto.UserDto;
 import cn.momia.common.api.http.MomiaHttpResponse;
@@ -22,6 +23,7 @@ public class AuthV1Api extends AbstractV1Api {
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthV1Api.class);
 
     @Autowired private SubjectServiceApi subjectServiceApi;
+    @Autowired private CouponServiceApi couponServiceApi;
     @Autowired private SmsServiceApi smsServiceApi;
     @Autowired private UserServiceApi userServiceApi;
 
@@ -45,7 +47,7 @@ public class AuthV1Api extends AbstractV1Api {
 
         UserDto user = processUser(userServiceApi.register(nickName, mobile, password, code));
         try {
-            subjectServiceApi.addInviteUserCoupon(user.getId(), mobile);
+            couponServiceApi.distributeInviteCoupon(user.getId(), mobile);
         } catch (Exception e) {
             LOGGER.error("分发邀请红包失败", e);
         }

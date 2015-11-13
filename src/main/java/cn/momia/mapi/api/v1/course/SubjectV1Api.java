@@ -3,7 +3,9 @@ package cn.momia.mapi.api.v1.course;
 import cn.momia.api.base.MetaUtil;
 import cn.momia.api.base.dto.AgeRangeDto;
 import cn.momia.api.base.dto.SortTypeDto;
+import cn.momia.api.course.CouponServiceApi;
 import cn.momia.api.course.CourseServiceApi;
+import cn.momia.api.course.OrderServiceApi;
 import cn.momia.api.course.SubjectServiceApi;
 import cn.momia.api.course.dto.CourseCommentDto;
 import cn.momia.api.course.dto.CourseDto;
@@ -34,6 +36,8 @@ import java.util.List;
 public class SubjectV1Api extends AbstractV1Api {
     @Autowired private CourseServiceApi courseServiceApi;
     @Autowired private SubjectServiceApi subjectServiceApi;
+    @Autowired private CouponServiceApi couponServiceApi;
+    @Autowired private OrderServiceApi orderServiceApi;
     @Autowired private UserServiceApi userServiceApi;
 
     @RequestMapping(method = RequestMethod.GET)
@@ -47,7 +51,7 @@ public class SubjectV1Api extends AbstractV1Api {
         PagedList<CourseDto> courses = courseServiceApi.query(id, 0, 2);
         processCourses(courses.getList());
 
-        PagedList<CourseCommentDto> comments = courseServiceApi.queryCommentsBySubject(id, 0, 2);
+        PagedList<CourseCommentDto> comments = subjectServiceApi.queryCommentsBySubject(id, 0, 2);
         processCourseComments(comments.getList());
 
         JSONObject responseJson = new JSONObject();
@@ -92,7 +96,7 @@ public class SubjectV1Api extends AbstractV1Api {
     public MomiaHttpResponse listComments(@RequestParam long id, @RequestParam int start) {
         if (id <= 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        PagedList<CourseCommentDto> pageComments = courseServiceApi.queryCommentsBySubject(id, start, Configuration.getInt("PageSize.CourseComment"));
+        PagedList<CourseCommentDto> pageComments = subjectServiceApi.queryCommentsBySubject(id, start, Configuration.getInt("PageSize.CourseComment"));
         processCourseComments(pageComments.getList());
 
         return MomiaHttpResponse.SUCCESS(pageComments);
@@ -141,7 +145,7 @@ public class SubjectV1Api extends AbstractV1Api {
         }
         orderJson.put("packages", packagesJson);
 
-        return MomiaHttpResponse.SUCCESS(subjectServiceApi.placeOrder(orderJson));
+        return MomiaHttpResponse.SUCCESS(orderServiceApi.placeOrder(orderJson));
     }
 
     @RequestMapping(value = "/order/delete", method = RequestMethod.POST)
@@ -149,7 +153,7 @@ public class SubjectV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (orderId <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        if (!subjectServiceApi.deleteOrder(utoken, orderId)) return MomiaHttpResponse.FAILED("删除订单失败");
+        if (!orderServiceApi.deleteOrder(utoken, orderId)) return MomiaHttpResponse.FAILED("删除订单失败");
         return MomiaHttpResponse.SUCCESS;
     }
 
@@ -158,7 +162,7 @@ public class SubjectV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (orderId <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        if (!subjectServiceApi.refundOrder(utoken, orderId)) return MomiaHttpResponse.FAILED("申请退款失败");
+        if (!orderServiceApi.refundOrder(utoken, orderId)) return MomiaHttpResponse.FAILED("申请退款失败");
         return MomiaHttpResponse.SUCCESS;
     }
 
@@ -169,7 +173,7 @@ public class SubjectV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (orderId <= 0 || userCouponId <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        return MomiaHttpResponse.SUCCESS(subjectServiceApi.coupon(utoken, orderId, userCouponId));
+        return MomiaHttpResponse.SUCCESS(couponServiceApi.coupon(utoken, orderId, userCouponId));
     }
 
     @RequestMapping(value = "/favor", method = RequestMethod.POST)

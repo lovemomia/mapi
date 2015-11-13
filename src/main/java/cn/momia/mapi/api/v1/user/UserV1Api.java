@@ -1,6 +1,8 @@
 package cn.momia.mapi.api.v1.user;
 
+import cn.momia.api.course.CouponServiceApi;
 import cn.momia.api.course.CourseServiceApi;
+import cn.momia.api.course.OrderServiceApi;
 import cn.momia.api.course.SubjectServiceApi;
 import cn.momia.api.course.dto.BookedCourseDto;
 import cn.momia.api.course.dto.CourseDto;
@@ -35,6 +37,8 @@ import java.util.List;
 public class UserV1Api extends AbstractV1Api {
     @Autowired private CourseServiceApi courseServiceApi;
     @Autowired private SubjectServiceApi subjectServiceApi;
+    @Autowired private CouponServiceApi couponServiceApi;
+    @Autowired private OrderServiceApi orderServiceApi;
     @Autowired private FeedServiceApi feedServiceApi;
     @Autowired private UserServiceApi userServiceApi;
 
@@ -143,7 +147,7 @@ public class UserV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        PagedList<OrderPackageDto> packages = subjectServiceApi.listBookableOrders(utoken, orderId, start, Configuration.getInt("PageSize.Subject"));
+        PagedList<OrderPackageDto> packages = orderServiceApi.listBookable(utoken, orderId, start, Configuration.getInt("PageSize.Subject"));
         for (OrderPackageDto orderPackage : packages.getList()) {
             orderPackage.setCover(ImageFile.middleUrl(orderPackage.getCover()));
         }
@@ -156,7 +160,7 @@ public class UserV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (status <= 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        PagedList<OrderDto> orders = subjectServiceApi.listOrders(utoken, status, start, Configuration.getInt("PageSize.Order"));
+        PagedList<OrderDto> orders = orderServiceApi.listOrders(utoken, status, start, Configuration.getInt("PageSize.Order"));
         for (OrderDto order : orders.getList()) {
             order.setCover(ImageFile.middleUrl(order.getCover()));
         }
@@ -171,7 +175,7 @@ public class UserV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (status < 0 || status > 3 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        PagedList<UserCouponDto> userCoupons = subjectServiceApi.listUserCoupons(utoken, status, start, Configuration.getInt("PageSize.UserCoupon"));
+        PagedList<UserCouponDto> userCoupons = couponServiceApi.listUserCoupons(utoken, status, start, Configuration.getInt("PageSize.UserCoupon"));
         return MomiaHttpResponse.SUCCESS(userCoupons);
     }
 
