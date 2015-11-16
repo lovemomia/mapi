@@ -64,6 +64,14 @@ public class UserV1Api extends AbstractV1Api {
         return MomiaHttpResponse.SUCCESS(processUser(userServiceApi.updateAvatar(utoken, avatar)));
     }
 
+    @RequestMapping(value = "/cover", method = RequestMethod.POST)
+    public MomiaHttpResponse updateCover(@RequestParam String utoken, @RequestParam String cover) {
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (StringUtils.isBlank(cover)) return MomiaHttpResponse.FAILED("用户封面图不能为空");
+
+        return MomiaHttpResponse.SUCCESS(processUser(userServiceApi.updateCover(utoken, cover)));
+    }
+
     @RequestMapping(value = "/name", method = RequestMethod.POST)
     public MomiaHttpResponse updateName(@RequestParam String utoken, @RequestParam String name) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
