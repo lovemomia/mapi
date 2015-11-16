@@ -60,7 +60,7 @@ public class AbstractV1Api extends AbstractApi {
             comment.setAvatar(ImageFile.smallUrl(comment.getAvatar()));
             List<String> imgs = comment.getImgs();
             comment.setImgs(completeSmallImgs(imgs));
-            comment.setLargeImgs(completeImgs(imgs));
+            comment.setLargeImgs(completeLargeImgs(imgs));
         }
     }
 
@@ -73,7 +73,7 @@ public class AbstractV1Api extends AbstractApi {
     protected void processFeed(FeedDto feed) {
         List<String> imgs = feed.getImgs();
         feed.setImgs(completeMiddleImgs(imgs));
-        feed.setLargeImgs(completeImgs(imgs));
+        feed.setLargeImgs(completeLargeImgs(imgs));
         feed.setAvatar(ImageFile.smallUrl(feed.getAvatar()));
     }
 

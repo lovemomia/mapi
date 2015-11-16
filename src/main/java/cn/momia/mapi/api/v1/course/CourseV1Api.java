@@ -98,7 +98,7 @@ public class CourseV1Api extends AbstractV1Api {
         if (id <= 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
         PagedList<String> book = courseServiceApi.book(id, start, Configuration.getInt("PageSize.BookImg"));
-        book.setList(completeImgs(book.getList()));
+        book.setList(completeLargeImgs(book.getList()));
 
         return MomiaHttpResponse.SUCCESS(book);
     }
