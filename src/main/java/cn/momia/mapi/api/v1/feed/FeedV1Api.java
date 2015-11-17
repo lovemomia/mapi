@@ -62,9 +62,9 @@ public class FeedV1Api extends AbstractV1Api {
     }
 
     @RequestMapping(value = "/course", method = RequestMethod.GET)
-    public MomiaHttpResponse topic(@RequestParam(defaultValue = "") String utoken,
-                                   @RequestParam(value = "coid") long courseId,
-                                   @RequestParam final int start) {
+    public MomiaHttpResponse course(@RequestParam(defaultValue = "") String utoken,
+                                    @RequestParam(value = "coid") long courseId,
+                                    @RequestParam final int start) {
         if (courseId <= 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
         JSONObject courseFeedsJson = new JSONObject();
@@ -81,6 +81,26 @@ public class FeedV1Api extends AbstractV1Api {
         courseFeedsJson.put("feeds", pagedFeeds);
 
         return MomiaHttpResponse.SUCCESS(courseFeedsJson);
+    }
+
+    @RequestMapping(value = "/course/list", method = RequestMethod.GET)
+    public MomiaHttpResponse listCourses(@RequestParam String utoken, @RequestParam int start) {
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (start < 0) return MomiaHttpResponse.BAD_REQUEST;
+
+        PagedList<? extends CourseDto> pagedCourses;
+        UserDto user = userServiceApi.get(utoken);
+        if (!feedServiceApi.isOfficialUser(user.getId())) {
+            pagedCourses = courseServiceApi.queryFinishedByUser(user.getId(), start, Configuration.getInt("PageSize.Course"));
+        } else {
+            pagedCourses = courseServiceApi.list(start, Configuration.getInt("PageSize.Course"));
+        }
+        
+        for (CourseDto course : pagedCourses.getList()) {
+            course.setCover(ImageFile.largeUrl(course.getCover()));
+        }
+
+        return MomiaHttpResponse.SUCCESS(pagedCourses);
     }
 
     @RequestMapping(value = "/tag", method = RequestMethod.GET)
