@@ -91,9 +91,9 @@ public class FeedV1Api extends AbstractV1Api {
         PagedList<? extends CourseDto> pagedCourses;
         UserDto user = userServiceApi.get(utoken);
         if (!feedServiceApi.isOfficialUser(user.getId())) {
-            pagedCourses = courseServiceApi.queryFinishedByUser(user.getId(), start, Configuration.getInt("PageSize.Course"));
+            pagedCourses = courseServiceApi.listFinished(user.getId(), start, Configuration.getInt("PageSize.Course"));
         } else {
-            pagedCourses = courseServiceApi.listFinished(start, Configuration.getInt("PageSize.Course"));
+            pagedCourses = courseServiceApi.listFinished(0, start, Configuration.getInt("PageSize.Course"));
         }
         
         for (CourseDto course : pagedCourses.getList()) {
