@@ -23,6 +23,7 @@
     <AppConf>
         <Name>duola</Name>
         <WapDomain>http://m.momia.cn</WapDomain>
+        <ShareCoupon>true</ShareCoupon>
     </AppConf>
 
     <PageSize>
