@@ -3,9 +3,12 @@ package cn.momia.mapi.api.v1.course;
 import cn.momia.api.course.CouponServiceApi;
 import cn.momia.api.course.SubjectServiceApi;
 import cn.momia.api.user.UserServiceApi;
+import cn.momia.api.user.dto.UserDto;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.common.util.MobileUtil;
+import cn.momia.common.webapp.config.Configuration;
 import cn.momia.mapi.api.v1.AbstractV1Api;
+import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,6 +21,22 @@ import org.springframework.web.bind.annotation.RestController;
 public class CouponV1Api extends AbstractV1Api {
     @Autowired private CouponServiceApi couponServiceApi;
     @Autowired private UserServiceApi userServiceApi;
+
+    @RequestMapping(value = "/share", method = RequestMethod.GET)
+    public MomiaHttpResponse shareCoupon(@RequestParam String utoken) {
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+
+        UserDto user = userServiceApi.get(utoken);
+        JSONObject shareJson = new JSONObject();
+        shareJson.put("img", Configuration.getString("Share.Img"));
+        shareJson.put("desc", Configuration.getString("Share.Desc"));
+        shareJson.put("url", Configuration.getString("Share.Url") + "?invite=" + user.getInviteCode());
+        shareJson.put("cover", Configuration.getString("Share.Cover"));
+        shareJson.put("title", Configuration.getString("Share.Title"));
+        shareJson.put("abstracts", Configuration.getString("Share.Abstracts"));
+
+        return MomiaHttpResponse.SUCCESS(shareJson);
+    }
 
     @RequestMapping(value = "/invite", method = RequestMethod.POST)
     public MomiaHttpResponse inviteCoupon(@RequestParam String mobile, @RequestParam(value = "invite") String inviteCode) {
