@@ -1,12 +1,17 @@
 package cn.momia.mapi.api.v1.user;
 
+import cn.momia.api.course.CouponServiceApi;
 import cn.momia.api.course.CourseServiceApi;
+import cn.momia.api.course.OrderServiceApi;
 import cn.momia.api.course.SubjectServiceApi;
 import cn.momia.api.course.dto.BookedCourseDto;
 import cn.momia.api.course.dto.CourseDto;
 import cn.momia.api.course.dto.FavoriteDto;
 import cn.momia.api.course.dto.OrderPackageDto;
 import cn.momia.api.course.dto.OrderDto;
+import cn.momia.api.course.dto.UserCouponDto;
+import cn.momia.api.feed.FeedServiceApi;
+import cn.momia.api.feed.dto.FeedDto;
 import cn.momia.api.user.dto.UserDto;
 import cn.momia.common.api.dto.PagedList;
 import cn.momia.common.api.http.MomiaHttpResponse;
@@ -32,6 +37,9 @@ import java.util.List;
 public class UserV1Api extends AbstractV1Api {
     @Autowired private CourseServiceApi courseServiceApi;
     @Autowired private SubjectServiceApi subjectServiceApi;
+    @Autowired private CouponServiceApi couponServiceApi;
+    @Autowired private OrderServiceApi orderServiceApi;
+    @Autowired private FeedServiceApi feedServiceApi;
     @Autowired private UserServiceApi userServiceApi;
 
     @RequestMapping(method = RequestMethod.GET)
@@ -54,6 +62,14 @@ public class UserV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(avatar)) return MomiaHttpResponse.FAILED("用户头像不能为空");
 
         return MomiaHttpResponse.SUCCESS(processUser(userServiceApi.updateAvatar(utoken, avatar)));
+    }
+
+    @RequestMapping(value = "/cover", method = RequestMethod.POST)
+    public MomiaHttpResponse updateCover(@RequestParam String utoken, @RequestParam String cover) {
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (StringUtils.isBlank(cover)) return MomiaHttpResponse.FAILED("用户封面图不能为空");
+
+        return MomiaHttpResponse.SUCCESS(processUser(userServiceApi.updateCover(utoken, cover)));
     }
 
     @RequestMapping(value = "/name", method = RequestMethod.POST)
@@ -139,7 +155,7 @@ public class UserV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        PagedList<OrderPackageDto> packages = subjectServiceApi.listBookableOrders(utoken, orderId, start, Configuration.getInt("PageSize.Subject"));
+        PagedList<OrderPackageDto> packages = orderServiceApi.listBookable(utoken, orderId, start, Configuration.getInt("PageSize.Subject"));
         for (OrderPackageDto orderPackage : packages.getList()) {
             orderPackage.setCover(ImageFile.middleUrl(orderPackage.getCover()));
         }
@@ -152,12 +168,23 @@ public class UserV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (status <= 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        PagedList<OrderDto> orders = subjectServiceApi.listOrders(utoken, status, start, Configuration.getInt("PageSize.Order"));
+        PagedList<OrderDto> orders = orderServiceApi.listOrders(utoken, status, start, Configuration.getInt("PageSize.Order"));
         for (OrderDto order : orders.getList()) {
             order.setCover(ImageFile.middleUrl(order.getCover()));
         }
 
         return MomiaHttpResponse.SUCCESS(orders);
+    }
+
+    @RequestMapping(value = "/coupon", method = RequestMethod.GET)
+    public MomiaHttpResponse listCoupons(@RequestParam String utoken,
+                                         @RequestParam(required = false, defaultValue = "0") int status,
+                                         @RequestParam int start) {
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (status < 0 || status > 3 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
+
+        PagedList<UserCouponDto> userCoupons = couponServiceApi.listUserCoupons(utoken, status, start, Configuration.getInt("PageSize.UserCoupon"));
+        return MomiaHttpResponse.SUCCESS(userCoupons);
     }
 
     @RequestMapping(value = "/favorite", method = RequestMethod.GET)
@@ -185,5 +212,33 @@ public class UserV1Api extends AbstractV1Api {
             JSONObject ref = favorite.getRef();
             ref.put("cover", ImageFile.middleUrl(ref.getString("cover")));
         }
+    }
+
+    @RequestMapping(value = "/feed", method = RequestMethod.GET)
+    public MomiaHttpResponse listFeeds(@RequestParam String utoken, @RequestParam int start) {
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (start < 0) return MomiaHttpResponse.BAD_REQUEST;
+
+        UserDto user = userServiceApi.get(utoken);
+        PagedList<FeedDto> pagedFeeds = feedServiceApi.listFeedsOfUser(user.getId(), start, Configuration.getInt("PageSize.Feed"));
+        processFeeds(pagedFeeds.getList());
+
+        return MomiaHttpResponse.SUCCESS(pagedFeeds);
+    }
+
+    @RequestMapping(value = "/info", method = RequestMethod.GET)
+    public MomiaHttpResponse getInfo(@RequestParam(value = "uid") long userId, @RequestParam int start) {
+        JSONObject infoJson = new JSONObject();
+
+        if (start == 0) {
+            UserDto user = userServiceApi.get(userId);
+            infoJson.put("user", processUser(user));
+        }
+
+        PagedList<FeedDto> pagedFeeds = feedServiceApi.listFeedsOfUser(userId, start, Configuration.getInt("PageSize.Feed"));
+        processFeeds(pagedFeeds.getList());
+        infoJson.put("feeds", pagedFeeds);
+
+        return MomiaHttpResponse.SUCCESS(infoJson);
     }
 }

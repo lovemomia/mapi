@@ -35,7 +35,9 @@ public class FeedV1Api extends AbstractV1Api {
     public MomiaHttpResponse follow(@RequestParam String utoken, @RequestParam(value = "fuid") long followedId) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (followedId <= 0) return MomiaHttpResponse.BAD_REQUEST;
-        if (!userServiceApi.exists(followedId)) return MomiaHttpResponse.FAILED("关注的用户不存在");
+
+        UserDto followedUser = userServiceApi.get(followedId);
+        if (!followedUser.exists()) return MomiaHttpResponse.FAILED("关注的用户不存在");
 
         UserDto user = userServiceApi.get(utoken);
         feedServiceApi.follow(user.getId(), followedId);
@@ -60,9 +62,9 @@ public class FeedV1Api extends AbstractV1Api {
     }
 
     @RequestMapping(value = "/course", method = RequestMethod.GET)
-    public MomiaHttpResponse topic(@RequestParam(defaultValue = "") String utoken,
-                                   @RequestParam(value = "coid") long courseId,
-                                   @RequestParam final int start) {
+    public MomiaHttpResponse course(@RequestParam(defaultValue = "") String utoken,
+                                    @RequestParam(value = "coid") long courseId,
+                                    @RequestParam final int start) {
         if (courseId <= 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
         JSONObject courseFeedsJson = new JSONObject();
@@ -81,15 +83,29 @@ public class FeedV1Api extends AbstractV1Api {
         return MomiaHttpResponse.SUCCESS(courseFeedsJson);
     }
 
+    @RequestMapping(value = "/course/list", method = RequestMethod.GET)
+    public MomiaHttpResponse listCourses(@RequestParam String utoken, @RequestParam int start) {
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (start < 0) return MomiaHttpResponse.BAD_REQUEST;
+
+        PagedList<? extends CourseDto> pagedCourses;
+        UserDto user = userServiceApi.get(utoken);
+        if (!feedServiceApi.isOfficialUser(user.getId())) {
+            pagedCourses = courseServiceApi.listFinished(user.getId(), start, Configuration.getInt("PageSize.Course"));
+        } else {
+            pagedCourses = courseServiceApi.listFinished(0, start, Configuration.getInt("PageSize.Course"));
+        }
+        
+        for (CourseDto course : pagedCourses.getList()) {
+            course.setCover(ImageFile.largeUrl(course.getCover()));
+        }
+
+        return MomiaHttpResponse.SUCCESS(pagedCourses);
+    }
+
     @RequestMapping(value = "/tag", method = RequestMethod.GET)
     public MomiaHttpResponse listTags() {
         return MomiaHttpResponse.SUCCESS(feedServiceApi.listTags(Configuration.getInt("PageSize.FeedTag")));
-    }
-
-    @RequestMapping(value = "/tag/add", method = RequestMethod.POST)
-    public MomiaHttpResponse addTag(@RequestParam String utoken, @RequestParam String name) {
-        UserDto user = userServiceApi.get(utoken);
-        return MomiaHttpResponse.SUCCESS(feedServiceApi.addTag(user.getId(), name));
     }
 
     @RequestMapping(value = "/add", method = RequestMethod.POST)
@@ -104,7 +120,7 @@ public class FeedV1Api extends AbstractV1Api {
         CourseDto course = courseServiceApi.get(feedJson.getLong("courseId"), CourseDto.Type.BASE);
         feedJson.put("subjectId", course.getSubjectId());
 
-        if (!courseServiceApi.finished(user.getId(), feedJson.getLong("courseId"))) return MomiaHttpResponse.FAILED("发表Feed失败，所选课程不存在或您还没参加该课程");
+        if (!courseServiceApi.joined(user.getId(), feedJson.getLong("courseId"))) return MomiaHttpResponse.FAILED("发表Feed失败，所选课程不存在或您还没参加该课程");
         feedServiceApi.add(feedJson);
 
         return MomiaHttpResponse.SUCCESS;

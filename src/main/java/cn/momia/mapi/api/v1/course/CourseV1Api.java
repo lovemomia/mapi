@@ -44,7 +44,7 @@ public class CourseV1Api extends AbstractV1Api {
             courseJson.put("favored", courseServiceApi.isFavored(user.getId(), id));
         }
 
-        List<TeacherDto> teachers = processTeachers(courseServiceApi.queryTeachers(id, 0, Configuration.getInt("PageSize.CourseTeacher")).getList());
+        List<TeacherDto> teachers = processTeachers(courseServiceApi.teacher(id, 0, Configuration.getInt("PageSize.CourseTeacher")).getList());
         if (!teachers.isEmpty()) courseJson.put("teachers", teachers);
 
         PagedList<CourseCommentDto> pagedComments = courseServiceApi.queryCommentsByCourse(id, 0, 1);
@@ -98,7 +98,7 @@ public class CourseV1Api extends AbstractV1Api {
         if (id <= 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
         PagedList<String> book = courseServiceApi.book(id, start, Configuration.getInt("PageSize.BookImg"));
-        book.setList(completeImgs(book.getList()));
+        book.setList(completeLargeImgs(book.getList()));
 
         return MomiaHttpResponse.SUCCESS(book);
     }
@@ -107,7 +107,7 @@ public class CourseV1Api extends AbstractV1Api {
     public MomiaHttpResponse teacher(@RequestParam long id, @RequestParam int start) {
         if (id <= 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        PagedList<TeacherDto> teachers = courseServiceApi.queryTeachers(id, start, Configuration.getInt("PageSize.Teacher"));
+        PagedList<TeacherDto> teachers = courseServiceApi.teacher(id, start, Configuration.getInt("PageSize.Teacher"));
         processTeachers(teachers.getList());
 
         return MomiaHttpResponse.SUCCESS(teachers);

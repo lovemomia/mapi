@@ -45,7 +45,7 @@ public class IndexV1Api extends AbstractV1Api {
             indexJson.put("icons", getIcons(cityId, clientType));
             indexJson.put("events", getEvents(cityId, clientType));
         }
-        indexJson.put("subjects", getFreeSubjects(cityId, start));
+        indexJson.put("subjects", getTrialSubjects(cityId, start));
 
         return MomiaHttpResponse.SUCCESS(indexJson);
     }
@@ -80,16 +80,16 @@ public class IndexV1Api extends AbstractV1Api {
         return events;
     }
 
-    private PagedList<SubjectDto> getFreeSubjects(int cityId, int start) {
+    private PagedList<SubjectDto> getTrialSubjects(int cityId, int start) {
         try {
-            PagedList<SubjectDto> subjects = subjectServiceApi.listFree(cityId, start, Configuration.getInt("PageSize.FreeSubject"));
+            PagedList<SubjectDto> subjects = subjectServiceApi.listTrial(cityId, start, Configuration.getInt("PageSize.TrialSubject"));
             for (SubjectDto subject : subjects.getList()) {
                 subject.setCover(ImageFile.largeUrl(subject.getCover()));
             }
 
             return subjects;
         } catch (Exception e) {
-            LOGGER.error("fail to list free subjects", e);
+            LOGGER.error("fail to list trial subjects", e);
             return PagedList.EMPTY;
         }
     }

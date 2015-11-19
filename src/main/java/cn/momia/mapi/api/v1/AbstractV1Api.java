@@ -79,6 +79,7 @@ public class AbstractV1Api extends AbstractApi {
 
     protected UserDto processUser(UserDto user) {
         user.setAvatar(ImageFile.smallUrl(user.getAvatar()));
+        user.setCover(ImageFile.largeUrl(user.getCover()));
         processChildren(user.getChildren());
 
         return user;
