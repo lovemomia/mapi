@@ -7,54 +7,9 @@ import cn.momia.image.api.ImageFile;
 import cn.momia.mapi.api.AbstractApi;
 import cn.momia.api.user.dto.UserDto;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class AbstractV1Api extends AbstractApi {
-    protected List<String> completeImgs(List<String> imgs) {
-        if (imgs == null) return null;
-
-        List<String> completedImgs = new ArrayList<String>();
-        for (String img : imgs) {
-            completedImgs.add(ImageFile.url(img));
-        }
-
-        return completedImgs;
-    }
-
-    protected List<String> completeLargeImgs(List<String> imgs) {
-        if (imgs == null) return null;
-
-        List<String> completedImgs = new ArrayList<String>();
-        for (String img : imgs) {
-            completedImgs.add(ImageFile.largeUrl(img));
-        }
-
-        return completedImgs;
-    }
-
-    protected List<String> completeMiddleImgs(List<String> imgs) {
-        if (imgs == null) return null;
-
-        List<String> completedImgs = new ArrayList<String>();
-        for (String img : imgs) {
-            completedImgs.add(ImageFile.middleUrl(img));
-        }
-
-        return completedImgs;
-    }
-
-    protected List<String> completeSmallImgs(List<String> imgs) {
-        if (imgs == null) return null;
-
-        List<String> completedImgs = new ArrayList<String>();
-        for (String img : imgs) {
-            completedImgs.add(ImageFile.smallUrl(img));
-        }
-
-        return completedImgs;
-    }
-
     protected void processCourseComments(List<CourseCommentDto> comments) {
         for (CourseCommentDto comment : comments) {
             comment.setAvatar(ImageFile.smallUrl(comment.getAvatar()));
