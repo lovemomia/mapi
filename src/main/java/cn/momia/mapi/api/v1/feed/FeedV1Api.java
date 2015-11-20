@@ -61,6 +61,19 @@ public class FeedV1Api extends AbstractV1Api {
         return MomiaHttpResponse.SUCCESS(pagedFeeds);
     }
 
+    @RequestMapping(value = "/subject", method = RequestMethod.GET)
+    public MomiaHttpResponse subject(@RequestParam(defaultValue = "") String utoken,
+                                     @RequestParam(value = "suid") long subjectId,
+                                     @RequestParam final int start) {
+        if (subjectId <= 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
+
+        long userId = StringUtils.isBlank(utoken) ? 0 : userServiceApi.get(utoken).getId();
+        PagedList<FeedDto> pagedFeeds = feedServiceApi.queryBySubject(userId, subjectId, start, Configuration.getInt("PageSize.Feed"));
+        processFeeds(pagedFeeds.getList());
+
+        return MomiaHttpResponse.SUCCESS(pagedFeeds);
+    }
+
     @RequestMapping(value = "/course", method = RequestMethod.GET)
     public MomiaHttpResponse course(@RequestParam(defaultValue = "") String utoken,
                                     @RequestParam(value = "coid") long courseId,

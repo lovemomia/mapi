@@ -62,12 +62,6 @@ public class SubjectV1Api extends AbstractV1Api {
         return MomiaHttpResponse.SUCCESS(responseJson);
     }
 
-    private void processCourses(List<CourseDto> courses) {
-        for (CourseDto course : courses) {
-            course.setCover(ImageFile.middleUrl(course.getCover()));
-        }
-    }
-
     @RequestMapping(value = "/course", method = RequestMethod.GET)
     public MomiaHttpResponse listCourses(@RequestParam long id,
                                          @RequestParam(value = "pid", required = false, defaultValue = "0") long packageId,
