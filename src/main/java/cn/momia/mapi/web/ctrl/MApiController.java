@@ -17,4 +17,9 @@ public class MApiController extends VersionController {
     public String processRequest(HttpServletRequest request) {
         return forward(request);
     }
+
+    @RequestMapping(value = "/v{\\d+}/**", method = { RequestMethod.GET, RequestMethod.POST })
+    public String notFound() {
+        return "forward:/error/404";
+    }
 }
