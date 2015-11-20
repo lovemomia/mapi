@@ -81,7 +81,7 @@ public abstract class AbstractApi extends BaseController {
         return completedImgs;
     }
 
-    protected void processCourses(List<CourseDto> courses) {
+    protected void processCourses(List<? extends CourseDto> courses) {
         for (CourseDto course : courses) {
             course.setCover(ImageFile.middleUrl(course.getCover()));
         }
