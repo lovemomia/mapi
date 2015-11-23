@@ -4,9 +4,11 @@ import cn.momia.api.course.CourseServiceApi;
 import cn.momia.api.course.SubjectServiceApi;
 import cn.momia.api.course.dto.CourseDto;
 import cn.momia.api.course.dto.SubjectDto;
+import cn.momia.api.course.dto.SubjectSkuDto;
 import cn.momia.api.feed.FeedServiceApi;
 import cn.momia.api.feed.dto.FeedDto;
 import cn.momia.api.user.UserServiceApi;
+import cn.momia.api.user.dto.ContactDto;
 import cn.momia.common.api.dto.PagedList;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.common.webapp.config.Configuration;
@@ -22,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -73,6 +76,32 @@ public class SubjectV2Api extends AbstractV2Api {
         responseJson.put("subject", subject);
         responseJson.put("courses", courses);
         responseJson.put("feeds", feeds);
+
+        return MomiaHttpResponse.SUCCESS(responseJson);
+    }
+
+    @RequestMapping(value = "/sku", method = RequestMethod.GET)
+    public MomiaHttpResponse sku(@RequestParam String utoken, @RequestParam long id, @RequestParam(value = "coid") long courseId) {
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
+
+        List<SubjectSkuDto> skus = subjectServiceApi.querySkus(id);
+        ContactDto contact = userServiceApi.getContact(utoken);
+
+        List<SubjectSkuDto> courseSkus = new ArrayList<SubjectSkuDto>();
+        List<SubjectSkuDto> subjectSkus = new ArrayList<SubjectSkuDto>();
+        for (SubjectSkuDto sku : skus) {
+            if (sku.getCourseId() <= 0) {
+                subjectSkus.add(sku);
+            } else if (sku.getCourseId() == courseId) {
+                courseSkus.add(sku);
+            }
+        }
+
+        JSONObject responseJson = new JSONObject();
+        responseJson.put("skus", courseSkus);
+        responseJson.put("packages", subjectSkus);
+        responseJson.put("contact", contact);
 
         return MomiaHttpResponse.SUCCESS(responseJson);
     }
