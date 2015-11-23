@@ -37,10 +37,12 @@ public class CourseV2Api extends AbstractV2Api {
     @Autowired private UserServiceApi userServiceApi;
 
     @RequestMapping(method = RequestMethod.GET)
-    public MomiaHttpResponse get(@RequestParam(required = false, defaultValue = "") String utoken, @RequestParam long id) {
+    public MomiaHttpResponse get(@RequestParam(required = false, defaultValue = "") String utoken,
+                                 @RequestParam long id,
+                                 @RequestParam(required = false, defaultValue = "") String pos) {
         if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        CourseDto course = processCourse(courseServiceApi.get(id));
+        CourseDto course = processCourse(courseServiceApi.get(id, pos));
         JSONObject courseJson = (JSONObject) JSON.toJSON(course);
         if (!StringUtils.isBlank(utoken)) {
             UserDto user = userServiceApi.get(utoken);
