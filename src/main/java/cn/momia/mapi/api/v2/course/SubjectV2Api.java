@@ -81,7 +81,7 @@ public class SubjectV2Api extends AbstractV2Api {
     }
 
     @RequestMapping(value = "/sku", method = RequestMethod.GET)
-    public MomiaHttpResponse sku(@RequestParam String utoken, @RequestParam long id, @RequestParam(value = "coid") long courseId) {
+    public MomiaHttpResponse sku(@RequestParam String utoken, @RequestParam long id, @RequestParam(required = false, value = "coid", defaultValue = "0") long courseId) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
@@ -99,8 +99,12 @@ public class SubjectV2Api extends AbstractV2Api {
         }
 
         JSONObject responseJson = new JSONObject();
-        responseJson.put("skus", courseSkus);
-        responseJson.put("packages", subjectSkus);
+        if (courseId > 0) {
+            responseJson.put("skus", courseSkus);
+            responseJson.put("packages", subjectSkus);
+        } else {
+            responseJson.put("skus", subjectSkus);
+        }
         responseJson.put("contact", contact);
 
         return MomiaHttpResponse.SUCCESS(responseJson);
