@@ -16,11 +16,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 public class ValidationFilter implements Filter {
-    private static final Pattern VERSION_PATTERN = Pattern.compile("^/v\\d+/");
-
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {}
 
@@ -39,7 +36,7 @@ public class ValidationFilter implements Filter {
                 return;
             }
 
-            if (isInvalidUri(httpRequest) || isInvalidSign(httpRequest)) {
+            if (isInvalidSign(httpRequest)) {
                 forwardErrorPage(request, response, 403);
                 return;
             }
@@ -74,11 +71,6 @@ public class ValidationFilter implements Filter {
                 StringUtils.isBlank(channel) ||
                 StringUtils.isBlank(net) ||
                 StringUtils.isBlank(sign));
-    }
-
-    private boolean isInvalidUri(HttpServletRequest request) {
-        String uri = request.getRequestURI();
-        return VERSION_PATTERN.matcher(uri).find();
     }
 
     private boolean isInvalidSign(HttpServletRequest httpRequest) {
