@@ -155,14 +155,17 @@ public class FeedV1Api extends AbstractV1Api {
         PagedList<FeedCommentDto> comments = feedServiceApi.listComments(id, 0, Configuration.getInt("PageSize.FeedDetailComment"));
         processComments(comments.getList());
 
-        CourseDto course = courseServiceApi.get(feed.getCourseId(), CourseDto.Type.BASE);
-        course.setCover(ImageFile.largeUrl(course.getCover()));
-
         JSONObject feedDetailJson = new JSONObject();
         feedDetailJson.put("feed", feed);
         feedDetailJson.put("staredUsers", stars);
         feedDetailJson.put("comments", comments);
-        feedDetailJson.put("course", course);
+
+        if (feed.getCourseId() > 0) {
+            CourseDto course = courseServiceApi.get(feed.getCourseId(), CourseDto.Type.BASE);
+            course.setCover(ImageFile.largeUrl(course.getCover()));
+
+            feedDetailJson.put("course", course);
+        }
 
         return MomiaHttpResponse.SUCCESS(feedDetailJson);
     }
