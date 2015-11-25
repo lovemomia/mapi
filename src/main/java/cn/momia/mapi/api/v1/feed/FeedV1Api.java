@@ -16,6 +16,8 @@ import cn.momia.mapi.api.v1.AbstractV1Api;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -27,6 +29,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/v1/feed")
 public class FeedV1Api extends AbstractV1Api {
+    private static final Logger LOGGER = LoggerFactory.getLogger(FeedV1Api.class);
+
     @Autowired private CourseServiceApi courseServiceApi;
     @Autowired private FeedServiceApi feedServiceApi;
     @Autowired private UserServiceApi userServiceApi;
@@ -161,10 +165,14 @@ public class FeedV1Api extends AbstractV1Api {
         feedDetailJson.put("comments", comments);
 
         if (feed.getCourseId() > 0) {
-            CourseDto course = courseServiceApi.get(feed.getCourseId(), CourseDto.Type.BASE);
-            course.setCover(ImageFile.largeUrl(course.getCover()));
+            try {
+                CourseDto course = courseServiceApi.get(feed.getCourseId(), CourseDto.Type.BASE);
+                course.setCover(ImageFile.largeUrl(course.getCover()));
 
-            feedDetailJson.put("course", course);
+                feedDetailJson.put("course", course);
+            } catch (Exception e) {
+                LOGGER.error("fail to get course info: {}", feed.getCourseId());
+            }
         }
 
         return MomiaHttpResponse.SUCCESS(feedDetailJson);
