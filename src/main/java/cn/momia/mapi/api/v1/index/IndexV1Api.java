@@ -53,6 +53,7 @@ public class IndexV1Api extends AbstractV1Api {
     private List<BannerDto> getBanners(int cityId, int clientType) {
         List<BannerDto> banners = eventServiceApi.listBanners(cityId, Configuration.getInt("PageSize.Banner"));
         for (BannerDto banner : banners) {
+            if (banner.getPlatform() != 0 && banner.getPlatform() != clientType) continue;
             banner.setCover(ImageFile.url(banner.getCover()));
             banner.setAction(buildAction(banner.getAction(), clientType));
         }
@@ -63,6 +64,7 @@ public class IndexV1Api extends AbstractV1Api {
     private List<IconDto> getIcons(int cityId, int clientType) {
         List<IconDto> icons = eventServiceApi.listIcons(cityId, Configuration.getInt("PageSize.Icon"));
         for (IconDto icon : icons) {
+            if (icon.getPlatform() != 0 && icon.getPlatform() != clientType) continue;
             icon.setImg(ImageFile.url(icon.getImg()));
             icon.setAction(buildAction(icon.getAction(), clientType));
         }
@@ -73,6 +75,7 @@ public class IndexV1Api extends AbstractV1Api {
     private List<EventDto> getEvents(int cityId, int clientType) {
         List<EventDto> events = eventServiceApi.listEvents(cityId, Configuration.getInt("PageSize.Event"));
         for (EventDto event : events) {
+            if (event.getPlatform() != 0 && event.getPlatform() != clientType) continue;
             event.setImg(ImageFile.url(event.getImg()));
             event.setAction(buildAction(event.getAction(), clientType));
         }
