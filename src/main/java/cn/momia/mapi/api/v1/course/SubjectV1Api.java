@@ -9,6 +9,7 @@ import cn.momia.api.course.OrderServiceApi;
 import cn.momia.api.course.SubjectServiceApi;
 import cn.momia.api.course.dto.CourseCommentDto;
 import cn.momia.api.course.dto.CourseDto;
+import cn.momia.api.course.dto.OrderDto;
 import cn.momia.api.course.dto.SubjectDto;
 import cn.momia.api.course.dto.SubjectSkuDto;
 import cn.momia.api.user.UserServiceApi;
@@ -29,6 +30,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -60,12 +62,6 @@ public class SubjectV1Api extends AbstractV1Api {
         if (!comments.getList().isEmpty()) responseJson.put("comments", comments);
 
         return MomiaHttpResponse.SUCCESS(responseJson);
-    }
-
-    private void processCourses(List<CourseDto> courses) {
-        for (CourseDto course : courses) {
-            course.setCover(ImageFile.middleUrl(course.getCover()));
-        }
     }
 
     @RequestMapping(value = "/course", method = RequestMethod.GET)
@@ -110,8 +106,13 @@ public class SubjectV1Api extends AbstractV1Api {
         List<SubjectSkuDto> skus = subjectServiceApi.querySkus(id);
         ContactDto contact = userServiceApi.getContact(utoken);
 
+        List<SubjectSkuDto> subjectSkus = new ArrayList<SubjectSkuDto>();
+        for (SubjectSkuDto sku : skus) {
+            if (sku.getCourseId() <= 0) subjectSkus.add(sku);
+        }
+
         JSONObject responseJson = new JSONObject();
-        responseJson.put("skus", skus);
+        responseJson.put("skus", subjectSkus);
         responseJson.put("contact", contact);
 
         return MomiaHttpResponse.SUCCESS(responseJson);
@@ -174,6 +175,17 @@ public class SubjectV1Api extends AbstractV1Api {
         if (orderId <= 0 || userCouponId <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
         return MomiaHttpResponse.SUCCESS(couponServiceApi.coupon(utoken, orderId, userCouponId));
+    }
+
+    @RequestMapping(value = "/order/detail", method = RequestMethod.GET)
+    public MomiaHttpResponse orderDetail(@RequestParam String utoken, @RequestParam(value = "oid") long orderId) {
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (orderId <= 0) return MomiaHttpResponse.BAD_REQUEST;
+
+        OrderDto order = orderServiceApi.get(utoken, orderId);
+        order.setCover(ImageFile.middleUrl(order.getCover()));
+
+        return MomiaHttpResponse.SUCCESS(order);
     }
 
     @RequestMapping(value = "/favor", method = RequestMethod.POST)

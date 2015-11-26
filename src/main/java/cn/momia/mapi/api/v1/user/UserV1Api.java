@@ -131,12 +131,6 @@ public class UserV1Api extends AbstractV1Api {
         return MomiaHttpResponse.SUCCESS(courses);
     }
 
-    private void processCourses(List<? extends CourseDto> courses) {
-        for (CourseDto course : courses) {
-            course.setCover(ImageFile.middleUrl(course.getCover()));
-        }
-    }
-
     @RequestMapping(value = "/course/finished", method = RequestMethod.GET)
     public MomiaHttpResponse listFinished(@RequestParam String utoken, @RequestParam int start) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;

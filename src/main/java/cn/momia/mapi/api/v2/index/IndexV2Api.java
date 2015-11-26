@@ -1,7 +1,7 @@
-package cn.momia.mapi.api.v1.index;
+package cn.momia.mapi.api.v2.index;
 
-import cn.momia.api.course.SubjectServiceApi;
-import cn.momia.api.course.dto.SubjectDto;
+import cn.momia.api.course.CourseServiceApi;
+import cn.momia.api.course.dto.CourseDto;
 import cn.momia.api.event.EventServiceApi;
 import cn.momia.api.event.dto.BannerDto;
 import cn.momia.api.event.dto.EventDto;
@@ -10,7 +10,7 @@ import cn.momia.common.api.dto.PagedList;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.common.webapp.config.Configuration;
 import cn.momia.image.api.ImageFile;
-import cn.momia.mapi.api.v1.AbstractV1Api;
+import cn.momia.mapi.api.v2.AbstractV2Api;
 import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,12 +24,12 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @RestController
-@RequestMapping("/v1/index")
-public class IndexV1Api extends AbstractV1Api {
-    private static final Logger LOGGER = LoggerFactory.getLogger(IndexV1Api.class);
+@RequestMapping("/v2/index")
+public class IndexV2Api extends AbstractV2Api {
+    private static final Logger LOGGER = LoggerFactory.getLogger(IndexV2Api.class);
 
     @Autowired private EventServiceApi eventServiceApi;
-    @Autowired private SubjectServiceApi subjectServiceApi;
+    @Autowired private CourseServiceApi courseServiceApi;
 
     @RequestMapping(method = RequestMethod.GET)
     public MomiaHttpResponse index(@RequestParam(value = "city") int cityId,
@@ -45,7 +45,7 @@ public class IndexV1Api extends AbstractV1Api {
             indexJson.put("icons", getIcons(cityId, clientType));
             indexJson.put("events", getEvents(cityId, clientType));
         }
-        indexJson.put("subjects", getTrialSubjects(cityId, start));
+        indexJson.put("courses", getRecommendCourses(cityId, start));
 
         return MomiaHttpResponse.SUCCESS(indexJson);
     }
@@ -80,16 +80,16 @@ public class IndexV1Api extends AbstractV1Api {
         return events;
     }
 
-    private PagedList<SubjectDto> getTrialSubjects(int cityId, int start) {
+    private PagedList<CourseDto> getRecommendCourses(int cityId, int start) {
         try {
-            PagedList<SubjectDto> subjects = subjectServiceApi.listTrial(cityId, start, Configuration.getInt("PageSize.Trial"));
-            for (SubjectDto subject : subjects.getList()) {
-                subject.setCover(ImageFile.largeUrl(subject.getCover()));
+            PagedList<CourseDto> courses = courseServiceApi.listRecommend(cityId, start, Configuration.getInt("PageSize.Course"));
+            for (CourseDto course : courses.getList()) {
+                course.setCover(ImageFile.largeUrl(course.getCover()));
             }
 
-            return subjects;
+            return courses;
         } catch (Exception e) {
-            LOGGER.error("fail to list trial subjects", e);
+            LOGGER.error("fail to list recommend courses", e);
             return PagedList.EMPTY;
         }
     }

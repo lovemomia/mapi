@@ -16,6 +16,8 @@ import cn.momia.mapi.api.v1.AbstractV1Api;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -27,6 +29,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/v1/feed")
 public class FeedV1Api extends AbstractV1Api {
+    private static final Logger LOGGER = LoggerFactory.getLogger(FeedV1Api.class);
+
     @Autowired private CourseServiceApi courseServiceApi;
     @Autowired private FeedServiceApi feedServiceApi;
     @Autowired private UserServiceApi userServiceApi;
@@ -56,6 +60,19 @@ public class FeedV1Api extends AbstractV1Api {
         }
 
         PagedList<FeedDto> pagedFeeds = feedServiceApi.list(userId, start, Configuration.getInt("PageSize.Feed"));
+        processFeeds(pagedFeeds.getList());
+
+        return MomiaHttpResponse.SUCCESS(pagedFeeds);
+    }
+
+    @RequestMapping(value = "/subject", method = RequestMethod.GET)
+    public MomiaHttpResponse subject(@RequestParam(defaultValue = "") String utoken,
+                                     @RequestParam(value = "suid") long subjectId,
+                                     @RequestParam final int start) {
+        if (subjectId <= 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
+
+        long userId = StringUtils.isBlank(utoken) ? 0 : userServiceApi.get(utoken).getId();
+        PagedList<FeedDto> pagedFeeds = feedServiceApi.queryBySubject(userId, subjectId, start, Configuration.getInt("PageSize.Feed"));
         processFeeds(pagedFeeds.getList());
 
         return MomiaHttpResponse.SUCCESS(pagedFeeds);
@@ -117,10 +134,13 @@ public class FeedV1Api extends AbstractV1Api {
         JSONObject feedJson = JSON.parseObject(feed);
         feedJson.put("userId", user.getId());
 
-        CourseDto course = courseServiceApi.get(feedJson.getLong("courseId"), CourseDto.Type.BASE);
-        feedJson.put("subjectId", course.getSubjectId());
+        Long courseId = feedJson.getLong("courseId");
+        if (courseId != null && courseId > 0) {
+            CourseDto course = courseServiceApi.get(courseId, CourseDto.Type.BASE);
+            feedJson.put("subjectId", course.getSubjectId());
+            if (!courseServiceApi.joined(user.getId(), feedJson.getLong("courseId"))) return MomiaHttpResponse.FAILED("发表Feed失败，所选课程不存在或您还没参加该课程");
+        }
 
-        if (!courseServiceApi.joined(user.getId(), feedJson.getLong("courseId"))) return MomiaHttpResponse.FAILED("发表Feed失败，所选课程不存在或您还没参加该课程");
         feedServiceApi.add(feedJson);
 
         return MomiaHttpResponse.SUCCESS;
@@ -139,14 +159,21 @@ public class FeedV1Api extends AbstractV1Api {
         PagedList<FeedCommentDto> comments = feedServiceApi.listComments(id, 0, Configuration.getInt("PageSize.FeedDetailComment"));
         processComments(comments.getList());
 
-        CourseDto course = courseServiceApi.get(feed.getCourseId(), CourseDto.Type.BASE);
-        course.setCover(ImageFile.largeUrl(course.getCover()));
-
         JSONObject feedDetailJson = new JSONObject();
         feedDetailJson.put("feed", feed);
         feedDetailJson.put("staredUsers", stars);
         feedDetailJson.put("comments", comments);
-        feedDetailJson.put("course", course);
+
+        if (feed.getCourseId() > 0) {
+            try {
+                CourseDto course = courseServiceApi.get(feed.getCourseId(), CourseDto.Type.BASE);
+                course.setCover(ImageFile.largeUrl(course.getCover()));
+
+                feedDetailJson.put("course", course);
+            } catch (Exception e) {
+                LOGGER.error("fail to get course info: {}", feed.getCourseId());
+            }
+        }
 
         return MomiaHttpResponse.SUCCESS(feedDetailJson);
     }
