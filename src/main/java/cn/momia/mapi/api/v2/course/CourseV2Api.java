@@ -49,8 +49,6 @@ public class CourseV2Api extends AbstractV2Api {
             courseJson.put("favored", courseServiceApi.isFavored(user.getId(), id));
         }
 
-        courseJson.put("buyable", courseServiceApi.isBuyable(id));
-
         List<TeacherDto> teachers = processTeachers(courseServiceApi.teacher(id, 0, Configuration.getInt("PageSize.CourseTeacher")).getList());
         if (!teachers.isEmpty()) courseJson.put("teachers", teachers);
 
