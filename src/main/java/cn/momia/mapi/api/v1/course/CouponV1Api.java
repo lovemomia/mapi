@@ -1,7 +1,6 @@
 package cn.momia.mapi.api.v1.course;
 
 import cn.momia.api.course.CouponServiceApi;
-import cn.momia.api.course.SubjectServiceApi;
 import cn.momia.api.user.UserServiceApi;
 import cn.momia.api.user.dto.UserDto;
 import cn.momia.common.api.http.MomiaHttpResponse;
