@@ -43,16 +43,16 @@ public class SubjectV2Api extends AbstractV2Api {
         return MomiaHttpResponse.SUCCESS(getTrialSubjects(cityId, start));
     }
 
-    private PagedList<SubjectDto> getTrialSubjects(int cityId, int start) {
+    private PagedList<CourseDto> getTrialSubjects(int cityId, int start) {
         try {
-            PagedList<SubjectDto> subjects = subjectServiceApi.listTrial(cityId, start, Configuration.getInt("PageSize.TrialSubject"));
-            for (SubjectDto subject : subjects.getList()) {
-                subject.setCover(ImageFile.largeUrl(subject.getCover()));
+            PagedList<CourseDto> courses = courseServiceApi.listTrial(cityId, start, Configuration.getInt("PageSize.Trial"));
+            for (CourseDto course : courses.getList()) {
+                course.setCover(ImageFile.largeUrl(course.getCover()));
             }
 
-            return subjects;
+            return courses;
         } catch (Exception e) {
-            LOGGER.error("fail to list trial subjects", e);
+            LOGGER.error("fail to list trial courses", e);
             return PagedList.EMPTY;
         }
     }

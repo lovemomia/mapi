@@ -39,7 +39,7 @@
         <Banner>3</Banner>
         <Icon>8</Icon>
         <Event>4</Event>
-        <TrialSubject>20</TrialSubject>
+        <Trial>20</Trial>
         <Course>20</Course>
         <CourseTeacher>6</CourseTeacher>
         <CourseComment>20</CourseComment>

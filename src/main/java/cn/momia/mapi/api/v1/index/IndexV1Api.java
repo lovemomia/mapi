@@ -82,7 +82,7 @@ public class IndexV1Api extends AbstractV1Api {
 
     private PagedList<SubjectDto> getTrialSubjects(int cityId, int start) {
         try {
-            PagedList<SubjectDto> subjects = subjectServiceApi.listTrial(cityId, start, Configuration.getInt("PageSize.TrialSubject"));
+            PagedList<SubjectDto> subjects = subjectServiceApi.listTrial(cityId, start, Configuration.getInt("PageSize.Trial"));
             for (SubjectDto subject : subjects.getList()) {
                 subject.setCover(ImageFile.largeUrl(subject.getCover()));
             }
