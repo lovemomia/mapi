@@ -47,10 +47,6 @@ public class CourseV1Api extends AbstractV1Api {
         List<TeacherDto> teachers = processTeachers(courseServiceApi.teacher(id, 0, Configuration.getInt("PageSize.CourseTeacher")).getList());
         if (!teachers.isEmpty()) courseJson.put("teachers", teachers);
 
-        PagedList<CourseCommentDto> pagedComments = courseServiceApi.queryCommentsByCourse(id, 0, 1);
-        processCourseComments(pagedComments.getList());
-        if (!pagedComments.getList().isEmpty()) courseJson.put("comments", pagedComments);
-
         return MomiaHttpResponse.SUCCESS(courseJson);
     }
 
