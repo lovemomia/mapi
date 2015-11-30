@@ -67,6 +67,7 @@ public class CourseV2Api extends AbstractV2Api {
                     if (contentBlockJson.containsKey("img")) contentBlockJson.put("img", ImageFile.largeUrl(contentBlockJson.getString("img")));
                 }
             }
+            courseJson.put("goal", detail.getAbstracts());
             courseJson.put("detail", detailJson);
         } catch (Exception e) {
             LOGGER.warn("invalid course detail: {}", id);

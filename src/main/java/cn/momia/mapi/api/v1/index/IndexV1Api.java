@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -52,32 +53,41 @@ public class IndexV1Api extends AbstractV1Api {
 
     private List<BannerDto> getBanners(int cityId, int clientType) {
         List<BannerDto> banners = eventServiceApi.listBanners(cityId, Configuration.getInt("PageSize.Banner"));
+        List<BannerDto> filteredBanners = new ArrayList<BannerDto>();
         for (BannerDto banner : banners) {
+            if (banner.getPlatform() != 0 && banner.getPlatform() != clientType) continue;
             banner.setCover(ImageFile.url(banner.getCover()));
             banner.setAction(buildAction(banner.getAction(), clientType));
+            filteredBanners.add(banner);
         }
 
-        return banners;
+        return filteredBanners;
     }
 
     private List<IconDto> getIcons(int cityId, int clientType) {
         List<IconDto> icons = eventServiceApi.listIcons(cityId, Configuration.getInt("PageSize.Icon"));
+        List<IconDto> filteredIcons = new ArrayList<IconDto>();
         for (IconDto icon : icons) {
+            if (icon.getPlatform() != 0 && icon.getPlatform() != clientType) continue;
             icon.setImg(ImageFile.url(icon.getImg()));
             icon.setAction(buildAction(icon.getAction(), clientType));
+            filteredIcons.add(icon);
         }
 
-        return icons;
+        return filteredIcons;
     }
 
     private List<EventDto> getEvents(int cityId, int clientType) {
         List<EventDto> events = eventServiceApi.listEvents(cityId, Configuration.getInt("PageSize.Event"));
+        List<EventDto> filteredEvents = new ArrayList<EventDto>();
         for (EventDto event : events) {
+            if (event.getPlatform() != 0 && event.getPlatform() != clientType) continue;
             event.setImg(ImageFile.url(event.getImg()));
             event.setAction(buildAction(event.getAction(), clientType));
+            filteredEvents.add(event);
         }
 
-        return events;
+        return filteredEvents;
     }
 
     private PagedList<SubjectDto> getTrialSubjects(int cityId, int start) {
