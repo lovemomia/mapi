@@ -3,9 +3,9 @@ package cn.momia.mapi.api.v2.index;
 import cn.momia.api.course.CourseServiceApi;
 import cn.momia.api.course.dto.CourseDto;
 import cn.momia.api.event.EventServiceApi;
-import cn.momia.api.event.dto.BannerDto;
-import cn.momia.api.event.dto.EventDto;
-import cn.momia.api.event.dto.IconDto;
+import cn.momia.api.event.dto.Banner;
+import cn.momia.api.event.dto.Event;
+import cn.momia.api.event.dto.Icon;
 import cn.momia.common.api.dto.PagedList;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.common.webapp.config.Configuration;
@@ -51,10 +51,10 @@ public class IndexV2Api extends AbstractV2Api {
         return MomiaHttpResponse.SUCCESS(indexJson);
     }
 
-    private List<BannerDto> getBanners(int cityId, int clientType) {
-        List<BannerDto> banners = eventServiceApi.listBanners(cityId, Configuration.getInt("PageSize.Banner"));
-        List<BannerDto> filteredBanners = new ArrayList<BannerDto>();
-        for (BannerDto banner : banners) {
+    private List<Banner> getBanners(int cityId, int clientType) {
+        List<Banner> banners = eventServiceApi.listBanners(cityId, Configuration.getInt("PageSize.Banner"));
+        List<Banner> filteredBanners = new ArrayList<Banner>();
+        for (Banner banner : banners) {
             if (banner.getPlatform() != 0 && banner.getPlatform() != clientType) continue;
             banner.setCover(ImageFile.url(banner.getCover()));
             banner.setAction(buildAction(banner.getAction(), clientType));
@@ -64,10 +64,10 @@ public class IndexV2Api extends AbstractV2Api {
         return filteredBanners;
     }
 
-    private List<IconDto> getIcons(int cityId, int clientType) {
-        List<IconDto> icons = eventServiceApi.listIcons(cityId, Configuration.getInt("PageSize.Icon"));
-        List<IconDto> filteredIcons = new ArrayList<IconDto>();
-        for (IconDto icon : icons) {
+    private List<Icon> getIcons(int cityId, int clientType) {
+        List<Icon> icons = eventServiceApi.listIcons(cityId, Configuration.getInt("PageSize.Icon"));
+        List<Icon> filteredIcons = new ArrayList<Icon>();
+        for (Icon icon : icons) {
             if (icon.getPlatform() != 0 && icon.getPlatform() != clientType) continue;
             icon.setImg(ImageFile.url(icon.getImg()));
             icon.setAction(buildAction(icon.getAction(), clientType));
@@ -77,10 +77,10 @@ public class IndexV2Api extends AbstractV2Api {
         return filteredIcons;
     }
 
-    private List<EventDto> getEvents(int cityId, int clientType) {
-        List<EventDto> events = eventServiceApi.listEvents(cityId, Configuration.getInt("PageSize.Event"));
-        List<EventDto> filteredEvents = new ArrayList<EventDto>();
-        for (EventDto event : events) {
+    private List<Event> getEvents(int cityId, int clientType) {
+        List<Event> events = eventServiceApi.listEvents(cityId, Configuration.getInt("PageSize.Event"));
+        List<Event> filteredEvents = new ArrayList<Event>();
+        for (Event event : events) {
             if (event.getPlatform() != 0 && event.getPlatform() != clientType) continue;
             event.setImg(ImageFile.url(event.getImg()));
             event.setAction(buildAction(event.getAction(), clientType));
