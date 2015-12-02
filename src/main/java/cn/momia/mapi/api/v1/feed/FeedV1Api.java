@@ -5,7 +5,7 @@ import cn.momia.api.course.dto.CourseDto;
 import cn.momia.api.feed.FeedServiceApi;
 import cn.momia.api.feed.dto.FeedCommentDto;
 import cn.momia.api.feed.dto.FeedDto;
-import cn.momia.api.feed.dto.FeedStarDto;
+import cn.momia.api.feed.dto.FeedTag;
 import cn.momia.api.user.UserServiceApi;
 import cn.momia.api.user.dto.User;
 import cn.momia.common.api.dto.PagedList;
@@ -122,7 +122,13 @@ public class FeedV1Api extends AbstractV1Api {
 
     @RequestMapping(value = "/tag", method = RequestMethod.GET)
     public MomiaHttpResponse listTags() {
-        return MomiaHttpResponse.SUCCESS(feedServiceApi.listTags(Configuration.getInt("PageSize.FeedTag")));
+        List<FeedTag> recommendedTags = feedServiceApi.listRecommendedTags(Configuration.getInt("PageSize.FeedTag"));
+        List<FeedTag> hotTags = feedServiceApi.listHotTags(Configuration.getInt("PageSize.FeedTag"));
+        JSONObject tagsJson = new JSONObject();
+        tagsJson.put("recommendedTags", recommendedTags);
+        tagsJson.put("hotTags", hotTags);
+
+        return MomiaHttpResponse.SUCCESS(tagsJson);
     }
 
     @RequestMapping(value = "/add", method = RequestMethod.POST)
@@ -154,14 +160,14 @@ public class FeedV1Api extends AbstractV1Api {
         FeedDto feed = feedServiceApi.get(userId, id);
         processFeed(feed);
 
-        PagedList<FeedStarDto> stars = feedServiceApi.listStars(id, 0, Configuration.getInt("PageSize.FeedDetailStar"));
-        processStars(stars.getList());
+        PagedList<User> staredUsers = feedServiceApi.listStars(id, 0, Configuration.getInt("PageSize.FeedDetailStar"));
+        processUsers(staredUsers.getList());
         PagedList<FeedCommentDto> comments = feedServiceApi.listComments(id, 0, Configuration.getInt("PageSize.FeedDetailComment"));
         processComments(comments.getList());
 
         JSONObject feedDetailJson = new JSONObject();
         feedDetailJson.put("feed", feed);
-        feedDetailJson.put("staredUsers", stars);
+        feedDetailJson.put("staredUsers", staredUsers);
         feedDetailJson.put("comments", comments);
 
         if (feed.getCourseId() > 0) {
@@ -176,12 +182,6 @@ public class FeedV1Api extends AbstractV1Api {
         }
 
         return MomiaHttpResponse.SUCCESS(feedDetailJson);
-    }
-
-    private void processStars(List<FeedStarDto> stars) {
-        for (FeedStarDto star : stars) {
-            star.setAvatar(ImageFile.smallUrl(star.getAvatar()));
-        }
     }
 
     private void processComments(List<FeedCommentDto> comments) {

@@ -109,10 +109,18 @@ public abstract class AbstractApi extends BaseController {
         feed.setAvatar(ImageFile.smallUrl(feed.getAvatar()));
     }
 
+    protected List<User> processUsers(List<User> users) {
+        for (User user : users) {
+            processUser(user);
+        }
+
+        return users;
+    }
+
     protected User processUser(User user) {
         user.setAvatar(ImageFile.smallUrl(user.getAvatar()));
-        user.setCover(ImageFile.largeUrl(user.getCover()));
-        processChildren(user.getChildren());
+        if (user.getCover() != null) user.setCover(ImageFile.largeUrl(user.getCover()));
+        if (user.getChildren() != null) processChildren(user.getChildren());
 
         return user;
     }
