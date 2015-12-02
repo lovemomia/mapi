@@ -3,8 +3,8 @@ package cn.momia.mapi.api;
 import cn.momia.api.course.dto.CourseCommentDto;
 import cn.momia.api.course.dto.CourseDto;
 import cn.momia.api.feed.dto.FeedDto;
-import cn.momia.api.user.dto.ChildDto;
-import cn.momia.api.user.dto.UserDto;
+import cn.momia.api.user.dto.Child;
+import cn.momia.api.user.dto.User;
 import cn.momia.common.client.ClientType;
 import cn.momia.common.webapp.config.Configuration;
 import cn.momia.common.webapp.ctrl.BaseController;
@@ -109,7 +109,7 @@ public abstract class AbstractApi extends BaseController {
         feed.setAvatar(ImageFile.smallUrl(feed.getAvatar()));
     }
 
-    protected UserDto processUser(UserDto user) {
+    protected User processUser(User user) {
         user.setAvatar(ImageFile.smallUrl(user.getAvatar()));
         user.setCover(ImageFile.largeUrl(user.getCover()));
         processChildren(user.getChildren());
@@ -117,15 +117,15 @@ public abstract class AbstractApi extends BaseController {
         return user;
     }
 
-    protected List<ChildDto> processChildren(List<ChildDto> children) {
-        for (ChildDto child : children) {
+    protected List<Child> processChildren(List<Child> children) {
+        for (Child child : children) {
             processChild(child);
         }
 
         return children;
     }
 
-    protected ChildDto processChild(ChildDto child) {
+    protected Child processChild(Child child) {
         child.setAvatar(ImageFile.smallUrl(child.getAvatar()));
         return child;
     }

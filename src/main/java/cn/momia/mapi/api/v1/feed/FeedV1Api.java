@@ -7,7 +7,7 @@ import cn.momia.api.feed.dto.FeedCommentDto;
 import cn.momia.api.feed.dto.FeedDto;
 import cn.momia.api.feed.dto.FeedStarDto;
 import cn.momia.api.user.UserServiceApi;
-import cn.momia.api.user.dto.UserDto;
+import cn.momia.api.user.dto.User;
 import cn.momia.common.api.dto.PagedList;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.common.webapp.config.Configuration;
@@ -40,10 +40,10 @@ public class FeedV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (followedId <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        UserDto followedUser = userServiceApi.get(followedId);
+        User followedUser = userServiceApi.get(followedId);
         if (!followedUser.exists()) return MomiaHttpResponse.FAILED("关注的用户不存在");
 
-        UserDto user = userServiceApi.get(utoken);
+        User user = userServiceApi.get(utoken);
         feedServiceApi.follow(user.getId(), followedId);
 
         return MomiaHttpResponse.SUCCESS;
@@ -55,7 +55,7 @@ public class FeedV1Api extends AbstractV1Api {
 
         long userId = 0;
         if (!StringUtils.isBlank(utoken)) {
-            UserDto user = userServiceApi.get(utoken);
+            User user = userServiceApi.get(utoken);
             userId = user.getId();
         }
 
@@ -106,7 +106,7 @@ public class FeedV1Api extends AbstractV1Api {
         if (start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
         PagedList<? extends CourseDto> pagedCourses;
-        UserDto user = userServiceApi.get(utoken);
+        User user = userServiceApi.get(utoken);
         if (!feedServiceApi.isOfficialUser(user.getId())) {
             pagedCourses = courseServiceApi.listFinished(user.getId(), start, Configuration.getInt("PageSize.Course"));
         } else {
@@ -130,7 +130,7 @@ public class FeedV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (StringUtils.isBlank(feed)) return MomiaHttpResponse.BAD_REQUEST;
 
-        UserDto user = userServiceApi.get(utoken);
+        User user = userServiceApi.get(utoken);
         JSONObject feedJson = JSON.parseObject(feed);
         feedJson.put("userId", user.getId());
 
@@ -195,7 +195,7 @@ public class FeedV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        UserDto user = userServiceApi.get(utoken);
+        User user = userServiceApi.get(utoken);
         if (!feedServiceApi.delete(user.getId(), id)) return MomiaHttpResponse.FAILED("删除Feed失败");
 
         return MomiaHttpResponse.SUCCESS;
@@ -216,7 +216,7 @@ public class FeedV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (id <= 0 || StringUtils.isBlank(content)) return MomiaHttpResponse.BAD_REQUEST;
 
-        UserDto user = userServiceApi.get(utoken);
+        User user = userServiceApi.get(utoken);
         feedServiceApi.addComment(user.getId(), id, content);
 
         return MomiaHttpResponse.SUCCESS;
@@ -227,7 +227,7 @@ public class FeedV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (id <= 0 || commentId <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        UserDto user = userServiceApi.get(utoken);
+        User user = userServiceApi.get(utoken);
         feedServiceApi.deleteComment(user.getId(), id, commentId);
 
         return MomiaHttpResponse.SUCCESS;
@@ -238,7 +238,7 @@ public class FeedV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        UserDto user = userServiceApi.get(utoken);
+        User user = userServiceApi.get(utoken);
         feedServiceApi.star(user.getId(), id);
 
         return MomiaHttpResponse.SUCCESS;
@@ -249,7 +249,7 @@ public class FeedV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        UserDto user = userServiceApi.get(utoken);
+        User user = userServiceApi.get(utoken);
         feedServiceApi.unstar(user.getId(), id);
 
         return MomiaHttpResponse.SUCCESS;

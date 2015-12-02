@@ -7,7 +7,7 @@ import cn.momia.api.course.dto.CourseDto;
 import cn.momia.api.course.dto.InstitutionDto;
 import cn.momia.api.course.dto.TeacherDto;
 import cn.momia.api.user.UserServiceApi;
-import cn.momia.api.user.dto.UserDto;
+import cn.momia.api.user.dto.User;
 import cn.momia.common.api.dto.PagedList;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.common.webapp.config.Configuration;
@@ -40,7 +40,7 @@ public class CourseV1Api extends AbstractV1Api {
         CourseDto course = processCourse(courseServiceApi.get(id, pos));
         JSONObject courseJson = (JSONObject) JSON.toJSON(course);
         if (!StringUtils.isBlank(utoken)) {
-            UserDto user = userServiceApi.get(utoken);
+            User user = userServiceApi.get(utoken);
             courseJson.put("favored", courseServiceApi.isFavored(user.getId(), id));
         }
 
@@ -156,7 +156,7 @@ public class CourseV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (StringUtils.isBlank(comment)) return MomiaHttpResponse.BAD_REQUEST;
 
-        UserDto user = userServiceApi.get(utoken);
+        User user = userServiceApi.get(utoken);
         JSONObject commentJson = JSON.parseObject(comment);
         commentJson.put("userId", user.getId());
 
@@ -177,7 +177,7 @@ public class CourseV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        UserDto user = userServiceApi.get(utoken);
+        User user = userServiceApi.get(utoken);
         if (!courseServiceApi.favor(user.getId(), id)) return MomiaHttpResponse.FAILED("添加收藏失败");
         return MomiaHttpResponse.SUCCESS;
     }
@@ -187,7 +187,7 @@ public class CourseV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        UserDto user = userServiceApi.get(utoken);
+        User user = userServiceApi.get(utoken);
         if (!courseServiceApi.unfavor(user.getId(), id)) return MomiaHttpResponse.FAILED("取消收藏失败");
         return MomiaHttpResponse.SUCCESS;
     }

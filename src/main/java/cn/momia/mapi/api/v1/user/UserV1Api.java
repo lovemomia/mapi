@@ -5,14 +5,13 @@ import cn.momia.api.course.CourseServiceApi;
 import cn.momia.api.course.OrderServiceApi;
 import cn.momia.api.course.SubjectServiceApi;
 import cn.momia.api.course.dto.BookedCourseDto;
-import cn.momia.api.course.dto.CourseDto;
 import cn.momia.api.course.dto.FavoriteDto;
 import cn.momia.api.course.dto.OrderPackageDto;
 import cn.momia.api.course.dto.OrderDto;
 import cn.momia.api.course.dto.UserCouponDto;
 import cn.momia.api.feed.FeedServiceApi;
 import cn.momia.api.feed.dto.FeedDto;
-import cn.momia.api.user.dto.UserDto;
+import cn.momia.api.user.dto.User;
 import cn.momia.common.api.dto.PagedList;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.api.user.UserServiceApi;
@@ -30,7 +29,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Date;
-import java.util.List;
 
 @RestController
 @RequestMapping("/v1/user")
@@ -124,7 +122,7 @@ public class UserV1Api extends AbstractV1Api {
     public MomiaHttpResponse listNotFinished(@RequestParam String utoken, @RequestParam int start) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
 
-        UserDto user = userServiceApi.get(utoken);
+        User user = userServiceApi.get(utoken);
         PagedList<BookedCourseDto> courses = courseServiceApi.queryNotFinishedByUser(user.getId(), start, Configuration.getInt("PageSize.Course"));
         processCourses(courses.getList());
 
@@ -135,7 +133,7 @@ public class UserV1Api extends AbstractV1Api {
     public MomiaHttpResponse listFinished(@RequestParam String utoken, @RequestParam int start) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
 
-        UserDto user = userServiceApi.get(utoken);
+        User user = userServiceApi.get(utoken);
         PagedList<BookedCourseDto> courses = courseServiceApi.queryFinishedByUser(user.getId(), start, Configuration.getInt("PageSize.Course"));
         processCourses(courses.getList());
 
@@ -186,7 +184,7 @@ public class UserV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        UserDto user = userServiceApi.get(utoken);
+        User user = userServiceApi.get(utoken);
         PagedList<FavoriteDto> favorites;
         switch (type) {
             case FavoriteDto.Type.SUBJECT:
@@ -213,7 +211,7 @@ public class UserV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        UserDto user = userServiceApi.get(utoken);
+        User user = userServiceApi.get(utoken);
         PagedList<FeedDto> pagedFeeds = feedServiceApi.listFeedsOfUser(user.getId(), start, Configuration.getInt("PageSize.Feed"));
         processFeeds(pagedFeeds.getList());
 
@@ -225,7 +223,7 @@ public class UserV1Api extends AbstractV1Api {
         JSONObject infoJson = new JSONObject();
 
         if (start == 0) {
-            UserDto user = userServiceApi.get(userId);
+            User user = userServiceApi.get(userId);
             infoJson.put("user", processUser(user));
         }
 

@@ -13,8 +13,8 @@ import cn.momia.api.course.dto.OrderDto;
 import cn.momia.api.course.dto.SubjectDto;
 import cn.momia.api.course.dto.SubjectSkuDto;
 import cn.momia.api.user.UserServiceApi;
-import cn.momia.api.user.dto.ContactDto;
-import cn.momia.api.user.dto.UserDto;
+import cn.momia.api.user.dto.Contact;
+import cn.momia.api.user.dto.User;
 import cn.momia.common.api.dto.PagedList;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.common.webapp.config.Configuration;
@@ -104,7 +104,7 @@ public class SubjectV1Api extends AbstractV1Api {
         if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
         List<SubjectSkuDto> skus = subjectServiceApi.querySkus(id);
-        ContactDto contact = userServiceApi.getContact(utoken);
+        Contact contact = userServiceApi.getContact(utoken);
 
         List<SubjectSkuDto> subjectSkus = new ArrayList<SubjectSkuDto>();
         for (SubjectSkuDto sku : skus) {
@@ -125,7 +125,7 @@ public class SubjectV1Api extends AbstractV1Api {
 
         JSONObject orderJson = JSON.parseObject(order);
 
-        UserDto user = userServiceApi.get(utoken);
+        User user = userServiceApi.get(utoken);
         orderJson.put("userId", user.getId());
 
         JSONObject contactJson = orderJson.getJSONObject("contact");
@@ -193,7 +193,7 @@ public class SubjectV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        UserDto user = userServiceApi.get(utoken);
+        User user = userServiceApi.get(utoken);
         if (!subjectServiceApi.favor(user.getId(), id)) return MomiaHttpResponse.FAILED("添加收藏失败");
         return MomiaHttpResponse.SUCCESS;
     }
@@ -203,7 +203,7 @@ public class SubjectV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        UserDto user = userServiceApi.get(utoken);
+        User user = userServiceApi.get(utoken);
         if (!subjectServiceApi.unfavor(user.getId(), id)) return MomiaHttpResponse.FAILED("取消收藏失败");
         return MomiaHttpResponse.SUCCESS;
     }

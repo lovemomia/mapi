@@ -7,7 +7,7 @@ import cn.momia.api.course.dto.CourseDetailDto;
 import cn.momia.api.course.dto.CourseDto;
 import cn.momia.api.course.dto.TeacherDto;
 import cn.momia.api.user.UserServiceApi;
-import cn.momia.api.user.dto.UserDto;
+import cn.momia.api.user.dto.User;
 import cn.momia.common.api.dto.PagedList;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.common.webapp.config.Configuration;
@@ -45,7 +45,7 @@ public class CourseV2Api extends AbstractV2Api {
         CourseDto course = processCourse(courseServiceApi.get(id, pos));
         JSONObject courseJson = (JSONObject) JSON.toJSON(course);
         if (!StringUtils.isBlank(utoken)) {
-            UserDto user = userServiceApi.get(utoken);
+            User user = userServiceApi.get(utoken);
             courseJson.put("favored", courseServiceApi.isFavored(user.getId(), id));
         }
 

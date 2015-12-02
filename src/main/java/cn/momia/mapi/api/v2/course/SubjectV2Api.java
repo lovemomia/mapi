@@ -8,7 +8,7 @@ import cn.momia.api.course.dto.SubjectSkuDto;
 import cn.momia.api.feed.FeedServiceApi;
 import cn.momia.api.feed.dto.FeedDto;
 import cn.momia.api.user.UserServiceApi;
-import cn.momia.api.user.dto.ContactDto;
+import cn.momia.api.user.dto.Contact;
 import cn.momia.common.api.dto.PagedList;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.common.webapp.config.Configuration;
@@ -86,7 +86,7 @@ public class SubjectV2Api extends AbstractV2Api {
         if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
         List<SubjectSkuDto> skus = subjectServiceApi.querySkus(id);
-        ContactDto contact = userServiceApi.getContact(utoken);
+        Contact contact = userServiceApi.getContact(utoken);
 
         List<SubjectSkuDto> courseSkus = new ArrayList<SubjectSkuDto>();
         List<SubjectSkuDto> subjectSkus = new ArrayList<SubjectSkuDto>();
