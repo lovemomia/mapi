@@ -1,8 +1,8 @@
 package cn.momia.mapi.api.v1.course;
 
 import cn.momia.api.base.MetaUtil;
-import cn.momia.api.base.dto.AgeRangeDto;
-import cn.momia.api.base.dto.SortTypeDto;
+import cn.momia.api.base.dto.AgeRange;
+import cn.momia.api.base.dto.SortType;
 import cn.momia.api.course.CouponServiceApi;
 import cn.momia.api.course.CourseServiceApi;
 import cn.momia.api.course.OrderServiceApi;
@@ -72,8 +72,8 @@ public class SubjectV1Api extends AbstractV1Api {
                                          @RequestParam int start) {
         if (id <= 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        AgeRangeDto ageRange = MetaUtil.getAgeRange(age);
-        SortTypeDto sortType = MetaUtil.getSortType(sort);
+        AgeRange ageRange = MetaUtil.getAgeRange(age);
+        SortType sortType = MetaUtil.getSortType(sort);
 
         PagedList<CourseDto> courses = courseServiceApi.query(id, packageId, ageRange.getMin(), ageRange.getMax(), sortType.getId(), start, Configuration.getInt("PageSize.Course"));
         processCourses(courses.getList());
