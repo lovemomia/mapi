@@ -17,6 +17,7 @@
         <Course>http://localhost:7070</Course>
         <Event>http://localhost:7070</Event>
         <Feed>http://localhost:7070</Feed>
+        <IM>http://localhost:7070</IM>
         <User>http://localhost:7070</User>
     </Service>
 
