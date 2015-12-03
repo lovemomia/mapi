@@ -5,6 +5,7 @@ import cn.momia.api.im.dto.ImUser;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.image.api.ImageFile;
 import cn.momia.mapi.api.v1.AbstractV1Api;
+import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -28,7 +30,11 @@ public class ImV1Api extends AbstractV1Api {
     @RequestMapping(value = "/user", method = RequestMethod.GET)
     public MomiaHttpResponse getImUser(@RequestParam(value = "uid") long userId) {
         if (userId <= 0) return MomiaHttpResponse.BAD_REQUEST;
-        return MomiaHttpResponse.SUCCESS(imServiceApi.getImUser(userId));
+
+        ImUser imUser = imServiceApi.getImUser(userId);
+        imUser.setAvatar(ImageFile.smallUrl(imUser.getAvatar()));
+
+        return MomiaHttpResponse.SUCCESS(imUser);
     }
 
     @RequestMapping(value = "/group/member", method = RequestMethod.GET)
@@ -36,11 +42,19 @@ public class ImV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
+        List<ImUser> teachers = new ArrayList<ImUser>();
+        List<ImUser> customers = new ArrayList<ImUser>();
         List<ImUser> members = imServiceApi.listGroupMembers(utoken, id);
         for (ImUser member : members) {
             member.setAvatar(ImageFile.smallUrl(member.getAvatar()));
+            if (member.isTeacher()) teachers.add(member);
+            else customers.add(member);
         }
 
-        return MomiaHttpResponse.SUCCESS(members);
+        JSONObject resultJson = new JSONObject();
+        resultJson.put("teachers", teachers);
+        resultJson.put("customers", customers);
+
+        return MomiaHttpResponse.SUCCESS(resultJson);
     }
 }
