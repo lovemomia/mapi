@@ -2,6 +2,7 @@ package cn.momia.mapi.api.v1.user;
 
 import cn.momia.api.base.SmsServiceApi;
 import cn.momia.api.course.CouponServiceApi;
+import cn.momia.api.im.ImServiceApi;
 import cn.momia.api.user.AuthServiceApi;
 import cn.momia.api.user.dto.User;
 import cn.momia.common.api.http.MomiaHttpResponse;
@@ -21,9 +22,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthV1Api extends AbstractV1Api {
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthV1Api.class);
 
-    @Autowired private CouponServiceApi couponServiceApi;
     @Autowired private SmsServiceApi smsServiceApi;
     @Autowired private AuthServiceApi authServiceApi;
+    @Autowired private CouponServiceApi couponServiceApi;
+    @Autowired private ImServiceApi imServiceApi;
 
     @RequestMapping(value = "/send", method = RequestMethod.POST)
     public MomiaHttpResponse send(@RequestParam String mobile)  {
@@ -44,13 +46,26 @@ public class AuthV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(code)) return MomiaHttpResponse.FAILED("验证码不能为空");
 
         User user = processUser(authServiceApi.register(nickName, mobile, password, code));
+        distributeInviteCoupon(user.getId(), mobile);
+        generateImToken(user.getId(), user.getToken(), user.getNickName(), user.getAvatar());
+
+        return MomiaHttpResponse.SUCCESS(user);
+    }
+
+    private void generateImToken(long userId, String utoken, String nickName, String avatar) {
         try {
-            couponServiceApi.distributeInviteCoupon(user.getId(), mobile);
+            imServiceApi.generateImToken(utoken, nickName, avatar);
+        } catch (Exception e) {
+            LOGGER.error("fail to generate im token for user: {}", userId, e);
+        }
+    }
+
+    private void distributeInviteCoupon(long userId, String mobile) {
+        try {
+            couponServiceApi.distributeInviteCoupon(userId, mobile);
         } catch (Exception e) {
             LOGGER.error("分发邀请红包失败", e);
         }
-
-        return MomiaHttpResponse.SUCCESS(user);
     }
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)

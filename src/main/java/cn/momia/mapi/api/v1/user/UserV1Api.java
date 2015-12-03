@@ -11,6 +11,7 @@ import cn.momia.api.course.dto.OrderDto;
 import cn.momia.api.course.dto.UserCouponDto;
 import cn.momia.api.feed.FeedServiceApi;
 import cn.momia.api.feed.dto.FeedDto;
+import cn.momia.api.im.ImServiceApi;
 import cn.momia.api.user.dto.User;
 import cn.momia.common.api.dto.PagedList;
 import cn.momia.common.api.http.MomiaHttpResponse;
@@ -38,6 +39,7 @@ public class UserV1Api extends AbstractV1Api {
     @Autowired private CouponServiceApi couponServiceApi;
     @Autowired private OrderServiceApi orderServiceApi;
     @Autowired private FeedServiceApi feedServiceApi;
+    @Autowired private ImServiceApi imServiceApi;
     @Autowired private UserServiceApi userServiceApi;
 
     @RequestMapping(method = RequestMethod.GET)
@@ -51,7 +53,10 @@ public class UserV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (StringUtils.isBlank(nickName)) return MomiaHttpResponse.FAILED("用户昵称不能为空");
 
-        return MomiaHttpResponse.SUCCESS(processUser(userServiceApi.updateNickName(utoken, nickName)));
+        User user = processUser(userServiceApi.updateNickName(utoken, nickName));
+        imServiceApi.updateImNickName(user.getToken(), user.getNickName());
+
+        return MomiaHttpResponse.SUCCESS(user);
     }
 
     @RequestMapping(value = "/avatar", method = RequestMethod.POST)
@@ -59,7 +64,10 @@ public class UserV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (StringUtils.isBlank(avatar)) return MomiaHttpResponse.FAILED("用户头像不能为空");
 
-        return MomiaHttpResponse.SUCCESS(processUser(userServiceApi.updateAvatar(utoken, avatar)));
+        User user = processUser(userServiceApi.updateAvatar(utoken, avatar));
+        imServiceApi.updateImAvatar(user.getToken(), user.getAvatar());
+
+        return MomiaHttpResponse.SUCCESS(user);
     }
 
     @RequestMapping(value = "/cover", method = RequestMethod.POST)
