@@ -1,6 +1,7 @@
 package cn.momia.mapi.api.v1.im;
 
 import cn.momia.api.course.CourseServiceApi;
+import cn.momia.api.course.dto.CourseDto;
 import cn.momia.api.im.ImServiceApi;
 import cn.momia.api.im.dto.Group;
 import cn.momia.api.im.dto.ImUser;
@@ -46,6 +47,19 @@ public class ImV1Api extends AbstractV1Api {
         imUser.setAvatar(ImageFile.smallUrl(imUser.getAvatar()));
 
         return MomiaHttpResponse.SUCCESS(imUser);
+    }
+
+    @RequestMapping(value = "/group", method = RequestMethod.GET)
+    public MomiaHttpResponse getGroupInfo(@RequestParam long id) {
+        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        Group group = imServiceApi.getGroup(id);
+        CourseDto course = courseServiceApi.get(group.getCourseId());
+        JSONObject groupInfo = new JSONObject();
+        groupInfo.put("groupId", group.getGroupId());
+        groupInfo.put("groupName", group.getGroupName());
+        groupInfo.put("tips", course.getTips());
+
+        return MomiaHttpResponse.SUCCESS(groupInfo);
     }
 
     @RequestMapping(value = "/group/member", method = RequestMethod.GET)
