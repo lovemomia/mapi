@@ -7,6 +7,8 @@ import cn.momia.api.im.ImServiceApi;
 import cn.momia.api.im.dto.Group;
 import cn.momia.api.im.dto.ImUser;
 import cn.momia.api.im.dto.Member;
+import cn.momia.api.user.UserServiceApi;
+import cn.momia.api.user.dto.User;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.common.util.TimeUtil;
 import cn.momia.image.api.ImageFile;
@@ -34,11 +36,18 @@ import java.util.Set;
 public class ImV1Api extends AbstractV1Api {
     @Autowired private CourseServiceApi courseServiceApi;
     @Autowired private ImServiceApi imServiceApi;
+    @Autowired private UserServiceApi userServiceApi;
 
     @RequestMapping(value = "/token", method = RequestMethod.GET)
     public MomiaHttpResponse getImToken(@RequestParam String utoken) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        return MomiaHttpResponse.SUCCESS(imServiceApi.getImToken(utoken));
+        String imToken = imServiceApi.getImToken(utoken);
+        if (StringUtils.isBlank(imToken)) {
+            User user = userServiceApi.get(utoken);
+            imToken = imServiceApi.generateImToken(utoken, user.getNickName(), ImageFile.smallUrl(user.getAvatar()));
+        }
+
+        return MomiaHttpResponse.SUCCESS(imToken);
     }
 
     @RequestMapping(value = "/user", method = RequestMethod.GET)
