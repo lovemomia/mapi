@@ -6,6 +6,7 @@ import cn.momia.api.im.dto.Group;
 import cn.momia.api.im.dto.ImUser;
 import cn.momia.api.im.dto.Member;
 import cn.momia.common.api.http.MomiaHttpResponse;
+import cn.momia.common.util.TimeUtil;
 import cn.momia.image.api.ImageFile;
 import cn.momia.mapi.api.v1.AbstractV1Api;
 import com.alibaba.fastjson.JSONObject;
@@ -94,8 +95,8 @@ public class ImV1Api extends AbstractV1Api {
             JSONObject userGroup = new JSONObject();
             userGroup.put("groupId", member.getGroupId());
             userGroup.put("groupName", group.getGroupName());
-            userGroup.put("addTime", member.getAddTime());
-            userGroup.put("tips", tipsOfCourses.get(group.getCourseId()));
+            userGroup.put("addTime", TimeUtil.STANDARD_DATE_FORMAT.format(member.getAddTime()));
+            userGroup.put("tips", tipsOfCourses.get(String.valueOf(group.getCourseId())));  // FIXME
 
             userGroups.add(userGroup);
         }
