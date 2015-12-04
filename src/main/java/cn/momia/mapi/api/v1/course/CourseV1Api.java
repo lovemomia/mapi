@@ -1,11 +1,13 @@
 package cn.momia.mapi.api.v1.course;
 
 import cn.momia.api.course.CourseServiceApi;
+import cn.momia.api.course.dto.BookedCourseDto;
 import cn.momia.api.course.dto.CourseBookDto;
 import cn.momia.api.course.dto.CourseCommentDto;
 import cn.momia.api.course.dto.CourseDto;
 import cn.momia.api.course.dto.InstitutionDto;
 import cn.momia.api.course.dto.TeacherDto;
+import cn.momia.api.im.ImServiceApi;
 import cn.momia.api.user.UserServiceApi;
 import cn.momia.api.user.dto.User;
 import cn.momia.common.api.dto.PagedList;
@@ -29,6 +31,7 @@ import java.util.List;
 @RequestMapping(value = "/v1/course")
 public class CourseV1Api extends AbstractV1Api {
     @Autowired private CourseServiceApi courseServiceApi;
+    @Autowired private ImServiceApi imServiceApi;
     @Autowired private UserServiceApi userServiceApi;
 
     @RequestMapping(method = RequestMethod.GET)
@@ -138,7 +141,9 @@ public class CourseV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (packageId <= 0 || skuId <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        if (!courseServiceApi.booking(utoken, packageId, skuId)) return MomiaHttpResponse.FAILED("选课失败");
+        BookedCourseDto bookedCourse = courseServiceApi.booking(utoken, packageId, skuId);
+        imServiceApi.joinGroup(utoken, bookedCourse.getId(), bookedCourse.getCourseSkuId());
+
         return MomiaHttpResponse.SUCCESS;
     }
 
@@ -147,7 +152,9 @@ public class CourseV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (bookingId <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        if (!courseServiceApi.cancel(utoken, bookingId)) return MomiaHttpResponse.FAILED("取消选课失败");
+        BookedCourseDto bookedCourse = courseServiceApi.cancel(utoken, bookingId);
+        imServiceApi.leaveGroup(utoken, bookedCourse.getId(), bookedCourse.getCourseSkuId());
+
         return MomiaHttpResponse.SUCCESS;
     }
 
