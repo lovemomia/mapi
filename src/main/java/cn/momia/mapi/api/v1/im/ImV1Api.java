@@ -2,6 +2,7 @@ package cn.momia.mapi.api.v1.im;
 
 import cn.momia.api.course.CourseServiceApi;
 import cn.momia.api.course.dto.CourseDto;
+import cn.momia.api.course.dto.CourseSkuDto;
 import cn.momia.api.im.ImServiceApi;
 import cn.momia.api.im.dto.Group;
 import cn.momia.api.im.dto.ImUser;
@@ -11,6 +12,7 @@ import cn.momia.common.util.TimeUtil;
 import cn.momia.image.api.ImageFile;
 import cn.momia.mapi.api.v1.AbstractV1Api;
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -53,11 +55,13 @@ public class ImV1Api extends AbstractV1Api {
     public MomiaHttpResponse getGroupInfo(@RequestParam long id) {
         if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
         Group group = imServiceApi.getGroup(id);
-        CourseDto course = courseServiceApi.get(group.getCourseId());
+        CourseSkuDto sku = courseServiceApi.getSku(group.getCourseId(), group.getCourseSkuId());
         JSONObject groupInfo = new JSONObject();
         groupInfo.put("groupId", group.getGroupId());
         groupInfo.put("groupName", group.getGroupName());
-        groupInfo.put("tips", course.getTips());
+        groupInfo.put("tips", courseServiceApi.queryTips(Sets.newHashSet(group.getCourseId())).get(String.valueOf(group.getCourseId())));
+        groupInfo.put("time", sku.getTime());
+        groupInfo.put("address", sku.getPlace().getAddress());
 
         return MomiaHttpResponse.SUCCESS(groupInfo);
     }
