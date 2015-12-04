@@ -1,7 +1,10 @@
 package cn.momia.mapi.api.v1.im;
 
+import cn.momia.api.course.CourseServiceApi;
 import cn.momia.api.im.ImServiceApi;
+import cn.momia.api.im.dto.Group;
 import cn.momia.api.im.dto.ImUser;
+import cn.momia.api.im.dto.Member;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.image.api.ImageFile;
 import cn.momia.mapi.api.v1.AbstractV1Api;
@@ -14,11 +17,18 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/v1/im")
 public class ImV1Api extends AbstractV1Api {
+    @Autowired private CourseServiceApi courseServiceApi;
     @Autowired private ImServiceApi imServiceApi;
 
     @RequestMapping(value = "/token", method = RequestMethod.GET)
@@ -56,5 +66,47 @@ public class ImV1Api extends AbstractV1Api {
         resultJson.put("customers", customers);
 
         return MomiaHttpResponse.SUCCESS(resultJson);
+    }
+
+    @RequestMapping(value = "/user/group", method = RequestMethod.GET)
+    public MomiaHttpResponse listUserGroups(@RequestParam String utoken) {
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+
+        List<Member> members = imServiceApi.queryMembersByUser(utoken);
+        Set<Long> groupIds = new HashSet<Long>();
+        for (Member member : members) {
+            groupIds.add(member.getGroupId());
+        }
+        List<Group> groups = imServiceApi.listGroups(groupIds);
+        Map<Long, Group> groupsMap = new HashMap<Long, Group>();
+        Set<Long> courseIds = new HashSet<Long>();
+        for (Group group : groups) {
+            groupsMap.put(group.getGroupId(), group);
+            courseIds.add(group.getCourseId());
+        }
+        Map<Long, String> tipsOfCourses = courseServiceApi.queryTips(courseIds);
+
+        List<JSONObject> userGroups = new ArrayList<JSONObject>();
+        for (Member member : members) {
+            Group group = groupsMap.get(member.getGroupId());
+            if (group == null) continue;
+
+            JSONObject userGroup = new JSONObject();
+            userGroup.put("groupId", member.getGroupId());
+            userGroup.put("groupName", group.getGroupName());
+            userGroup.put("addTime", member.getAddTime());
+            userGroup.put("tips", tipsOfCourses.get(group.getCourseId()));
+
+            userGroups.add(userGroup);
+        }
+
+        Collections.sort(userGroups, new Comparator<JSONObject>() {
+            @Override
+            public int compare(JSONObject o1, JSONObject o2) {
+                return o1.getString("groupName").compareTo(o2.getString("groupName"));
+            }
+        });
+
+        return MomiaHttpResponse.SUCCESS(userGroups);
     }
 }
