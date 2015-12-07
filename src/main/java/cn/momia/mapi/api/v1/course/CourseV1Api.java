@@ -5,7 +5,7 @@ import cn.momia.api.course.dto.BookedCourseDto;
 import cn.momia.api.course.dto.CourseBookDto;
 import cn.momia.api.course.dto.CourseCommentDto;
 import cn.momia.api.course.dto.CourseDto;
-import cn.momia.api.course.dto.InstitutionDto;
+import cn.momia.api.course.dto.Institution;
 import cn.momia.api.course.dto.Teacher;
 import cn.momia.api.im.ImServiceApi;
 import cn.momia.api.user.UserServiceApi;
@@ -116,7 +116,7 @@ public class CourseV1Api extends AbstractV1Api {
     public MomiaHttpResponse institution(@RequestParam long id) {
         if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        InstitutionDto institution = courseServiceApi.institution(id);
+        Institution institution = courseServiceApi.institution(id);
         institution.setCover(ImageFile.largeUrl(institution.getCover()));
 
         return MomiaHttpResponse.SUCCESS(institution);
