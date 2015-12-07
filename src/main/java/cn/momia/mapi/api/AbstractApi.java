@@ -2,7 +2,7 @@ package cn.momia.mapi.api;
 
 import cn.momia.api.course.dto.CourseCommentDto;
 import cn.momia.api.course.dto.CourseDto;
-import cn.momia.api.feed.dto.FeedDto;
+import cn.momia.api.feed.dto.UserFeed;
 import cn.momia.api.user.dto.Child;
 import cn.momia.api.user.dto.User;
 import cn.momia.common.client.ClientType;
@@ -96,13 +96,13 @@ public abstract class AbstractApi extends BaseController {
         }
     }
 
-    protected void processFeeds(List<FeedDto> feeds) {
-        for (FeedDto feed : feeds) {
+    protected void processFeeds(List<UserFeed> feeds) {
+        for (UserFeed feed : feeds) {
             processFeed(feed);
         }
     }
 
-    protected void processFeed(FeedDto feed) {
+    protected void processFeed(UserFeed feed) {
         List<String> imgs = feed.getImgs();
         feed.setImgs(completeMiddleImgs(imgs));
         feed.setLargeImgs(completeLargeImgs(imgs));

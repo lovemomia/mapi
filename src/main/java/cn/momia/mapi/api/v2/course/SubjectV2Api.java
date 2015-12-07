@@ -6,7 +6,7 @@ import cn.momia.api.course.dto.CourseDto;
 import cn.momia.api.course.dto.SubjectDto;
 import cn.momia.api.course.dto.SubjectSkuDto;
 import cn.momia.api.feed.FeedServiceApi;
-import cn.momia.api.feed.dto.FeedDto;
+import cn.momia.api.feed.dto.UserFeed;
 import cn.momia.api.user.UserServiceApi;
 import cn.momia.api.user.dto.Contact;
 import cn.momia.common.api.dto.PagedList;
@@ -69,7 +69,7 @@ public class SubjectV2Api extends AbstractV2Api {
         processCourses(courses.getList());
 
         long userId = StringUtils.isBlank(utoken) ? 0 : userServiceApi.get(utoken).getId();
-        PagedList<FeedDto> feeds = feedServiceApi.queryBySubject(userId, id, 0, 10);
+        PagedList<UserFeed> feeds = feedServiceApi.queryBySubject(userId, id, 0, 10);
         processFeeds(feeds.getList());
 
         JSONObject responseJson = new JSONObject();

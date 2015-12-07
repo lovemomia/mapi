@@ -10,7 +10,7 @@ import cn.momia.api.course.dto.OrderPackageDto;
 import cn.momia.api.course.dto.OrderDto;
 import cn.momia.api.course.dto.UserCouponDto;
 import cn.momia.api.feed.FeedServiceApi;
-import cn.momia.api.feed.dto.FeedDto;
+import cn.momia.api.feed.dto.UserFeed;
 import cn.momia.api.im.ImServiceApi;
 import cn.momia.api.user.dto.User;
 import cn.momia.common.api.dto.PagedList;
@@ -220,7 +220,7 @@ public class UserV1Api extends AbstractV1Api {
         if (start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
         User user = userServiceApi.get(utoken);
-        PagedList<FeedDto> pagedFeeds = feedServiceApi.listFeedsOfUser(user.getId(), start, Configuration.getInt("PageSize.Feed"));
+        PagedList<UserFeed> pagedFeeds = feedServiceApi.listFeedsOfUser(user.getId(), start, Configuration.getInt("PageSize.Feed"));
         processFeeds(pagedFeeds.getList());
 
         return MomiaHttpResponse.SUCCESS(pagedFeeds);
@@ -235,7 +235,7 @@ public class UserV1Api extends AbstractV1Api {
             infoJson.put("user", processUser(user));
         }
 
-        PagedList<FeedDto> pagedFeeds = feedServiceApi.listFeedsOfUser(userId, start, Configuration.getInt("PageSize.Feed"));
+        PagedList<UserFeed> pagedFeeds = feedServiceApi.listFeedsOfUser(userId, start, Configuration.getInt("PageSize.Feed"));
         processFeeds(pagedFeeds.getList());
         infoJson.put("feeds", pagedFeeds);
 
