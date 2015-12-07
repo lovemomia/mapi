@@ -8,7 +8,7 @@ import cn.momia.api.course.dto.BookedCourseDto;
 import cn.momia.api.course.dto.FavoriteDto;
 import cn.momia.api.course.dto.OrderPackageDto;
 import cn.momia.api.course.dto.OrderDto;
-import cn.momia.api.course.dto.UserCouponDto;
+import cn.momia.api.course.dto.UserCoupon;
 import cn.momia.api.feed.FeedServiceApi;
 import cn.momia.api.feed.dto.UserFeed;
 import cn.momia.api.im.ImServiceApi;
@@ -183,7 +183,7 @@ public class UserV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (status < 0 || status > 3 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        PagedList<UserCouponDto> userCoupons = couponServiceApi.listUserCoupons(utoken, status, start, Configuration.getInt("PageSize.UserCoupon"));
+        PagedList<UserCoupon> userCoupons = couponServiceApi.listUserCoupons(utoken, status, start, Configuration.getInt("PageSize.UserCoupon"));
         return MomiaHttpResponse.SUCCESS(userCoupons);
     }
 
