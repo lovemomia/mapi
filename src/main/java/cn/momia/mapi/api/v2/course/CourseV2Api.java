@@ -5,7 +5,6 @@ import cn.momia.api.course.dto.CourseBookDto;
 import cn.momia.api.course.dto.CourseCommentDto;
 import cn.momia.api.course.dto.CourseDetailDto;
 import cn.momia.api.course.dto.CourseDto;
-import cn.momia.api.course.dto.TeacherDto;
 import cn.momia.api.user.UserServiceApi;
 import cn.momia.api.user.dto.User;
 import cn.momia.common.api.dto.PagedList;
@@ -49,7 +48,7 @@ public class CourseV2Api extends AbstractV2Api {
             courseJson.put("favored", courseServiceApi.isFavored(user.getId(), id));
         }
 
-        List<TeacherDto> teachers = processTeachers(courseServiceApi.teacher(id, 0, Configuration.getInt("PageSize.CourseTeacher")).getList());
+        List<Teacher> teachers = processTeachers(courseServiceApi.teacher(id, 0, Configuration.getInt("PageSize.CourseTeacher")).getList());
         if (!teachers.isEmpty()) courseJson.put("teachers", teachers);
 
         PagedList<CourseCommentDto> pagedComments = courseServiceApi.queryCommentsByCourse(id, 0, 1);
@@ -101,8 +100,8 @@ public class CourseV2Api extends AbstractV2Api {
         return book;
     }
 
-    private List<TeacherDto> processTeachers(List<TeacherDto> teachers) {
-        for (TeacherDto teacher : teachers) {
+    private List<Teacher> processTeachers(List<Teacher> teachers) {
+        for (Teacher teacher : teachers) {
             teacher.setAvatar(ImageFile.smallUrl(teacher.getAvatar()));
         }
 

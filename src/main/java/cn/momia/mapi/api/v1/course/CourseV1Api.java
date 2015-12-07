@@ -6,7 +6,7 @@ import cn.momia.api.course.dto.CourseBookDto;
 import cn.momia.api.course.dto.CourseCommentDto;
 import cn.momia.api.course.dto.CourseDto;
 import cn.momia.api.course.dto.InstitutionDto;
-import cn.momia.api.course.dto.TeacherDto;
+import cn.momia.api.course.dto.Teacher;
 import cn.momia.api.im.ImServiceApi;
 import cn.momia.api.user.UserServiceApi;
 import cn.momia.api.user.dto.User;
@@ -47,7 +47,7 @@ public class CourseV1Api extends AbstractV1Api {
             courseJson.put("favored", courseServiceApi.isFavored(user.getId(), id));
         }
 
-        List<TeacherDto> teachers = processTeachers(courseServiceApi.teacher(id, 0, Configuration.getInt("PageSize.CourseTeacher")).getList());
+        List<Teacher> teachers = processTeachers(courseServiceApi.teacher(id, 0, Configuration.getInt("PageSize.CourseTeacher")).getList());
         if (!teachers.isEmpty()) courseJson.put("teachers", teachers);
 
         return MomiaHttpResponse.SUCCESS(courseJson);
@@ -78,8 +78,8 @@ public class CourseV1Api extends AbstractV1Api {
         return book;
     }
 
-    private List<TeacherDto> processTeachers(List<TeacherDto> teachers) {
-        for (TeacherDto teacher : teachers) {
+    private List<Teacher> processTeachers(List<Teacher> teachers) {
+        for (Teacher teacher : teachers) {
             teacher.setAvatar(ImageFile.smallUrl(teacher.getAvatar()));
         }
 
@@ -106,7 +106,7 @@ public class CourseV1Api extends AbstractV1Api {
     public MomiaHttpResponse teacher(@RequestParam long id, @RequestParam int start) {
         if (id <= 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        PagedList<TeacherDto> teachers = courseServiceApi.teacher(id, start, Configuration.getInt("PageSize.Teacher"));
+        PagedList<Teacher> teachers = courseServiceApi.teacher(id, start, Configuration.getInt("PageSize.Teacher"));
         processTeachers(teachers.getList());
 
         return MomiaHttpResponse.SUCCESS(teachers);
