@@ -5,6 +5,7 @@ import cn.momia.api.course.dto.CourseBookDto;
 import cn.momia.api.course.dto.CourseCommentDto;
 import cn.momia.api.course.dto.CourseDetailDto;
 import cn.momia.api.course.dto.CourseDto;
+import cn.momia.api.course.dto.Teacher;
 import cn.momia.api.user.UserServiceApi;
 import cn.momia.api.user.dto.User;
 import cn.momia.common.api.dto.PagedList;
