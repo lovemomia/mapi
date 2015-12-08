@@ -6,8 +6,8 @@ import cn.momia.api.course.OrderServiceApi;
 import cn.momia.api.course.SubjectServiceApi;
 import cn.momia.api.course.dto.BookedCourseDto;
 import cn.momia.api.course.dto.Favorite;
-import cn.momia.api.course.dto.OrderPackageDto;
-import cn.momia.api.course.dto.OrderDto;
+import cn.momia.api.course.dto.SubjectPackage;
+import cn.momia.api.course.dto.SubjectOrder;
 import cn.momia.api.course.dto.UserCoupon;
 import cn.momia.api.feed.FeedServiceApi;
 import cn.momia.api.feed.dto.UserFeed;
@@ -155,8 +155,8 @@ public class UserV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        PagedList<OrderPackageDto> packages = orderServiceApi.listBookable(utoken, orderId, start, Configuration.getInt("PageSize.Subject"));
-        for (OrderPackageDto orderPackage : packages.getList()) {
+        PagedList<SubjectPackage> packages = orderServiceApi.listBookable(utoken, orderId, start, Configuration.getInt("PageSize.Subject"));
+        for (SubjectPackage orderPackage : packages.getList()) {
             orderPackage.setCover(ImageFile.middleUrl(orderPackage.getCover()));
         }
 
@@ -168,8 +168,8 @@ public class UserV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (status <= 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        PagedList<OrderDto> orders = orderServiceApi.listOrders(utoken, status, start, Configuration.getInt("PageSize.Order"));
-        for (OrderDto order : orders.getList()) {
+        PagedList<SubjectOrder> orders = orderServiceApi.listOrders(utoken, status, start, Configuration.getInt("PageSize.Order"));
+        for (SubjectOrder order : orders.getList()) {
             order.setCover(ImageFile.middleUrl(order.getCover()));
         }
 

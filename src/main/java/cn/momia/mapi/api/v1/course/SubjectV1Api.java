@@ -10,7 +10,7 @@ import cn.momia.api.course.SubjectServiceApi;
 import cn.momia.api.course.dto.SubjectSku;
 import cn.momia.api.course.dto.UserCourseComment;
 import cn.momia.api.course.dto.CourseDto;
-import cn.momia.api.course.dto.OrderDto;
+import cn.momia.api.course.dto.SubjectOrder;
 import cn.momia.api.course.dto.SubjectDto;
 import cn.momia.api.user.UserServiceApi;
 import cn.momia.api.user.dto.Contact;
@@ -182,7 +182,7 @@ public class SubjectV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (orderId <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        OrderDto order = orderServiceApi.get(utoken, orderId);
+        SubjectOrder order = orderServiceApi.get(utoken, orderId);
         order.setCover(ImageFile.middleUrl(order.getCover()));
 
         return MomiaHttpResponse.SUCCESS(order);
