@@ -4,7 +4,7 @@ import cn.momia.api.course.CourseServiceApi;
 import cn.momia.api.course.SubjectServiceApi;
 import cn.momia.api.course.dto.CourseDto;
 import cn.momia.api.course.dto.SubjectDto;
-import cn.momia.api.course.dto.SubjectSkuDto;
+import cn.momia.api.course.dto.SubjectSku;
 import cn.momia.api.feed.FeedServiceApi;
 import cn.momia.api.feed.dto.UserFeed;
 import cn.momia.api.user.UserServiceApi;
@@ -85,12 +85,12 @@ public class SubjectV2Api extends AbstractV2Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        List<SubjectSkuDto> skus = subjectServiceApi.querySkus(id);
+        List<SubjectSku> skus = subjectServiceApi.querySkus(id);
         Contact contact = userServiceApi.getContact(utoken);
 
-        List<SubjectSkuDto> courseSkus = new ArrayList<SubjectSkuDto>();
-        List<SubjectSkuDto> subjectSkus = new ArrayList<SubjectSkuDto>();
-        for (SubjectSkuDto sku : skus) {
+        List<SubjectSku> courseSkus = new ArrayList<SubjectSku>();
+        List<SubjectSku> subjectSkus = new ArrayList<SubjectSku>();
+        for (SubjectSku sku : skus) {
             if (sku.getCourseId() <= 0) {
                 subjectSkus.add(sku);
             } else if (sku.getCourseId() == courseId) {
