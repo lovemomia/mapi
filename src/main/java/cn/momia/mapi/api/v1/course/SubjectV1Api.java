@@ -7,11 +7,11 @@ import cn.momia.api.course.CouponServiceApi;
 import cn.momia.api.course.CourseServiceApi;
 import cn.momia.api.course.OrderServiceApi;
 import cn.momia.api.course.SubjectServiceApi;
+import cn.momia.api.course.dto.Subject;
 import cn.momia.api.course.dto.SubjectSku;
 import cn.momia.api.course.dto.UserCourseComment;
 import cn.momia.api.course.dto.CourseDto;
 import cn.momia.api.course.dto.SubjectOrder;
-import cn.momia.api.course.dto.SubjectDto;
 import cn.momia.api.user.UserServiceApi;
 import cn.momia.api.user.dto.Contact;
 import cn.momia.api.user.dto.User;
@@ -46,7 +46,7 @@ public class SubjectV1Api extends AbstractV1Api {
     public MomiaHttpResponse get(@RequestParam long id) {
         if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        SubjectDto subject = subjectServiceApi.get(id);
+        Subject subject = subjectServiceApi.get(id);
         subject.setCover(ImageFile.largeUrl(subject.getCover()));
         subject.setImgs(completeLargeImgs(subject.getImgs()));
 

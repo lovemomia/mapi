@@ -1,7 +1,7 @@
 package cn.momia.mapi.api.v1.index;
 
 import cn.momia.api.course.SubjectServiceApi;
-import cn.momia.api.course.dto.SubjectDto;
+import cn.momia.api.course.dto.Subject;
 import cn.momia.api.event.EventServiceApi;
 import cn.momia.api.event.dto.Banner;
 import cn.momia.api.event.dto.Event;
@@ -90,10 +90,10 @@ public class IndexV1Api extends AbstractV1Api {
         return filteredEvents;
     }
 
-    private PagedList<SubjectDto> getTrialSubjects(int cityId, int start) {
+    private PagedList<Subject> getTrialSubjects(int cityId, int start) {
         try {
-            PagedList<SubjectDto> subjects = subjectServiceApi.listTrial(cityId, start, Configuration.getInt("PageSize.Trial"));
-            for (SubjectDto subject : subjects.getList()) {
+            PagedList<Subject> subjects = subjectServiceApi.listTrial(cityId, start, Configuration.getInt("PageSize.Trial"));
+            for (Subject subject : subjects.getList()) {
                 subject.setCover(ImageFile.largeUrl(subject.getCover()));
             }
 

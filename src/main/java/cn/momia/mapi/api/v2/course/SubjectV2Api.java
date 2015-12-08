@@ -3,7 +3,7 @@ package cn.momia.mapi.api.v2.course;
 import cn.momia.api.course.CourseServiceApi;
 import cn.momia.api.course.SubjectServiceApi;
 import cn.momia.api.course.dto.CourseDto;
-import cn.momia.api.course.dto.SubjectDto;
+import cn.momia.api.course.dto.Subject;
 import cn.momia.api.course.dto.SubjectSku;
 import cn.momia.api.feed.FeedServiceApi;
 import cn.momia.api.feed.dto.UserFeed;
@@ -61,7 +61,7 @@ public class SubjectV2Api extends AbstractV2Api {
     public MomiaHttpResponse get(@RequestParam(required = false, defaultValue = "") String utoken, @RequestParam long id) {
         if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        SubjectDto subject = subjectServiceApi.get(id);
+        Subject subject = subjectServiceApi.get(id);
         subject.setCover(ImageFile.largeUrl(subject.getCover()));
         subject.setImgs(completeLargeImgs(subject.getImgs()));
 
