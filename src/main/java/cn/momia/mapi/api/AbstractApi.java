@@ -1,6 +1,6 @@
 package cn.momia.mapi.api;
 
-import cn.momia.api.course.dto.CourseCommentDto;
+import cn.momia.api.course.dto.UserCourseComment;
 import cn.momia.api.course.dto.CourseDto;
 import cn.momia.api.feed.dto.UserFeed;
 import cn.momia.api.user.dto.Child;
@@ -87,8 +87,8 @@ public abstract class AbstractApi extends BaseController {
         }
     }
 
-    protected void processCourseComments(List<CourseCommentDto> comments) {
-        for (CourseCommentDto comment : comments) {
+    protected void processCourseComments(List<UserCourseComment> comments) {
+        for (UserCourseComment comment : comments) {
             comment.setAvatar(ImageFile.smallUrl(comment.getAvatar()));
             List<String> imgs = comment.getImgs();
             comment.setImgs(completeSmallImgs(imgs));

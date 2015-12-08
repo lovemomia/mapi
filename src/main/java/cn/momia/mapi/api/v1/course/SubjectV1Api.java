@@ -7,7 +7,7 @@ import cn.momia.api.course.CouponServiceApi;
 import cn.momia.api.course.CourseServiceApi;
 import cn.momia.api.course.OrderServiceApi;
 import cn.momia.api.course.SubjectServiceApi;
-import cn.momia.api.course.dto.CourseCommentDto;
+import cn.momia.api.course.dto.UserCourseComment;
 import cn.momia.api.course.dto.CourseDto;
 import cn.momia.api.course.dto.OrderDto;
 import cn.momia.api.course.dto.SubjectDto;
@@ -53,7 +53,7 @@ public class SubjectV1Api extends AbstractV1Api {
         PagedList<CourseDto> courses = courseServiceApi.query(id, 0, 2);
         processCourses(courses.getList());
 
-        PagedList<CourseCommentDto> comments = subjectServiceApi.queryCommentsBySubject(id, 0, 2);
+        PagedList<UserCourseComment> comments = subjectServiceApi.queryCommentsBySubject(id, 0, 2);
         processCourseComments(comments.getList());
 
         JSONObject responseJson = new JSONObject();
@@ -92,7 +92,7 @@ public class SubjectV1Api extends AbstractV1Api {
     public MomiaHttpResponse listComments(@RequestParam long id, @RequestParam int start) {
         if (id <= 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        PagedList<CourseCommentDto> pageComments = subjectServiceApi.queryCommentsBySubject(id, start, Configuration.getInt("PageSize.CourseComment"));
+        PagedList<UserCourseComment> pageComments = subjectServiceApi.queryCommentsBySubject(id, start, Configuration.getInt("PageSize.CourseComment"));
         processCourseComments(pageComments.getList());
 
         return MomiaHttpResponse.SUCCESS(pageComments);

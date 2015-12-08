@@ -3,7 +3,7 @@ package cn.momia.mapi.api.v1.course;
 import cn.momia.api.course.CourseServiceApi;
 import cn.momia.api.course.dto.BookedCourseDto;
 import cn.momia.api.course.dto.CourseBookDto;
-import cn.momia.api.course.dto.CourseCommentDto;
+import cn.momia.api.course.dto.UserCourseComment;
 import cn.momia.api.course.dto.CourseDto;
 import cn.momia.api.course.dto.Institution;
 import cn.momia.api.course.dto.Teacher;
@@ -173,7 +173,7 @@ public class CourseV1Api extends AbstractV1Api {
     @RequestMapping(value = "/comment/list", method = RequestMethod.GET)
     public MomiaHttpResponse listComment(@RequestParam long id, @RequestParam int start) {
         if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
-        PagedList<CourseCommentDto> pagedComments = courseServiceApi.queryCommentsByCourse(id, start, Configuration.getInt("PageSize.CourseComment"));
+        PagedList<UserCourseComment> pagedComments = courseServiceApi.queryCommentsByCourse(id, start, Configuration.getInt("PageSize.CourseComment"));
         processCourseComments(pagedComments.getList());
 
         return MomiaHttpResponse.SUCCESS(pagedComments);

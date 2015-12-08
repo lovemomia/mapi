@@ -3,7 +3,7 @@ package cn.momia.mapi.api.v1.feed;
 import cn.momia.api.course.CourseServiceApi;
 import cn.momia.api.course.dto.CourseDto;
 import cn.momia.api.feed.FeedServiceApi;
-import cn.momia.api.feed.dto.UserComment;
+import cn.momia.api.feed.dto.UserFeedComment;
 import cn.momia.api.feed.dto.UserFeed;
 import cn.momia.api.feed.dto.FeedTag;
 import cn.momia.api.user.UserServiceApi;
@@ -162,7 +162,7 @@ public class FeedV1Api extends AbstractV1Api {
 
         PagedList<User> staredUsers = feedServiceApi.listStars(id, 0, Configuration.getInt("PageSize.FeedDetailStar"));
         processUsers(staredUsers.getList());
-        PagedList<UserComment> comments = feedServiceApi.listComments(id, 0, Configuration.getInt("PageSize.FeedDetailComment"));
+        PagedList<UserFeedComment> comments = feedServiceApi.listComments(id, 0, Configuration.getInt("PageSize.FeedDetailComment"));
         processComments(comments.getList());
 
         JSONObject feedDetailJson = new JSONObject();
@@ -184,8 +184,8 @@ public class FeedV1Api extends AbstractV1Api {
         return MomiaHttpResponse.SUCCESS(feedDetailJson);
     }
 
-    private void processComments(List<UserComment> comments) {
-        for (UserComment comment : comments) {
+    private void processComments(List<UserFeedComment> comments) {
+        for (UserFeedComment comment : comments) {
             comment.setAvatar(ImageFile.smallUrl(comment.getAvatar()));
         }
     }
@@ -205,7 +205,7 @@ public class FeedV1Api extends AbstractV1Api {
     public MomiaHttpResponse listComments(@RequestParam long id, @RequestParam int start) {
         if (id <= 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        PagedList<UserComment> pagedComments = feedServiceApi.listComments(id, start, Configuration.getInt("PageSize.FeedComment"));
+        PagedList<UserFeedComment> pagedComments = feedServiceApi.listComments(id, start, Configuration.getInt("PageSize.FeedComment"));
         processComments(pagedComments.getList());
 
         return MomiaHttpResponse.SUCCESS(pagedComments);
