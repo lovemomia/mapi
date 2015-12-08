@@ -3,7 +3,7 @@ package cn.momia.mapi.api.v2.course;
 import cn.momia.api.course.CourseServiceApi;
 import cn.momia.api.course.dto.CourseBookDto;
 import cn.momia.api.course.dto.CourseCommentDto;
-import cn.momia.api.course.dto.CourseDetailDto;
+import cn.momia.api.course.dto.CourseDetail;
 import cn.momia.api.course.dto.CourseDto;
 import cn.momia.api.course.dto.Teacher;
 import cn.momia.api.user.UserServiceApi;
@@ -57,7 +57,7 @@ public class CourseV2Api extends AbstractV2Api {
         if (!pagedComments.getList().isEmpty()) courseJson.put("comments", pagedComments);
 
         try {
-            CourseDetailDto detail = courseServiceApi.detail(id);
+            CourseDetail detail = courseServiceApi.detail(id);
             JSONArray detailJson = JSON.parseArray(detail.getDetail());
             for (int i = 0; i < detailJson.size(); i++) {
                 JSONObject detailBlockJson = detailJson.getJSONObject(i);
