@@ -5,7 +5,7 @@ import cn.momia.api.course.CourseServiceApi;
 import cn.momia.api.course.OrderServiceApi;
 import cn.momia.api.course.SubjectServiceApi;
 import cn.momia.api.course.dto.BookedCourseDto;
-import cn.momia.api.course.dto.FavoriteDto;
+import cn.momia.api.course.dto.Favorite;
 import cn.momia.api.course.dto.OrderPackageDto;
 import cn.momia.api.course.dto.OrderDto;
 import cn.momia.api.course.dto.UserCoupon;
@@ -193,9 +193,9 @@ public class UserV1Api extends AbstractV1Api {
         if (start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
         User user = userServiceApi.get(utoken);
-        PagedList<FavoriteDto> favorites;
+        PagedList<Favorite> favorites;
         switch (type) {
-            case FavoriteDto.Type.SUBJECT:
+            case Favorite.Type.SUBJECT:
                 favorites = subjectServiceApi.listFavorites(user.getId(), start, Configuration.getInt("PageSize.Favorite"));
                 processFavorites(favorites);
                 break;
@@ -207,8 +207,8 @@ public class UserV1Api extends AbstractV1Api {
         return MomiaHttpResponse.SUCCESS(favorites);
     }
 
-    private void processFavorites(PagedList<FavoriteDto> favorites) {
-        for (FavoriteDto favorite : favorites.getList()) {
+    private void processFavorites(PagedList<Favorite> favorites) {
+        for (Favorite favorite : favorites.getList()) {
             JSONObject ref = favorite.getRef();
             ref.put("cover", ImageFile.middleUrl(ref.getString("cover")));
         }
