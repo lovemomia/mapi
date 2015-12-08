@@ -1,7 +1,6 @@
 package cn.momia.mapi.api.v2.course;
 
 import cn.momia.api.course.CourseServiceApi;
-import cn.momia.api.course.dto.CourseBookDto;
 import cn.momia.api.course.dto.UserCourseComment;
 import cn.momia.api.course.dto.CourseDetail;
 import cn.momia.api.course.dto.CourseDto;
@@ -85,20 +84,20 @@ public class CourseV2Api extends AbstractV2Api {
         return course;
     }
 
-    private CourseBookDto processCourseBook(CourseBookDto book) {
-        if (book == null) return null;
+    private void processCourseBook(JSONObject book) {
+        if (book == null) return;
 
         List<String> imgs = new ArrayList<String>();
         List<String> largeImgs = new ArrayList<String>();
-        for (String img : book.getImgs()) {
+        JSONArray imgsJson = book.getJSONArray("imgs");
+        for (int i = 0; i < imgsJson.size(); i++) {
+            String img = imgsJson.getString(i);
             imgs.add(ImageFile.smallUrl(img));
             largeImgs.add(ImageFile.url(img));
         }
 
-        book.setImgs(imgs);
-        book.setLargeImgs(largeImgs);
-
-        return book;
+        book.put("imgs", imgs);
+        book.put("largeImgs", largeImgs);
     }
 
     private List<Teacher> processTeachers(List<Teacher> teachers) {
