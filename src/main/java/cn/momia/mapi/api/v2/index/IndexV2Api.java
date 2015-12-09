@@ -1,7 +1,7 @@
 package cn.momia.mapi.api.v2.index;
 
 import cn.momia.api.course.CourseServiceApi;
-import cn.momia.api.course.dto.CourseDto;
+import cn.momia.api.course.dto.Course;
 import cn.momia.api.event.EventServiceApi;
 import cn.momia.api.event.dto.Banner;
 import cn.momia.api.event.dto.Event;
@@ -90,10 +90,10 @@ public class IndexV2Api extends AbstractV2Api {
         return filteredEvents;
     }
 
-    private PagedList<CourseDto> getRecommendCourses(int cityId, int start) {
+    private PagedList<Course> getRecommendCourses(int cityId, int start) {
         try {
-            PagedList<CourseDto> courses = courseServiceApi.listRecommend(cityId, start, Configuration.getInt("PageSize.Course"));
-            for (CourseDto course : courses.getList()) {
+            PagedList<Course> courses = courseServiceApi.listRecommend(cityId, start, Configuration.getInt("PageSize.Course"));
+            for (Course course : courses.getList()) {
                 course.setCover(ImageFile.largeUrl(course.getCover()));
             }
 

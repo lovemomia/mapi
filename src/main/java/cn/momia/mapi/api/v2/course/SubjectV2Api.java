@@ -2,7 +2,7 @@ package cn.momia.mapi.api.v2.course;
 
 import cn.momia.api.course.CourseServiceApi;
 import cn.momia.api.course.SubjectServiceApi;
-import cn.momia.api.course.dto.CourseDto;
+import cn.momia.api.course.dto.Course;
 import cn.momia.api.course.dto.Subject;
 import cn.momia.api.course.dto.SubjectSku;
 import cn.momia.api.feed.FeedServiceApi;
@@ -43,10 +43,10 @@ public class SubjectV2Api extends AbstractV2Api {
         return MomiaHttpResponse.SUCCESS(getTrialSubjects(cityId, start));
     }
 
-    private PagedList<CourseDto> getTrialSubjects(int cityId, int start) {
+    private PagedList<Course> getTrialSubjects(int cityId, int start) {
         try {
-            PagedList<CourseDto> courses = courseServiceApi.listTrial(cityId, start, Configuration.getInt("PageSize.Trial"));
-            for (CourseDto course : courses.getList()) {
+            PagedList<Course> courses = courseServiceApi.listTrial(cityId, start, Configuration.getInt("PageSize.Trial"));
+            for (Course course : courses.getList()) {
                 course.setCover(ImageFile.largeUrl(course.getCover()));
             }
 
@@ -65,7 +65,7 @@ public class SubjectV2Api extends AbstractV2Api {
         subject.setCover(ImageFile.largeUrl(subject.getCover()));
         subject.setImgs(completeLargeImgs(subject.getImgs()));
 
-        PagedList<CourseDto> courses = courseServiceApi.query(id, 0, 10);
+        PagedList<Course> courses = courseServiceApi.query(id, 0, 10);
         processCourses(courses.getList());
 
         long userId = StringUtils.isBlank(utoken) ? 0 : userServiceApi.get(utoken).getId();

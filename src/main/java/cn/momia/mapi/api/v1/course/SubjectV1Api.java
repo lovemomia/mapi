@@ -7,10 +7,10 @@ import cn.momia.api.course.CouponServiceApi;
 import cn.momia.api.course.CourseServiceApi;
 import cn.momia.api.course.OrderServiceApi;
 import cn.momia.api.course.SubjectServiceApi;
+import cn.momia.api.course.dto.Course;
 import cn.momia.api.course.dto.Subject;
 import cn.momia.api.course.dto.SubjectSku;
 import cn.momia.api.course.dto.UserCourseComment;
-import cn.momia.api.course.dto.CourseDto;
 import cn.momia.api.course.dto.SubjectOrder;
 import cn.momia.api.user.UserServiceApi;
 import cn.momia.api.user.dto.Contact;
@@ -50,7 +50,7 @@ public class SubjectV1Api extends AbstractV1Api {
         subject.setCover(ImageFile.largeUrl(subject.getCover()));
         subject.setImgs(completeLargeImgs(subject.getImgs()));
 
-        PagedList<CourseDto> courses = courseServiceApi.query(id, 0, 2);
+        PagedList<Course> courses = courseServiceApi.query(id, 0, 2);
         processCourses(courses.getList());
 
         PagedList<UserCourseComment> comments = subjectServiceApi.queryCommentsBySubject(id, 0, 2);
@@ -75,7 +75,7 @@ public class SubjectV1Api extends AbstractV1Api {
         AgeRange ageRange = MetaUtil.getAgeRange(age);
         SortType sortType = MetaUtil.getSortType(sort);
 
-        PagedList<CourseDto> courses = courseServiceApi.query(id, packageId, ageRange.getMin(), ageRange.getMax(), sortType.getId(), start, Configuration.getInt("PageSize.Course"));
+        PagedList<Course> courses = courseServiceApi.query(id, packageId, ageRange.getMin(), ageRange.getMax(), sortType.getId(), start, Configuration.getInt("PageSize.Course"));
         processCourses(courses.getList());
 
         JSONObject responseJson = new JSONObject();

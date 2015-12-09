@@ -1,9 +1,9 @@
 package cn.momia.mapi.api.v2.course;
 
 import cn.momia.api.course.CourseServiceApi;
+import cn.momia.api.course.dto.Course;
 import cn.momia.api.course.dto.UserCourseComment;
 import cn.momia.api.course.dto.CourseDetail;
-import cn.momia.api.course.dto.CourseDto;
 import cn.momia.api.course.dto.Teacher;
 import cn.momia.api.user.UserServiceApi;
 import cn.momia.api.user.dto.User;
@@ -41,7 +41,7 @@ public class CourseV2Api extends AbstractV2Api {
                                  @RequestParam(required = false, defaultValue = "") String pos) {
         if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        CourseDto course = processCourse(courseServiceApi.get(id, pos));
+        Course course = processCourse(courseServiceApi.get(id, pos));
         JSONObject courseJson = (JSONObject) JSON.toJSON(course);
         if (!StringUtils.isBlank(utoken)) {
             User user = userServiceApi.get(utoken);
@@ -75,7 +75,7 @@ public class CourseV2Api extends AbstractV2Api {
         return MomiaHttpResponse.SUCCESS(courseJson);
     }
 
-    private CourseDto processCourse(CourseDto course) {
+    private Course processCourse(Course course) {
         course.setCover(ImageFile.largeUrl(course.getCover()));
 
         course.setImgs(completeLargeImgs(course.getImgs()));

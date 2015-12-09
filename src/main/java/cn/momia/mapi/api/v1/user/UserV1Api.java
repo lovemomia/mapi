@@ -4,7 +4,7 @@ import cn.momia.api.course.CouponServiceApi;
 import cn.momia.api.course.CourseServiceApi;
 import cn.momia.api.course.OrderServiceApi;
 import cn.momia.api.course.SubjectServiceApi;
-import cn.momia.api.course.dto.BookedCourseDto;
+import cn.momia.api.course.dto.BookedCourse;
 import cn.momia.api.course.dto.Favorite;
 import cn.momia.api.course.dto.SubjectPackage;
 import cn.momia.api.course.dto.SubjectOrder;
@@ -131,7 +131,7 @@ public class UserV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
 
         User user = userServiceApi.get(utoken);
-        PagedList<BookedCourseDto> courses = courseServiceApi.queryNotFinishedByUser(user.getId(), start, Configuration.getInt("PageSize.Course"));
+        PagedList<BookedCourse> courses = courseServiceApi.queryNotFinishedByUser(user.getId(), start, Configuration.getInt("PageSize.Course"));
         processCourses(courses.getList());
 
         return MomiaHttpResponse.SUCCESS(courses);
@@ -142,7 +142,7 @@ public class UserV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
 
         User user = userServiceApi.get(utoken);
-        PagedList<BookedCourseDto> courses = courseServiceApi.queryFinishedByUser(user.getId(), start, Configuration.getInt("PageSize.Course"));
+        PagedList<BookedCourse> courses = courseServiceApi.queryFinishedByUser(user.getId(), start, Configuration.getInt("PageSize.Course"));
         processCourses(courses.getList());
 
         return MomiaHttpResponse.SUCCESS(courses);

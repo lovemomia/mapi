@@ -1,7 +1,7 @@
 package cn.momia.mapi.api;
 
+import cn.momia.api.course.dto.Course;
 import cn.momia.api.course.dto.UserCourseComment;
-import cn.momia.api.course.dto.CourseDto;
 import cn.momia.api.feed.dto.UserFeed;
 import cn.momia.api.user.dto.Child;
 import cn.momia.api.user.dto.User;
@@ -81,8 +81,8 @@ public abstract class AbstractApi extends BaseController {
         return completedImgs;
     }
 
-    protected void processCourses(List<? extends CourseDto> courses) {
-        for (CourseDto course : courses) {
+    protected void processCourses(List<? extends Course> courses) {
+        for (Course course : courses) {
             course.setCover(ImageFile.middleUrl(course.getCover()));
         }
     }

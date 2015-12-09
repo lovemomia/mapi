@@ -1,9 +1,9 @@
 package cn.momia.mapi.api.v1.course;
 
 import cn.momia.api.course.CourseServiceApi;
-import cn.momia.api.course.dto.BookedCourseDto;
+import cn.momia.api.course.dto.BookedCourse;
+import cn.momia.api.course.dto.Course;
 import cn.momia.api.course.dto.UserCourseComment;
-import cn.momia.api.course.dto.CourseDto;
 import cn.momia.api.course.dto.Institution;
 import cn.momia.api.course.dto.Teacher;
 import cn.momia.api.im.ImServiceApi;
@@ -40,7 +40,7 @@ public class CourseV1Api extends AbstractV1Api {
                                  @RequestParam(required = false, defaultValue = "") String pos) {
         if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        CourseDto course = processCourse(courseServiceApi.get(id, pos));
+        Course course = processCourse(courseServiceApi.get(id, pos));
         JSONObject courseJson = (JSONObject) JSON.toJSON(course);
         if (!StringUtils.isBlank(utoken)) {
             User user = userServiceApi.get(utoken);
@@ -53,7 +53,7 @@ public class CourseV1Api extends AbstractV1Api {
         return MomiaHttpResponse.SUCCESS(courseJson);
     }
 
-    private CourseDto processCourse(CourseDto course) {
+    private Course processCourse(Course course) {
         course.setCover(ImageFile.largeUrl(course.getCover()));
 
         course.setImgs(completeLargeImgs(course.getImgs()));
@@ -141,7 +141,7 @@ public class CourseV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (packageId <= 0 || skuId <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        BookedCourseDto bookedCourse = courseServiceApi.booking(utoken, packageId, skuId);
+        BookedCourse bookedCourse = courseServiceApi.booking(utoken, packageId, skuId);
         imServiceApi.joinGroup(utoken, bookedCourse.getId(), bookedCourse.getCourseSkuId());
 
         return MomiaHttpResponse.SUCCESS;
@@ -152,7 +152,7 @@ public class CourseV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (bookingId <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        BookedCourseDto bookedCourse = courseServiceApi.cancel(utoken, bookingId);
+        BookedCourse bookedCourse = courseServiceApi.cancel(utoken, bookingId);
         imServiceApi.leaveGroup(utoken, bookedCourse.getId(), bookedCourse.getCourseSkuId());
 
         return MomiaHttpResponse.SUCCESS;

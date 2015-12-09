@@ -1,7 +1,7 @@
 package cn.momia.mapi.api.v1.feed;
 
 import cn.momia.api.course.CourseServiceApi;
-import cn.momia.api.course.dto.CourseDto;
+import cn.momia.api.course.dto.Course;
 import cn.momia.api.feed.FeedServiceApi;
 import cn.momia.api.feed.dto.UserFeedComment;
 import cn.momia.api.feed.dto.UserFeed;
@@ -87,7 +87,7 @@ public class FeedV1Api extends AbstractV1Api {
         JSONObject courseFeedsJson = new JSONObject();
 
         if (start == 0) {
-            CourseDto course = courseServiceApi.get(courseId, CourseDto.Type.BASE);
+            Course course = courseServiceApi.get(courseId, Course.ShowType.BASE);
             course.setCover(ImageFile.largeUrl(course.getCover()));
             courseFeedsJson.put("course", course);
         }
@@ -105,7 +105,7 @@ public class FeedV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        PagedList<? extends CourseDto> pagedCourses;
+        PagedList<? extends Course> pagedCourses;
         User user = userServiceApi.get(utoken);
         if (!feedServiceApi.isOfficialUser(user.getId())) {
             pagedCourses = courseServiceApi.listFinished(user.getId(), start, Configuration.getInt("PageSize.Course"));
@@ -113,7 +113,7 @@ public class FeedV1Api extends AbstractV1Api {
             pagedCourses = courseServiceApi.listFinished(0, start, Configuration.getInt("PageSize.Course"));
         }
         
-        for (CourseDto course : pagedCourses.getList()) {
+        for (Course course : pagedCourses.getList()) {
             course.setCover(ImageFile.largeUrl(course.getCover()));
         }
 
@@ -142,7 +142,7 @@ public class FeedV1Api extends AbstractV1Api {
 
         Long courseId = feedJson.getLong("courseId");
         if (courseId != null && courseId > 0) {
-            CourseDto course = courseServiceApi.get(courseId, CourseDto.Type.BASE);
+            Course course = courseServiceApi.get(courseId, Course.ShowType.BASE);
             feedJson.put("subjectId", course.getSubjectId());
             if (!courseServiceApi.joined(user.getId(), feedJson.getLong("courseId"))) return MomiaHttpResponse.FAILED("发表Feed失败，所选课程不存在或您还没参加该课程");
         }
@@ -172,7 +172,7 @@ public class FeedV1Api extends AbstractV1Api {
 
         if (feed.getCourseId() > 0) {
             try {
-                CourseDto course = courseServiceApi.get(feed.getCourseId(), CourseDto.Type.BASE);
+                Course course = courseServiceApi.get(feed.getCourseId(), Course.ShowType.BASE);
                 course.setCover(ImageFile.largeUrl(course.getCover()));
 
                 feedDetailJson.put("course", course);
