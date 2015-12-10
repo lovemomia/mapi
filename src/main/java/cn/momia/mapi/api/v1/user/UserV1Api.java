@@ -52,6 +52,7 @@ public class UserV1Api extends AbstractV1Api {
     public MomiaHttpResponse updateNickName(@RequestParam String utoken, @RequestParam(value = "nickname") String nickName) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (StringUtils.isBlank(nickName)) return MomiaHttpResponse.FAILED("用户昵称不能为空");
+        if (nickName.contains("官方")) return MomiaHttpResponse.FAILED("用户昵称不能包含“官方”");
 
         User user = processUser(userServiceApi.updateNickName(utoken, nickName));
         imServiceApi.updateImNickName(user.getToken(), user.getNickName());
