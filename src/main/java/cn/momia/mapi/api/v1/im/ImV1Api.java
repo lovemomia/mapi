@@ -84,7 +84,7 @@ public class ImV1Api extends AbstractV1Api {
         List<ImUser> members = imServiceApi.listGroupMembers(utoken, id);
         for (ImUser member : members) {
             member.setAvatar(ImageFile.smallUrl(member.getAvatar()));
-            if (member.isTeacher()) teachers.add(member);
+            if (member.getRole() == User.Role.TEACHER) teachers.add(member);
             else customers.add(member);
         }
 
