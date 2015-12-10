@@ -63,7 +63,6 @@ public class ImV1Api extends AbstractV1Api {
         List<String> latestImgs = feedServiceApi.getLatestImgs(userId);
         if (!latestImgs.isEmpty()) {
             imUserJson.put("imgs", completeMiddleImgs(latestImgs));
-            imUserJson.put("largeImgs", completeLargeImgs(latestImgs));
         }
 
         return MomiaHttpResponse.SUCCESS(imUser);
