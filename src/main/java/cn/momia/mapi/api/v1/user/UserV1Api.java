@@ -232,6 +232,7 @@ public class UserV1Api extends AbstractV1Api {
 
         if (start == 0) {
             User user = userServiceApi.get(userId);
+            if (!user.exists()) return MomiaHttpResponse.FAILED("用户不存在");
             infoJson.put("user", processUser(user));
         }
 
