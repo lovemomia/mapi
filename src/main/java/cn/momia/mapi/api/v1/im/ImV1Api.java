@@ -65,7 +65,7 @@ public class ImV1Api extends AbstractV1Api {
             imUserJson.put("imgs", completeMiddleImgs(latestImgs));
         }
 
-        return MomiaHttpResponse.SUCCESS(imUser);
+        return MomiaHttpResponse.SUCCESS(imUserJson);
     }
 
     @RequestMapping(value = "/group", method = RequestMethod.GET)
