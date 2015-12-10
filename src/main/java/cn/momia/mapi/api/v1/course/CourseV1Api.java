@@ -142,7 +142,11 @@ public class CourseV1Api extends AbstractV1Api {
         if (packageId <= 0 || skuId <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
         BookedCourse bookedCourse = courseServiceApi.booking(utoken, packageId, skuId);
-        imServiceApi.joinGroup(utoken, bookedCourse.getId(), bookedCourse.getCourseSkuId());
+        if (bookedCourse.getParentId() > 0 && bookedCourse.getParentCourseSkuId() > 0) {
+            imServiceApi.joinGroup(utoken, bookedCourse.getParentId(), bookedCourse.getParentCourseSkuId());
+        } else {
+            imServiceApi.joinGroup(utoken, bookedCourse.getId(), bookedCourse.getCourseSkuId());
+        }
 
         return MomiaHttpResponse.SUCCESS;
     }
@@ -153,7 +157,11 @@ public class CourseV1Api extends AbstractV1Api {
         if (bookingId <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
         BookedCourse bookedCourse = courseServiceApi.cancel(utoken, bookingId);
-        imServiceApi.leaveGroup(utoken, bookedCourse.getId(), bookedCourse.getCourseSkuId());
+        if (bookedCourse.getParentId() > 0 && bookedCourse.getParentCourseSkuId() > 0) {
+            imServiceApi.leaveGroup(utoken, bookedCourse.getParentId(), bookedCourse.getParentCourseSkuId());
+        } else {
+            imServiceApi.leaveGroup(utoken, bookedCourse.getId(), bookedCourse.getCourseSkuId());
+        }
 
         return MomiaHttpResponse.SUCCESS;
     }
