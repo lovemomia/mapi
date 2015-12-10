@@ -2,6 +2,7 @@ package cn.momia.mapi.api.v1.im;
 
 import cn.momia.api.course.CourseServiceApi;
 import cn.momia.api.course.dto.CourseSku;
+import cn.momia.api.feed.FeedServiceApi;
 import cn.momia.api.im.ImServiceApi;
 import cn.momia.api.im.dto.Group;
 import cn.momia.api.im.dto.ImUser;
@@ -12,6 +13,7 @@ import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.common.util.TimeUtil;
 import cn.momia.image.api.ImageFile;
 import cn.momia.mapi.api.v1.AbstractV1Api;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
@@ -34,6 +36,7 @@ import java.util.Set;
 @RequestMapping("/v1/im")
 public class ImV1Api extends AbstractV1Api {
     @Autowired private CourseServiceApi courseServiceApi;
+    @Autowired private FeedServiceApi feedServiceApi;
     @Autowired private ImServiceApi imServiceApi;
     @Autowired private UserServiceApi userServiceApi;
 
@@ -55,6 +58,13 @@ public class ImV1Api extends AbstractV1Api {
 
         ImUser imUser = imServiceApi.getImUser(userId);
         imUser.setAvatar(ImageFile.smallUrl(imUser.getAvatar()));
+
+        JSONObject imUserJson = (JSONObject) JSON.toJSON(imUser);
+        List<String> latestImgs = feedServiceApi.getLatestImgs(userId);
+        if (!latestImgs.isEmpty()) {
+            imUserJson.put("imgs", completeMiddleImgs(latestImgs));
+            imUserJson.put("largeImgs", completeLargeImgs(latestImgs));
+        }
 
         return MomiaHttpResponse.SUCCESS(imUser);
     }
