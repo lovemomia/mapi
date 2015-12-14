@@ -65,11 +65,11 @@ public class SubjectV2Api extends AbstractV2Api {
         subject.setCover(ImageFile.largeUrl(subject.getCover()));
         subject.setImgs(completeLargeImgs(subject.getImgs()));
 
-        PagedList<Course> courses = courseServiceApi.query(id, 0, 10);
+        PagedList<Course> courses = courseServiceApi.query(id, 0, Configuration.getInt("PageSize.Course"));
         processCourses(courses.getList());
 
         long userId = StringUtils.isBlank(utoken) ? 0 : userServiceApi.get(utoken).getId();
-        PagedList<UserFeed> feeds = feedServiceApi.queryBySubject(userId, id, 0, 10);
+        PagedList<UserFeed> feeds = feedServiceApi.queryBySubject(userId, id, 0, Configuration.getInt("PageSize.Feed"));
         processFeeds(feeds.getList());
 
         JSONObject responseJson = new JSONObject();
