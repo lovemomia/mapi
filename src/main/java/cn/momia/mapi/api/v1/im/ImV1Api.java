@@ -78,6 +78,7 @@ public class ImV1Api extends AbstractV1Api {
         groupInfo.put("groupName", group.getGroupName());
         groupInfo.put("tips", courseServiceApi.queryTips(Sets.newHashSet(group.getCourseId())).get(String.valueOf(group.getCourseId())));
         groupInfo.put("time", sku.getTime());
+        groupInfo.put("route", sku.getRoute());
         groupInfo.put("address", sku.getPlace().getAddress());
 
         return MomiaHttpResponse.SUCCESS(groupInfo);
