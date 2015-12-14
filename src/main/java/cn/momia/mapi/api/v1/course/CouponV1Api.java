@@ -2,7 +2,7 @@ package cn.momia.mapi.api.v1.course;
 
 import cn.momia.api.course.CouponServiceApi;
 import cn.momia.api.user.UserServiceApi;
-import cn.momia.api.user.dto.UserDto;
+import cn.momia.api.user.dto.User;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.common.util.MobileUtil;
 import cn.momia.common.webapp.config.Configuration;
@@ -25,7 +25,7 @@ public class CouponV1Api extends AbstractV1Api {
     public MomiaHttpResponse shareCoupon(@RequestParam String utoken) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
 
-        UserDto user = userServiceApi.get(utoken);
+        User user = userServiceApi.get(utoken);
         JSONObject shareJson = new JSONObject();
         shareJson.put("img", Configuration.getString("Share.Img"));
         shareJson.put("desc", Configuration.getString("Share.Desc"));

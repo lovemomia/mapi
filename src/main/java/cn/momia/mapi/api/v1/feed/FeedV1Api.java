@@ -1,13 +1,13 @@
 package cn.momia.mapi.api.v1.feed;
 
 import cn.momia.api.course.CourseServiceApi;
-import cn.momia.api.course.dto.CourseDto;
+import cn.momia.api.course.dto.Course;
 import cn.momia.api.feed.FeedServiceApi;
-import cn.momia.api.feed.dto.FeedCommentDto;
-import cn.momia.api.feed.dto.FeedDto;
-import cn.momia.api.feed.dto.FeedStarDto;
+import cn.momia.api.feed.dto.UserFeedComment;
+import cn.momia.api.feed.dto.UserFeed;
+import cn.momia.api.feed.dto.FeedTag;
 import cn.momia.api.user.UserServiceApi;
-import cn.momia.api.user.dto.UserDto;
+import cn.momia.api.user.dto.User;
 import cn.momia.common.api.dto.PagedList;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.common.webapp.config.Configuration;
@@ -40,10 +40,10 @@ public class FeedV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (followedId <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        UserDto followedUser = userServiceApi.get(followedId);
+        User followedUser = userServiceApi.get(followedId);
         if (!followedUser.exists()) return MomiaHttpResponse.FAILED("关注的用户不存在");
 
-        UserDto user = userServiceApi.get(utoken);
+        User user = userServiceApi.get(utoken);
         feedServiceApi.follow(user.getId(), followedId);
 
         return MomiaHttpResponse.SUCCESS;
@@ -55,11 +55,11 @@ public class FeedV1Api extends AbstractV1Api {
 
         long userId = 0;
         if (!StringUtils.isBlank(utoken)) {
-            UserDto user = userServiceApi.get(utoken);
+            User user = userServiceApi.get(utoken);
             userId = user.getId();
         }
 
-        PagedList<FeedDto> pagedFeeds = feedServiceApi.list(userId, start, Configuration.getInt("PageSize.Feed"));
+        PagedList<UserFeed> pagedFeeds = feedServiceApi.list(userId, start, Configuration.getInt("PageSize.Feed"));
         processFeeds(pagedFeeds.getList());
 
         return MomiaHttpResponse.SUCCESS(pagedFeeds);
@@ -72,7 +72,7 @@ public class FeedV1Api extends AbstractV1Api {
         if (subjectId <= 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
         long userId = StringUtils.isBlank(utoken) ? 0 : userServiceApi.get(utoken).getId();
-        PagedList<FeedDto> pagedFeeds = feedServiceApi.queryBySubject(userId, subjectId, start, Configuration.getInt("PageSize.Feed"));
+        PagedList<UserFeed> pagedFeeds = feedServiceApi.queryBySubject(userId, subjectId, start, Configuration.getInt("PageSize.Feed"));
         processFeeds(pagedFeeds.getList());
 
         return MomiaHttpResponse.SUCCESS(pagedFeeds);
@@ -87,13 +87,13 @@ public class FeedV1Api extends AbstractV1Api {
         JSONObject courseFeedsJson = new JSONObject();
 
         if (start == 0) {
-            CourseDto course = courseServiceApi.get(courseId, CourseDto.Type.BASE);
+            Course course = courseServiceApi.get(courseId, Course.ShowType.BASE);
             course.setCover(ImageFile.largeUrl(course.getCover()));
             courseFeedsJson.put("course", course);
         }
 
         long userId = StringUtils.isBlank(utoken) ? 0 : userServiceApi.get(utoken).getId();
-        PagedList<FeedDto> pagedFeeds = feedServiceApi.queryByCourse(userId, courseId, start, Configuration.getInt("PageSize.Feed"));
+        PagedList<UserFeed> pagedFeeds = feedServiceApi.queryByCourse(userId, courseId, start, Configuration.getInt("PageSize.Feed"));
         processFeeds(pagedFeeds.getList());
         courseFeedsJson.put("feeds", pagedFeeds);
 
@@ -105,15 +105,15 @@ public class FeedV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        PagedList<? extends CourseDto> pagedCourses;
-        UserDto user = userServiceApi.get(utoken);
+        PagedList<? extends Course> pagedCourses;
+        User user = userServiceApi.get(utoken);
         if (!feedServiceApi.isOfficialUser(user.getId())) {
             pagedCourses = courseServiceApi.listFinished(user.getId(), start, Configuration.getInt("PageSize.Course"));
         } else {
             pagedCourses = courseServiceApi.listFinished(0, start, Configuration.getInt("PageSize.Course"));
         }
         
-        for (CourseDto course : pagedCourses.getList()) {
+        for (Course course : pagedCourses.getList()) {
             course.setCover(ImageFile.largeUrl(course.getCover()));
         }
 
@@ -122,7 +122,13 @@ public class FeedV1Api extends AbstractV1Api {
 
     @RequestMapping(value = "/tag", method = RequestMethod.GET)
     public MomiaHttpResponse listTags() {
-        return MomiaHttpResponse.SUCCESS(feedServiceApi.listTags(Configuration.getInt("PageSize.FeedTag")));
+        List<FeedTag> recommendedTags = feedServiceApi.listRecommendedTags(Configuration.getInt("PageSize.FeedTag"));
+        List<FeedTag> hotTags = feedServiceApi.listHotTags(Configuration.getInt("PageSize.FeedTag"));
+        JSONObject tagsJson = new JSONObject();
+        tagsJson.put("recommendedTags", recommendedTags);
+        tagsJson.put("hotTags", hotTags);
+
+        return MomiaHttpResponse.SUCCESS(tagsJson);
     }
 
     @RequestMapping(value = "/add", method = RequestMethod.POST)
@@ -130,13 +136,13 @@ public class FeedV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (StringUtils.isBlank(feed)) return MomiaHttpResponse.BAD_REQUEST;
 
-        UserDto user = userServiceApi.get(utoken);
+        User user = userServiceApi.get(utoken);
         JSONObject feedJson = JSON.parseObject(feed);
         feedJson.put("userId", user.getId());
 
         Long courseId = feedJson.getLong("courseId");
         if (courseId != null && courseId > 0) {
-            CourseDto course = courseServiceApi.get(courseId, CourseDto.Type.BASE);
+            Course course = courseServiceApi.get(courseId, Course.ShowType.BASE);
             feedJson.put("subjectId", course.getSubjectId());
             if (!courseServiceApi.joined(user.getId(), feedJson.getLong("courseId"))) return MomiaHttpResponse.FAILED("发表Feed失败，所选课程不存在或您还没参加该课程");
         }
@@ -151,22 +157,22 @@ public class FeedV1Api extends AbstractV1Api {
         if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
         long userId = StringUtils.isBlank(utoken) ? 0 : userServiceApi.get(utoken).getId();
-        FeedDto feed = feedServiceApi.get(userId, id);
+        UserFeed feed = feedServiceApi.get(userId, id);
         processFeed(feed);
 
-        PagedList<FeedStarDto> stars = feedServiceApi.listStars(id, 0, Configuration.getInt("PageSize.FeedDetailStar"));
-        processStars(stars.getList());
-        PagedList<FeedCommentDto> comments = feedServiceApi.listComments(id, 0, Configuration.getInt("PageSize.FeedDetailComment"));
+        PagedList<User> staredUsers = feedServiceApi.listStars(id, 0, Configuration.getInt("PageSize.FeedDetailStar"));
+        processUsers(staredUsers.getList());
+        PagedList<UserFeedComment> comments = feedServiceApi.listComments(id, 0, Configuration.getInt("PageSize.FeedDetailComment"));
         processComments(comments.getList());
 
         JSONObject feedDetailJson = new JSONObject();
         feedDetailJson.put("feed", feed);
-        feedDetailJson.put("staredUsers", stars);
+        feedDetailJson.put("staredUsers", staredUsers);
         feedDetailJson.put("comments", comments);
 
         if (feed.getCourseId() > 0) {
             try {
-                CourseDto course = courseServiceApi.get(feed.getCourseId(), CourseDto.Type.BASE);
+                Course course = courseServiceApi.get(feed.getCourseId(), Course.ShowType.BASE);
                 course.setCover(ImageFile.largeUrl(course.getCover()));
 
                 feedDetailJson.put("course", course);
@@ -178,14 +184,8 @@ public class FeedV1Api extends AbstractV1Api {
         return MomiaHttpResponse.SUCCESS(feedDetailJson);
     }
 
-    private void processStars(List<FeedStarDto> stars) {
-        for (FeedStarDto star : stars) {
-            star.setAvatar(ImageFile.smallUrl(star.getAvatar()));
-        }
-    }
-
-    private void processComments(List<FeedCommentDto> comments) {
-        for (FeedCommentDto comment : comments) {
+    private void processComments(List<UserFeedComment> comments) {
+        for (UserFeedComment comment : comments) {
             comment.setAvatar(ImageFile.smallUrl(comment.getAvatar()));
         }
     }
@@ -195,7 +195,7 @@ public class FeedV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        UserDto user = userServiceApi.get(utoken);
+        User user = userServiceApi.get(utoken);
         if (!feedServiceApi.delete(user.getId(), id)) return MomiaHttpResponse.FAILED("删除Feed失败");
 
         return MomiaHttpResponse.SUCCESS;
@@ -205,7 +205,7 @@ public class FeedV1Api extends AbstractV1Api {
     public MomiaHttpResponse listComments(@RequestParam long id, @RequestParam int start) {
         if (id <= 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        PagedList<FeedCommentDto> pagedComments = feedServiceApi.listComments(id, start, Configuration.getInt("PageSize.FeedComment"));
+        PagedList<UserFeedComment> pagedComments = feedServiceApi.listComments(id, start, Configuration.getInt("PageSize.FeedComment"));
         processComments(pagedComments.getList());
 
         return MomiaHttpResponse.SUCCESS(pagedComments);
@@ -216,7 +216,7 @@ public class FeedV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (id <= 0 || StringUtils.isBlank(content)) return MomiaHttpResponse.BAD_REQUEST;
 
-        UserDto user = userServiceApi.get(utoken);
+        User user = userServiceApi.get(utoken);
         feedServiceApi.addComment(user.getId(), id, content);
 
         return MomiaHttpResponse.SUCCESS;
@@ -227,7 +227,7 @@ public class FeedV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (id <= 0 || commentId <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        UserDto user = userServiceApi.get(utoken);
+        User user = userServiceApi.get(utoken);
         feedServiceApi.deleteComment(user.getId(), id, commentId);
 
         return MomiaHttpResponse.SUCCESS;
@@ -238,7 +238,7 @@ public class FeedV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        UserDto user = userServiceApi.get(utoken);
+        User user = userServiceApi.get(utoken);
         feedServiceApi.star(user.getId(), id);
 
         return MomiaHttpResponse.SUCCESS;
@@ -249,7 +249,7 @@ public class FeedV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        UserDto user = userServiceApi.get(utoken);
+        User user = userServiceApi.get(utoken);
         feedServiceApi.unstar(user.getId(), id);
 
         return MomiaHttpResponse.SUCCESS;

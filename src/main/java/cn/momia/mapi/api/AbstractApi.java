@@ -1,10 +1,10 @@
 package cn.momia.mapi.api;
 
-import cn.momia.api.course.dto.CourseCommentDto;
-import cn.momia.api.course.dto.CourseDto;
-import cn.momia.api.feed.dto.FeedDto;
-import cn.momia.api.user.dto.ChildDto;
-import cn.momia.api.user.dto.UserDto;
+import cn.momia.api.course.dto.Course;
+import cn.momia.api.course.dto.UserCourseComment;
+import cn.momia.api.feed.dto.UserFeed;
+import cn.momia.api.user.dto.Child;
+import cn.momia.api.user.dto.User;
 import cn.momia.common.client.ClientType;
 import cn.momia.common.webapp.config.Configuration;
 import cn.momia.common.webapp.ctrl.BaseController;
@@ -81,14 +81,14 @@ public abstract class AbstractApi extends BaseController {
         return completedImgs;
     }
 
-    protected void processCourses(List<? extends CourseDto> courses) {
-        for (CourseDto course : courses) {
+    protected void processCourses(List<? extends Course> courses) {
+        for (Course course : courses) {
             course.setCover(ImageFile.middleUrl(course.getCover()));
         }
     }
 
-    protected void processCourseComments(List<CourseCommentDto> comments) {
-        for (CourseCommentDto comment : comments) {
+    protected void processCourseComments(List<UserCourseComment> comments) {
+        for (UserCourseComment comment : comments) {
             comment.setAvatar(ImageFile.smallUrl(comment.getAvatar()));
             List<String> imgs = comment.getImgs();
             comment.setImgs(completeSmallImgs(imgs));
@@ -96,36 +96,44 @@ public abstract class AbstractApi extends BaseController {
         }
     }
 
-    protected void processFeeds(List<FeedDto> feeds) {
-        for (FeedDto feed : feeds) {
+    protected void processFeeds(List<UserFeed> feeds) {
+        for (UserFeed feed : feeds) {
             processFeed(feed);
         }
     }
 
-    protected void processFeed(FeedDto feed) {
+    protected void processFeed(UserFeed feed) {
         List<String> imgs = feed.getImgs();
         feed.setImgs(completeMiddleImgs(imgs));
         feed.setLargeImgs(completeLargeImgs(imgs));
         feed.setAvatar(ImageFile.smallUrl(feed.getAvatar()));
     }
 
-    protected UserDto processUser(UserDto user) {
+    protected List<User> processUsers(List<User> users) {
+        for (User user : users) {
+            processUser(user);
+        }
+
+        return users;
+    }
+
+    protected User processUser(User user) {
         user.setAvatar(ImageFile.smallUrl(user.getAvatar()));
-        user.setCover(ImageFile.largeUrl(user.getCover()));
-        processChildren(user.getChildren());
+        if (user.getCover() != null) user.setCover(ImageFile.largeUrl(user.getCover()));
+        if (user.getChildren() != null) processChildren(user.getChildren());
 
         return user;
     }
 
-    protected List<ChildDto> processChildren(List<ChildDto> children) {
-        for (ChildDto child : children) {
+    protected List<Child> processChildren(List<Child> children) {
+        for (Child child : children) {
             processChild(child);
         }
 
         return children;
     }
 
-    protected ChildDto processChild(ChildDto child) {
+    protected Child processChild(Child child) {
         child.setAvatar(ImageFile.smallUrl(child.getAvatar()));
         return child;
     }

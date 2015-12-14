@@ -1,20 +1,20 @@
 package cn.momia.mapi.api.v1.course;
 
 import cn.momia.api.base.MetaUtil;
-import cn.momia.api.base.dto.AgeRangeDto;
-import cn.momia.api.base.dto.SortTypeDto;
+import cn.momia.api.base.dto.AgeRange;
+import cn.momia.api.base.dto.SortType;
 import cn.momia.api.course.CouponServiceApi;
 import cn.momia.api.course.CourseServiceApi;
 import cn.momia.api.course.OrderServiceApi;
 import cn.momia.api.course.SubjectServiceApi;
-import cn.momia.api.course.dto.CourseCommentDto;
-import cn.momia.api.course.dto.CourseDto;
-import cn.momia.api.course.dto.OrderDto;
-import cn.momia.api.course.dto.SubjectDto;
-import cn.momia.api.course.dto.SubjectSkuDto;
+import cn.momia.api.course.dto.Course;
+import cn.momia.api.course.dto.Subject;
+import cn.momia.api.course.dto.SubjectSku;
+import cn.momia.api.course.dto.UserCourseComment;
+import cn.momia.api.course.dto.SubjectOrder;
 import cn.momia.api.user.UserServiceApi;
-import cn.momia.api.user.dto.ContactDto;
-import cn.momia.api.user.dto.UserDto;
+import cn.momia.api.user.dto.Contact;
+import cn.momia.api.user.dto.User;
 import cn.momia.common.api.dto.PagedList;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.common.webapp.config.Configuration;
@@ -46,14 +46,14 @@ public class SubjectV1Api extends AbstractV1Api {
     public MomiaHttpResponse get(@RequestParam long id) {
         if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        SubjectDto subject = subjectServiceApi.get(id);
+        Subject subject = subjectServiceApi.get(id);
         subject.setCover(ImageFile.largeUrl(subject.getCover()));
         subject.setImgs(completeLargeImgs(subject.getImgs()));
 
-        PagedList<CourseDto> courses = courseServiceApi.query(id, 0, 2);
+        PagedList<Course> courses = courseServiceApi.query(id, 0, 2);
         processCourses(courses.getList());
 
-        PagedList<CourseCommentDto> comments = subjectServiceApi.queryCommentsBySubject(id, 0, 2);
+        PagedList<UserCourseComment> comments = subjectServiceApi.queryCommentsBySubject(id, 0, 2);
         processCourseComments(comments.getList());
 
         JSONObject responseJson = new JSONObject();
@@ -72,10 +72,10 @@ public class SubjectV1Api extends AbstractV1Api {
                                          @RequestParam int start) {
         if (id <= 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        AgeRangeDto ageRange = MetaUtil.getAgeRange(age);
-        SortTypeDto sortType = MetaUtil.getSortType(sort);
+        AgeRange ageRange = MetaUtil.getAgeRange(age);
+        SortType sortType = MetaUtil.getSortType(sort);
 
-        PagedList<CourseDto> courses = courseServiceApi.query(id, packageId, ageRange.getMin(), ageRange.getMax(), sortType.getId(), start, Configuration.getInt("PageSize.Course"));
+        PagedList<Course> courses = courseServiceApi.query(id, packageId, ageRange.getMin(), ageRange.getMax(), sortType.getId(), start, Configuration.getInt("PageSize.Course"));
         processCourses(courses.getList());
 
         JSONObject responseJson = new JSONObject();
@@ -92,7 +92,7 @@ public class SubjectV1Api extends AbstractV1Api {
     public MomiaHttpResponse listComments(@RequestParam long id, @RequestParam int start) {
         if (id <= 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        PagedList<CourseCommentDto> pageComments = subjectServiceApi.queryCommentsBySubject(id, start, Configuration.getInt("PageSize.CourseComment"));
+        PagedList<UserCourseComment> pageComments = subjectServiceApi.queryCommentsBySubject(id, start, Configuration.getInt("PageSize.CourseComment"));
         processCourseComments(pageComments.getList());
 
         return MomiaHttpResponse.SUCCESS(pageComments);
@@ -103,11 +103,11 @@ public class SubjectV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        List<SubjectSkuDto> skus = subjectServiceApi.querySkus(id);
-        ContactDto contact = userServiceApi.getContact(utoken);
+        List<SubjectSku> skus = subjectServiceApi.querySkus(id);
+        Contact contact = userServiceApi.getContact(utoken);
 
-        List<SubjectSkuDto> subjectSkus = new ArrayList<SubjectSkuDto>();
-        for (SubjectSkuDto sku : skus) {
+        List<SubjectSku> subjectSkus = new ArrayList<SubjectSku>();
+        for (SubjectSku sku : skus) {
             if (sku.getCourseId() <= 0) subjectSkus.add(sku);
         }
 
@@ -125,7 +125,7 @@ public class SubjectV1Api extends AbstractV1Api {
 
         JSONObject orderJson = JSON.parseObject(order);
 
-        UserDto user = userServiceApi.get(utoken);
+        User user = userServiceApi.get(utoken);
         orderJson.put("userId", user.getId());
 
         JSONObject contactJson = orderJson.getJSONObject("contact");
@@ -182,7 +182,7 @@ public class SubjectV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (orderId <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        OrderDto order = orderServiceApi.get(utoken, orderId);
+        SubjectOrder order = orderServiceApi.get(utoken, orderId);
         order.setCover(ImageFile.middleUrl(order.getCover()));
 
         return MomiaHttpResponse.SUCCESS(order);
@@ -193,7 +193,7 @@ public class SubjectV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        UserDto user = userServiceApi.get(utoken);
+        User user = userServiceApi.get(utoken);
         if (!subjectServiceApi.favor(user.getId(), id)) return MomiaHttpResponse.FAILED("添加收藏失败");
         return MomiaHttpResponse.SUCCESS;
     }
@@ -203,7 +203,7 @@ public class SubjectV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        UserDto user = userServiceApi.get(utoken);
+        User user = userServiceApi.get(utoken);
         if (!subjectServiceApi.unfavor(user.getId(), id)) return MomiaHttpResponse.FAILED("取消收藏失败");
         return MomiaHttpResponse.SUCCESS;
     }

@@ -2,13 +2,13 @@ package cn.momia.mapi.api.v2.course;
 
 import cn.momia.api.course.CourseServiceApi;
 import cn.momia.api.course.SubjectServiceApi;
-import cn.momia.api.course.dto.CourseDto;
-import cn.momia.api.course.dto.SubjectDto;
-import cn.momia.api.course.dto.SubjectSkuDto;
+import cn.momia.api.course.dto.Course;
+import cn.momia.api.course.dto.Subject;
+import cn.momia.api.course.dto.SubjectSku;
 import cn.momia.api.feed.FeedServiceApi;
-import cn.momia.api.feed.dto.FeedDto;
+import cn.momia.api.feed.dto.UserFeed;
 import cn.momia.api.user.UserServiceApi;
-import cn.momia.api.user.dto.ContactDto;
+import cn.momia.api.user.dto.Contact;
 import cn.momia.common.api.dto.PagedList;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.common.webapp.config.Configuration;
@@ -43,10 +43,10 @@ public class SubjectV2Api extends AbstractV2Api {
         return MomiaHttpResponse.SUCCESS(getTrialSubjects(cityId, start));
     }
 
-    private PagedList<CourseDto> getTrialSubjects(int cityId, int start) {
+    private PagedList<Course> getTrialSubjects(int cityId, int start) {
         try {
-            PagedList<CourseDto> courses = courseServiceApi.listTrial(cityId, start, Configuration.getInt("PageSize.Trial"));
-            for (CourseDto course : courses.getList()) {
+            PagedList<Course> courses = courseServiceApi.listTrial(cityId, start, Configuration.getInt("PageSize.Trial"));
+            for (Course course : courses.getList()) {
                 course.setCover(ImageFile.largeUrl(course.getCover()));
             }
 
@@ -61,15 +61,15 @@ public class SubjectV2Api extends AbstractV2Api {
     public MomiaHttpResponse get(@RequestParam(required = false, defaultValue = "") String utoken, @RequestParam long id) {
         if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        SubjectDto subject = subjectServiceApi.get(id);
+        Subject subject = subjectServiceApi.get(id);
         subject.setCover(ImageFile.largeUrl(subject.getCover()));
         subject.setImgs(completeLargeImgs(subject.getImgs()));
 
-        PagedList<CourseDto> courses = courseServiceApi.query(id, 0, 10);
+        PagedList<Course> courses = courseServiceApi.query(id, 0, Configuration.getInt("PageSize.Course"));
         processCourses(courses.getList());
 
         long userId = StringUtils.isBlank(utoken) ? 0 : userServiceApi.get(utoken).getId();
-        PagedList<FeedDto> feeds = feedServiceApi.queryBySubject(userId, id, 0, 10);
+        PagedList<UserFeed> feeds = feedServiceApi.queryBySubject(userId, id, 0, Configuration.getInt("PageSize.Feed"));
         processFeeds(feeds.getList());
 
         JSONObject responseJson = new JSONObject();
@@ -85,12 +85,12 @@ public class SubjectV2Api extends AbstractV2Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        List<SubjectSkuDto> skus = subjectServiceApi.querySkus(id);
-        ContactDto contact = userServiceApi.getContact(utoken);
+        List<SubjectSku> skus = subjectServiceApi.querySkus(id);
+        Contact contact = userServiceApi.getContact(utoken);
 
-        List<SubjectSkuDto> courseSkus = new ArrayList<SubjectSkuDto>();
-        List<SubjectSkuDto> subjectSkus = new ArrayList<SubjectSkuDto>();
-        for (SubjectSkuDto sku : skus) {
+        List<SubjectSku> courseSkus = new ArrayList<SubjectSku>();
+        List<SubjectSku> subjectSkus = new ArrayList<SubjectSku>();
+        for (SubjectSku sku : skus) {
             if (sku.getCourseId() <= 0) {
                 subjectSkus.add(sku);
             } else if (sku.getCourseId() == courseId) {

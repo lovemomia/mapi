@@ -1,13 +1,12 @@
 package cn.momia.mapi.api.v2.course;
 
 import cn.momia.api.course.CourseServiceApi;
-import cn.momia.api.course.dto.CourseBookDto;
-import cn.momia.api.course.dto.CourseCommentDto;
-import cn.momia.api.course.dto.CourseDetailDto;
-import cn.momia.api.course.dto.CourseDto;
-import cn.momia.api.course.dto.TeacherDto;
+import cn.momia.api.course.dto.Course;
+import cn.momia.api.course.dto.UserCourseComment;
+import cn.momia.api.course.dto.CourseDetail;
+import cn.momia.api.course.dto.Teacher;
 import cn.momia.api.user.UserServiceApi;
-import cn.momia.api.user.dto.UserDto;
+import cn.momia.api.user.dto.User;
 import cn.momia.common.api.dto.PagedList;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.common.webapp.config.Configuration;
@@ -42,22 +41,22 @@ public class CourseV2Api extends AbstractV2Api {
                                  @RequestParam(required = false, defaultValue = "") String pos) {
         if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        CourseDto course = processCourse(courseServiceApi.get(id, pos));
+        Course course = processCourse(courseServiceApi.get(id, pos));
         JSONObject courseJson = (JSONObject) JSON.toJSON(course);
         if (!StringUtils.isBlank(utoken)) {
-            UserDto user = userServiceApi.get(utoken);
+            User user = userServiceApi.get(utoken);
             courseJson.put("favored", courseServiceApi.isFavored(user.getId(), id));
         }
 
-        List<TeacherDto> teachers = processTeachers(courseServiceApi.teacher(id, 0, Configuration.getInt("PageSize.CourseTeacher")).getList());
+        List<Teacher> teachers = processTeachers(courseServiceApi.teacher(id, 0, Configuration.getInt("PageSize.CourseTeacher")).getList());
         if (!teachers.isEmpty()) courseJson.put("teachers", teachers);
 
-        PagedList<CourseCommentDto> pagedComments = courseServiceApi.queryCommentsByCourse(id, 0, 1);
+        PagedList<UserCourseComment> pagedComments = courseServiceApi.queryCommentsByCourse(id, 0, 1);
         processCourseComments(pagedComments.getList());
         if (!pagedComments.getList().isEmpty()) courseJson.put("comments", pagedComments);
 
         try {
-            CourseDetailDto detail = courseServiceApi.detail(id);
+            CourseDetail detail = courseServiceApi.detail(id);
             JSONArray detailJson = JSON.parseArray(detail.getDetail());
             for (int i = 0; i < detailJson.size(); i++) {
                 JSONObject detailBlockJson = detailJson.getJSONObject(i);
@@ -76,7 +75,7 @@ public class CourseV2Api extends AbstractV2Api {
         return MomiaHttpResponse.SUCCESS(courseJson);
     }
 
-    private CourseDto processCourse(CourseDto course) {
+    private Course processCourse(Course course) {
         course.setCover(ImageFile.largeUrl(course.getCover()));
 
         course.setImgs(completeLargeImgs(course.getImgs()));
@@ -85,24 +84,24 @@ public class CourseV2Api extends AbstractV2Api {
         return course;
     }
 
-    private CourseBookDto processCourseBook(CourseBookDto book) {
-        if (book == null) return null;
+    private void processCourseBook(JSONObject book) {
+        if (book == null) return;
 
         List<String> imgs = new ArrayList<String>();
         List<String> largeImgs = new ArrayList<String>();
-        for (String img : book.getImgs()) {
+        JSONArray imgsJson = book.getJSONArray("imgs");
+        for (int i = 0; i < imgsJson.size(); i++) {
+            String img = imgsJson.getString(i);
             imgs.add(ImageFile.smallUrl(img));
             largeImgs.add(ImageFile.url(img));
         }
 
-        book.setImgs(imgs);
-        book.setLargeImgs(largeImgs);
-
-        return book;
+        book.put("imgs", imgs);
+        book.put("largeImgs", largeImgs);
     }
 
-    private List<TeacherDto> processTeachers(List<TeacherDto> teachers) {
-        for (TeacherDto teacher : teachers) {
+    private List<Teacher> processTeachers(List<Teacher> teachers) {
+        for (Teacher teacher : teachers) {
             teacher.setAvatar(ImageFile.smallUrl(teacher.getAvatar()));
         }
 

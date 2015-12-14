@@ -1,13 +1,9 @@
 package cn.momia.mapi.api.v1.user;
 
 import cn.momia.api.user.ChildServiceApi;
-import cn.momia.api.user.UserServiceApi;
-import cn.momia.api.user.dto.ChildDto;
 import cn.momia.common.api.http.MomiaHttpResponse;
-import cn.momia.common.api.util.CastUtil;
 import cn.momia.common.util.SexUtil;
 import cn.momia.mapi.api.v1.AbstractV1Api;
-import com.alibaba.fastjson.JSONArray;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -16,14 +12,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 @RestController
 @RequestMapping("/v1/user/child")
 public class ChildV1Api extends AbstractV1Api {
-    @Autowired private UserServiceApi userServiceApi;
     @Autowired private ChildServiceApi childServiceApi;
 
     @RequestMapping(method = RequestMethod.POST)
@@ -31,16 +24,7 @@ public class ChildV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (StringUtils.isBlank(children)) return MomiaHttpResponse.BAD_REQUEST;
 
-        long userId = userServiceApi.get(utoken).getId();
-        List<ChildDto> childDtos = new ArrayList<ChildDto>();
-        JSONArray childrenJson = JSONArray.parseArray(children);
-        for (int i = 0; i < childrenJson.size(); i++) {
-            ChildDto childDto = CastUtil.toObject(childrenJson.getJSONObject(i), ChildDto.class);
-            childDto.setUserId(userId);
-            childDtos.add(childDto);
-        }
-
-        return MomiaHttpResponse.SUCCESS(processUser(childServiceApi.add(childDtos)));
+        return MomiaHttpResponse.SUCCESS(processUser(childServiceApi.add(utoken, children)));
     }
 
     @RequestMapping(method = RequestMethod.GET)
