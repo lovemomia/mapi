@@ -87,6 +87,10 @@ public class IndexV1Api extends AbstractV1Api {
             filteredEvents.add(event);
         }
 
+        if (filteredEvents.size() % 2 != 0) {
+            return filteredEvents.subList(0, filteredEvents.size() - 1);
+        }
+
         return filteredEvents;
     }
 
