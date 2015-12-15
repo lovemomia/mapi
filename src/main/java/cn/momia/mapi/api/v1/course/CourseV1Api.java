@@ -3,6 +3,8 @@ package cn.momia.mapi.api.v1.course;
 import cn.momia.api.course.CourseServiceApi;
 import cn.momia.api.course.dto.BookedCourse;
 import cn.momia.api.course.dto.Course;
+import cn.momia.api.course.dto.CourseSku;
+import cn.momia.api.course.dto.DatedCourseSkus;
 import cn.momia.api.course.dto.UserCourseComment;
 import cn.momia.api.course.dto.Institution;
 import cn.momia.api.course.dto.Teacher;
@@ -25,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -129,9 +132,40 @@ public class CourseV1Api extends AbstractV1Api {
     }
 
     @RequestMapping(value = "/sku/month", method = RequestMethod.GET)
-    public MomiaHttpResponse listWeekSkus(@RequestParam long id, @RequestParam int month) {
+    public MomiaHttpResponse listMonthSkus(@RequestParam long id, @RequestParam int month) {
         if (id <= 0 || month <= 0 || month > 12) return MomiaHttpResponse.BAD_REQUEST;
         return MomiaHttpResponse.SUCCESS(courseServiceApi.listMonthSkus(id, month));
+    }
+
+    @RequestMapping(value = "/sku/week/bookable", method = RequestMethod.GET)
+    public MomiaHttpResponse listBookableWeekSkus(@RequestParam long id) {
+        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        return MomiaHttpResponse.SUCCESS(filterUnbookableSkus(courseServiceApi.listWeekSkus(id)));
+    }
+
+    private List<DatedCourseSkus> filterUnbookableSkus(List<DatedCourseSkus> allDatedCourseSkus) {
+        Date now = new Date();
+        List<DatedCourseSkus> result = new ArrayList<DatedCourseSkus>();
+        for (DatedCourseSkus datedCourseSkus : allDatedCourseSkus) {
+            List<CourseSku> filteredSkus = new ArrayList<CourseSku>();
+            for (CourseSku sku : datedCourseSkus.getSkus()) {
+                if (sku.isAvaliable(now) && sku.getStock() > 0) filteredSkus.add(sku);
+            }
+
+            if (filteredSkus.size() > 0) {
+                DatedCourseSkus newDatedCourseSkus = new DatedCourseSkus();
+                newDatedCourseSkus.setDate(datedCourseSkus.getDate());
+                newDatedCourseSkus.setSkus(filteredSkus);
+                result.add(newDatedCourseSkus);
+            }
+        }
+        return result;
+    }
+
+    @RequestMapping(value = "/sku/month/bookable", method = RequestMethod.GET)
+    public MomiaHttpResponse listBookableMonthSkus(@RequestParam long id, @RequestParam int month) {
+        if (id <= 0 || month <= 0 || month > 12) return MomiaHttpResponse.BAD_REQUEST;
+        return MomiaHttpResponse.SUCCESS(filterUnbookableSkus(courseServiceApi.listMonthSkus(id, month)));
     }
 
     @RequestMapping(value = "/booking", method = RequestMethod.POST)
