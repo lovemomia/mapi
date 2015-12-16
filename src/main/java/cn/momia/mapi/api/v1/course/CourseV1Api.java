@@ -128,11 +128,42 @@ public class CourseV1Api extends AbstractV1Api {
     @RequestMapping(value = "/sku/week", method = RequestMethod.GET)
     public MomiaHttpResponse listWeekSkus(@RequestParam long id) {
         if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
-        return MomiaHttpResponse.SUCCESS(courseServiceApi.listWeekSkus(id));
+        return MomiaHttpResponse.SUCCESS(filterUnavaliableSkus(courseServiceApi.listWeekSkus(id)));
+    }
+
+    private List<DatedCourseSkus> filterUnavaliableSkus(List<DatedCourseSkus> allDatedCourseSkus) {
+        Date now = new Date();
+        List<DatedCourseSkus> result = new ArrayList<DatedCourseSkus>();
+        for (DatedCourseSkus datedCourseSkus : allDatedCourseSkus) {
+            List<CourseSku> filteredSkus = new ArrayList<CourseSku>();
+            for (CourseSku sku : datedCourseSkus.getSkus()) {
+                if (sku.isAvaliable(now)) filteredSkus.add(sku);
+            }
+
+            if (filteredSkus.size() > 0) {
+                DatedCourseSkus newDatedCourseSkus = new DatedCourseSkus();
+                newDatedCourseSkus.setDate(datedCourseSkus.getDate());
+                newDatedCourseSkus.setSkus(filteredSkus);
+                result.add(newDatedCourseSkus);
+            }
+        }
+        return result;
     }
 
     @RequestMapping(value = "/sku/month", method = RequestMethod.GET)
     public MomiaHttpResponse listMonthSkus(@RequestParam long id, @RequestParam int month) {
+        if (id <= 0 || month <= 0 || month > 12) return MomiaHttpResponse.BAD_REQUEST;
+        return MomiaHttpResponse.SUCCESS(filterUnavaliableSkus(courseServiceApi.listMonthSkus(id, month)));
+    }
+
+    @RequestMapping(value = "/sku/week/notend", method = RequestMethod.GET)
+    public MomiaHttpResponse listNotEndWeekSkus(@RequestParam long id) {
+        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        return MomiaHttpResponse.SUCCESS(courseServiceApi.listWeekSkus(id));
+    }
+
+    @RequestMapping(value = "/sku/month/notend", method = RequestMethod.GET)
+    public MomiaHttpResponse lisNotEndtMonthSkus(@RequestParam long id, @RequestParam int month) {
         if (id <= 0 || month <= 0 || month > 12) return MomiaHttpResponse.BAD_REQUEST;
         return MomiaHttpResponse.SUCCESS(courseServiceApi.listMonthSkus(id, month));
     }
