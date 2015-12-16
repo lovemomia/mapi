@@ -103,12 +103,18 @@ public class SubjectV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
+        Subject subject = subjectServiceApi.get(id);
+
         List<SubjectSku> skus = subjectServiceApi.querySkus(id);
         Contact contact = userServiceApi.getContact(utoken);
 
         List<SubjectSku> subjectSkus = new ArrayList<SubjectSku>();
         for (SubjectSku sku : skus) {
-            if (sku.getCourseId() <= 0) subjectSkus.add(sku);
+            if (subject.getType() == Subject.Type.NORMAL) {
+                if (sku.getCourseId() <= 0) subjectSkus.add(sku);
+            } else if (subject.getType() == Subject.Type.TRIAL) {
+                if (sku.getCourseId() > 0) subjectSkus.add(sku);
+            }
         }
 
         JSONObject responseJson = new JSONObject();
