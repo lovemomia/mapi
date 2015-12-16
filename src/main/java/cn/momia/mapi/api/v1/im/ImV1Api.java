@@ -40,6 +40,14 @@ public class ImV1Api extends AbstractV1Api {
     @Autowired private ImServiceApi imServiceApi;
     @Autowired private UserServiceApi userServiceApi;
 
+    @RequestMapping(value = "/token", method = RequestMethod.POST)
+    public MomiaHttpResponse generateImToken(@RequestParam String utoken) {
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+
+        User user = userServiceApi.get(utoken);
+        return MomiaHttpResponse.SUCCESS(imServiceApi.generateImToken(utoken, user.getNickName(), ImageFile.smallUrl(user.getAvatar())));
+    }
+
     @RequestMapping(value = "/token", method = RequestMethod.GET)
     public MomiaHttpResponse getImToken(@RequestParam String utoken) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
