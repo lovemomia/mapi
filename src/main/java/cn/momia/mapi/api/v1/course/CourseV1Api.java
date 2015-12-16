@@ -128,16 +128,15 @@ public class CourseV1Api extends AbstractV1Api {
     @RequestMapping(value = "/sku/week", method = RequestMethod.GET)
     public MomiaHttpResponse listWeekSkus(@RequestParam long id) {
         if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
-        return MomiaHttpResponse.SUCCESS(filterUnavaliableSkus(courseServiceApi.listWeekSkus(id)));
+        return MomiaHttpResponse.SUCCESS(filterClosedSkus(courseServiceApi.listWeekSkus(id)));
     }
 
-    private List<DatedCourseSkus> filterUnavaliableSkus(List<DatedCourseSkus> allDatedCourseSkus) {
-        Date now = new Date();
+    private List<DatedCourseSkus> filterClosedSkus(List<DatedCourseSkus> allDatedCourseSkus) {
         List<DatedCourseSkus> result = new ArrayList<DatedCourseSkus>();
         for (DatedCourseSkus datedCourseSkus : allDatedCourseSkus) {
             List<CourseSku> filteredSkus = new ArrayList<CourseSku>();
             for (CourseSku sku : datedCourseSkus.getSkus()) {
-                if (sku.isAvaliable(now)) filteredSkus.add(sku);
+                if (!sku.isClosed()) filteredSkus.add(sku);
             }
 
             if (filteredSkus.size() > 0) {
@@ -153,7 +152,7 @@ public class CourseV1Api extends AbstractV1Api {
     @RequestMapping(value = "/sku/month", method = RequestMethod.GET)
     public MomiaHttpResponse listMonthSkus(@RequestParam long id, @RequestParam int month) {
         if (id <= 0 || month <= 0 || month > 12) return MomiaHttpResponse.BAD_REQUEST;
-        return MomiaHttpResponse.SUCCESS(filterUnavaliableSkus(courseServiceApi.listMonthSkus(id, month)));
+        return MomiaHttpResponse.SUCCESS(filterClosedSkus(courseServiceApi.listMonthSkus(id, month)));
     }
 
     @RequestMapping(value = "/sku/week/notend", method = RequestMethod.GET)
@@ -180,7 +179,7 @@ public class CourseV1Api extends AbstractV1Api {
         for (DatedCourseSkus datedCourseSkus : allDatedCourseSkus) {
             List<CourseSku> filteredSkus = new ArrayList<CourseSku>();
             for (CourseSku sku : datedCourseSkus.getSkus()) {
-                if (sku.isAvaliable(now) && sku.getStock() > 0) filteredSkus.add(sku);
+                if (sku.isBookable(now)) filteredSkus.add(sku);
             }
 
             if (filteredSkus.size() > 0) {
