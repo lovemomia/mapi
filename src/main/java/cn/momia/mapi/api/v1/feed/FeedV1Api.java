@@ -144,7 +144,7 @@ public class FeedV1Api extends AbstractV1Api {
         if (courseId != null && courseId > 0) {
             Course course = courseServiceApi.get(courseId, Course.ShowType.BASE);
             feedJson.put("subjectId", course.getSubjectId());
-            if (!courseServiceApi.joined(user.getId(), feedJson.getLong("courseId"))) return MomiaHttpResponse.FAILED("发表Feed失败，所选课程不存在或您还没参加该课程");
+            if (!feedServiceApi.isOfficialUser(user.getId()) && !courseServiceApi.joined(user.getId(), feedJson.getLong("courseId"))) return MomiaHttpResponse.FAILED("发表Feed失败，所选课程不存在或您还没参加该课程");
         }
 
         feedServiceApi.add(feedJson);
