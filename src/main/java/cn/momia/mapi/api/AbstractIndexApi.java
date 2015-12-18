@@ -5,7 +5,6 @@ import cn.momia.api.event.dto.Banner;
 import cn.momia.api.event.dto.Event;
 import cn.momia.api.event.dto.Icon;
 import cn.momia.common.webapp.config.Configuration;
-import cn.momia.image.api.ImageFile;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -20,7 +19,7 @@ public class AbstractIndexApi extends AbstractApi {
         List<Banner> filteredBanners = new ArrayList<Banner>();
         for (Banner banner : banners) {
             if (banner.getPlatform() != 0 && banner.getPlatform() != clientType) continue;
-            banner.setCover(ImageFile.url(banner.getCover()));
+            banner.setCover(completeImg(banner.getCover()));
             banner.setAction(buildAction(banner.getAction(), clientType));
             filteredBanners.add(banner);
         }
@@ -33,7 +32,7 @@ public class AbstractIndexApi extends AbstractApi {
         List<Icon> filteredIcons = new ArrayList<Icon>();
         for (Icon icon : icons) {
             if (icon.getPlatform() != 0 && icon.getPlatform() != clientType) continue;
-            icon.setImg(ImageFile.url(icon.getImg()));
+            icon.setImg(completeImg(icon.getImg()));
             icon.setAction(buildAction(icon.getAction(), clientType));
             filteredIcons.add(icon);
         }
@@ -46,7 +45,7 @@ public class AbstractIndexApi extends AbstractApi {
         List<Event> filteredEvents = new ArrayList<Event>();
         for (Event event : events) {
             if (event.getPlatform() != 0 && event.getPlatform() != clientType) continue;
-            event.setImg(ImageFile.url(event.getImg()));
+            event.setImg(completeImg(event.getImg()));
             event.setAction(buildAction(event.getAction(), clientType));
             filteredEvents.add(event);
         }

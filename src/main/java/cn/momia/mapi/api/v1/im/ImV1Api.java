@@ -11,7 +11,6 @@ import cn.momia.api.user.UserServiceApi;
 import cn.momia.api.user.dto.User;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.common.util.TimeUtil;
-import cn.momia.image.api.ImageFile;
 import cn.momia.mapi.api.AbstractApi;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -45,7 +44,7 @@ public class ImV1Api extends AbstractApi {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
 
         User user = userServiceApi.get(utoken);
-        return MomiaHttpResponse.SUCCESS(imServiceApi.generateImToken(utoken, user.getNickName(), ImageFile.smallUrl(user.getAvatar())));
+        return MomiaHttpResponse.SUCCESS(imServiceApi.generateImToken(utoken, user.getNickName(), completeSmallImg(user.getAvatar())));
     }
 
     @RequestMapping(value = "/token", method = RequestMethod.GET)
@@ -54,7 +53,7 @@ public class ImV1Api extends AbstractApi {
         String imToken = imServiceApi.getImToken(utoken);
         if (StringUtils.isBlank(imToken)) {
             User user = userServiceApi.get(utoken);
-            imToken = imServiceApi.generateImToken(utoken, user.getNickName(), ImageFile.smallUrl(user.getAvatar()));
+            imToken = imServiceApi.generateImToken(utoken, user.getNickName(), completeSmallImg(user.getAvatar()));
         }
 
         return MomiaHttpResponse.SUCCESS(imToken);
@@ -65,7 +64,7 @@ public class ImV1Api extends AbstractApi {
         if (userId <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
         ImUser imUser = imServiceApi.getImUser(userId);
-        imUser.setAvatar(ImageFile.smallUrl(imUser.getAvatar()));
+        imUser.setAvatar(completeSmallImg(imUser.getAvatar()));
 
         JSONObject imUserJson = (JSONObject) JSON.toJSON(imUser);
         List<String> latestImgs = feedServiceApi.getLatestImgs(userId);
@@ -101,7 +100,7 @@ public class ImV1Api extends AbstractApi {
         List<ImUser> customers = new ArrayList<ImUser>();
         List<ImUser> members = imServiceApi.listGroupMembers(utoken, id);
         for (ImUser member : members) {
-            member.setAvatar(ImageFile.smallUrl(member.getAvatar()));
+            member.setAvatar(completeSmallImg(member.getAvatar()));
             if (member.getRole() == User.Role.TEACHER) teachers.add(member);
             else customers.add(member);
         }

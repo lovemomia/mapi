@@ -51,6 +51,10 @@ public abstract class AbstractApi extends BaseController {
         return completedImgs;
     }
 
+    protected String completeImg(String img) {
+        return ImageFile.url(img);
+    }
+
     protected List<String> completeLargeImgs(List<String> imgs) {
         if (imgs == null) return null;
 
@@ -82,6 +86,10 @@ public abstract class AbstractApi extends BaseController {
         }
 
         return completedImgs;
+    }
+
+    protected String completeSmallImg(String img) {
+        return ImageFile.smallUrl(img);
     }
 
     protected void completeLargeImg(Subject subject) {
