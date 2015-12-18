@@ -77,6 +77,10 @@ public abstract class AbstractApi extends BaseController {
         return completedImgs;
     }
 
+    protected String completeMiddleImg(String img) {
+        return ImageFile.middleUrl(img);
+    }
+
     protected List<String> completeSmallImgs(List<String> imgs) {
         if (imgs == null) return null;
 
@@ -92,19 +96,23 @@ public abstract class AbstractApi extends BaseController {
         return ImageFile.smallUrl(img);
     }
 
-    protected void completeLargeImg(Subject subject) {
+    protected Subject completeLargeImg(Subject subject) {
         subject.setCover(ImageFile.largeUrl(subject.getCover()));
         subject.setImgs(completeLargeImgs(subject.getImgs()));
+
+        return subject;
     }
 
-    protected void completeLargeImg(Course course) {
+    protected Course completeLargeImg(Course course) {
         course.setCover(ImageFile.largeUrl(course.getCover()));
         course.setImgs(completeLargeImgs(course.getImgs()));
-        completeCourseBookImgs(course.getBook());
+        course.setBook(completeCourseBookImgs(course.getBook()));
+
+        return course;
     }
 
-    private void completeCourseBookImgs(JSONObject book) {
-        if (book == null) return;
+    private JSONObject completeCourseBookImgs(JSONObject book) {
+        if (book == null) return null;
 
         List<String> imgs = new ArrayList<String>();
         List<String> largeImgs = new ArrayList<String>();
@@ -117,6 +125,8 @@ public abstract class AbstractApi extends BaseController {
 
         book.put("imgs", imgs);
         book.put("largeImgs", largeImgs);
+
+        return book;
     }
 
     protected void processCourses(List<? extends Course> courses) {
@@ -134,44 +144,48 @@ public abstract class AbstractApi extends BaseController {
         }
     }
 
-    protected void processFeeds(List<UserFeed> feeds) {
+    protected List<UserFeed> completeFeedsImgs(List<UserFeed> feeds) {
         for (UserFeed feed : feeds) {
-            processFeed(feed);
+            completeFeedImgs(feed);
         }
+
+        return feeds;
     }
 
-    protected void processFeed(UserFeed feed) {
+    protected UserFeed completeFeedImgs(UserFeed feed) {
         List<String> imgs = feed.getImgs();
         feed.setImgs(completeMiddleImgs(imgs));
         feed.setLargeImgs(completeLargeImgs(imgs));
         feed.setAvatar(ImageFile.smallUrl(feed.getAvatar()));
+
+        return feed;
     }
 
-    protected List<User> processUsers(List<User> users) {
+    protected List<User> completeUsersImgs(List<User> users) {
         for (User user : users) {
-            processUser(user);
+            completeUserImgs(user);
         }
 
         return users;
     }
 
-    protected User processUser(User user) {
+    protected User completeUserImgs(User user) {
         user.setAvatar(ImageFile.smallUrl(user.getAvatar()));
         if (user.getCover() != null) user.setCover(ImageFile.largeUrl(user.getCover()));
-        if (user.getChildren() != null) processChildren(user.getChildren());
+        if (user.getChildren() != null) completeChildrenImgs(user.getChildren());
 
         return user;
     }
 
-    protected List<Child> processChildren(List<Child> children) {
+    protected List<Child> completeChildrenImgs(List<Child> children) {
         for (Child child : children) {
-            processChild(child);
+            completeChildImg(child);
         }
 
         return children;
     }
 
-    protected Child processChild(Child child) {
+    protected Child completeChildImg(Child child) {
         child.setAvatar(ImageFile.smallUrl(child.getAvatar()));
         return child;
     }

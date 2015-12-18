@@ -70,7 +70,7 @@ public class SubjectV2Api extends AbstractApi {
 
         long userId = StringUtils.isBlank(utoken) ? 0 : userServiceApi.get(utoken).getId();
         PagedList<UserFeed> feeds = feedServiceApi.queryBySubject(userId, id, 0, Configuration.getInt("PageSize.Feed"));
-        processFeeds(feeds.getList());
+        completeFeedsImgs(feeds.getList());
 
         JSONObject responseJson = new JSONObject();
         responseJson.put("subject", subject);

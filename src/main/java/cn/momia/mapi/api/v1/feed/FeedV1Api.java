@@ -60,7 +60,7 @@ public class FeedV1Api extends AbstractApi {
         }
 
         PagedList<UserFeed> pagedFeeds = feedServiceApi.list(userId, start, Configuration.getInt("PageSize.Feed"));
-        processFeeds(pagedFeeds.getList());
+        completeFeedsImgs(pagedFeeds.getList());
 
         return MomiaHttpResponse.SUCCESS(pagedFeeds);
     }
@@ -73,7 +73,7 @@ public class FeedV1Api extends AbstractApi {
 
         long userId = StringUtils.isBlank(utoken) ? 0 : userServiceApi.get(utoken).getId();
         PagedList<UserFeed> pagedFeeds = feedServiceApi.queryBySubject(userId, subjectId, start, Configuration.getInt("PageSize.Feed"));
-        processFeeds(pagedFeeds.getList());
+        completeFeedsImgs(pagedFeeds.getList());
 
         return MomiaHttpResponse.SUCCESS(pagedFeeds);
     }
@@ -94,7 +94,7 @@ public class FeedV1Api extends AbstractApi {
 
         long userId = StringUtils.isBlank(utoken) ? 0 : userServiceApi.get(utoken).getId();
         PagedList<UserFeed> pagedFeeds = feedServiceApi.queryByCourse(userId, courseId, start, Configuration.getInt("PageSize.Feed"));
-        processFeeds(pagedFeeds.getList());
+        completeFeedsImgs(pagedFeeds.getList());
         courseFeedsJson.put("feeds", pagedFeeds);
 
         return MomiaHttpResponse.SUCCESS(courseFeedsJson);
@@ -158,10 +158,10 @@ public class FeedV1Api extends AbstractApi {
 
         long userId = StringUtils.isBlank(utoken) ? 0 : userServiceApi.get(utoken).getId();
         UserFeed feed = feedServiceApi.get(userId, id);
-        processFeed(feed);
+        completeFeedImgs(feed);
 
         PagedList<User> staredUsers = feedServiceApi.listStars(id, 0, Configuration.getInt("PageSize.FeedDetailStar"));
-        processUsers(staredUsers.getList());
+        completeUsersImgs(staredUsers.getList());
         PagedList<UserFeedComment> comments = feedServiceApi.listComments(id, 0, Configuration.getInt("PageSize.FeedDetailComment"));
         processComments(comments.getList());
 

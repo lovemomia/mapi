@@ -18,7 +18,6 @@ import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.api.user.UserServiceApi;
 import cn.momia.common.util.SexUtil;
 import cn.momia.common.webapp.config.Configuration;
-import cn.momia.image.api.ImageFile;
 import cn.momia.mapi.api.AbstractApi;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
@@ -45,7 +44,7 @@ public class UserV1Api extends AbstractApi {
     @RequestMapping(method = RequestMethod.GET)
     public MomiaHttpResponse getUser(@RequestParam String utoken) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        return MomiaHttpResponse.SUCCESS(processUser(userServiceApi.get(utoken)));
+        return MomiaHttpResponse.SUCCESS(completeUserImgs(userServiceApi.get(utoken)));
     }
 
     @RequestMapping(value = "/nickname", method = RequestMethod.POST)
@@ -54,7 +53,7 @@ public class UserV1Api extends AbstractApi {
         if (StringUtils.isBlank(nickName)) return MomiaHttpResponse.FAILED("用户昵称不能为空");
         if (nickName.contains("官方")) return MomiaHttpResponse.FAILED("用户昵称不能包含“官方”");
 
-        User user = processUser(userServiceApi.updateNickName(utoken, nickName));
+        User user = completeUserImgs(userServiceApi.updateNickName(utoken, nickName));
         imServiceApi.updateImNickName(user.getToken(), user.getNickName());
 
         return MomiaHttpResponse.SUCCESS(user);
@@ -65,7 +64,7 @@ public class UserV1Api extends AbstractApi {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (StringUtils.isBlank(avatar)) return MomiaHttpResponse.FAILED("用户头像不能为空");
 
-        User user = processUser(userServiceApi.updateAvatar(utoken, avatar));
+        User user = completeUserImgs(userServiceApi.updateAvatar(utoken, avatar));
         imServiceApi.updateImAvatar(user.getToken(), user.getAvatar());
 
         return MomiaHttpResponse.SUCCESS(user);
@@ -76,7 +75,7 @@ public class UserV1Api extends AbstractApi {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (StringUtils.isBlank(cover)) return MomiaHttpResponse.FAILED("用户封面图不能为空");
 
-        return MomiaHttpResponse.SUCCESS(processUser(userServiceApi.updateCover(utoken, cover)));
+        return MomiaHttpResponse.SUCCESS(completeUserImgs(userServiceApi.updateCover(utoken, cover)));
     }
 
     @RequestMapping(value = "/name", method = RequestMethod.POST)
@@ -84,7 +83,7 @@ public class UserV1Api extends AbstractApi {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (StringUtils.isBlank(name)) return MomiaHttpResponse.FAILED("用户名字不能为空");
 
-        return MomiaHttpResponse.SUCCESS(processUser(userServiceApi.updateName(utoken, name)));
+        return MomiaHttpResponse.SUCCESS(completeUserImgs(userServiceApi.updateName(utoken, name)));
     }
 
     @RequestMapping(value = "/sex", method = RequestMethod.POST)
@@ -92,7 +91,7 @@ public class UserV1Api extends AbstractApi {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (StringUtils.isBlank(sex) || SexUtil.isInvalid(sex)) return MomiaHttpResponse.FAILED("无效的用户性别");
 
-        return MomiaHttpResponse.SUCCESS(processUser(userServiceApi.updateSex(utoken, sex)));
+        return MomiaHttpResponse.SUCCESS(completeUserImgs(userServiceApi.updateSex(utoken, sex)));
     }
 
     @RequestMapping(value = "/birthday", method = RequestMethod.POST)
@@ -100,7 +99,7 @@ public class UserV1Api extends AbstractApi {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (birthday == null) return MomiaHttpResponse.FAILED("出生日期不能为空");
 
-        return MomiaHttpResponse.SUCCESS(processUser(userServiceApi.updateBirthday(utoken, birthday)));
+        return MomiaHttpResponse.SUCCESS(completeUserImgs(userServiceApi.updateBirthday(utoken, birthday)));
     }
 
     @RequestMapping(value = "/city", method = RequestMethod.POST)
@@ -108,7 +107,7 @@ public class UserV1Api extends AbstractApi {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (cityId <= 0) return MomiaHttpResponse.FAILED("无效的城市ID");
 
-        return MomiaHttpResponse.SUCCESS(processUser(userServiceApi.updateCity(utoken, cityId)));
+        return MomiaHttpResponse.SUCCESS(completeUserImgs(userServiceApi.updateCity(utoken, cityId)));
     }
 
     @RequestMapping(value = "/region", method = RequestMethod.POST)
@@ -116,7 +115,7 @@ public class UserV1Api extends AbstractApi {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (regionId <= 0) return MomiaHttpResponse.FAILED("无效的区域ID");
 
-        return MomiaHttpResponse.SUCCESS(processUser(userServiceApi.updateRegion(utoken, regionId)));
+        return MomiaHttpResponse.SUCCESS(completeUserImgs(userServiceApi.updateRegion(utoken, regionId)));
     }
 
     @RequestMapping(value = "/address", method = RequestMethod.POST)
@@ -124,7 +123,7 @@ public class UserV1Api extends AbstractApi {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (StringUtils.isBlank(address)) return MomiaHttpResponse.FAILED("地址不能为空");
 
-        return MomiaHttpResponse.SUCCESS(processUser(userServiceApi.updateAddress(utoken, address)));
+        return MomiaHttpResponse.SUCCESS(completeUserImgs(userServiceApi.updateAddress(utoken, address)));
     }
 
     @RequestMapping(value = "/course/notfinished", method = RequestMethod.GET)
@@ -158,7 +157,7 @@ public class UserV1Api extends AbstractApi {
 
         PagedList<SubjectPackage> packages = orderServiceApi.listBookable(utoken, orderId, start, Configuration.getInt("PageSize.Subject"));
         for (SubjectPackage orderPackage : packages.getList()) {
-            orderPackage.setCover(ImageFile.middleUrl(orderPackage.getCover()));
+            orderPackage.setCover(completeMiddleImg(orderPackage.getCover()));
         }
 
         return MomiaHttpResponse.SUCCESS(packages);
@@ -171,7 +170,7 @@ public class UserV1Api extends AbstractApi {
 
         PagedList<SubjectOrder> orders = orderServiceApi.listOrders(utoken, status, start, Configuration.getInt("PageSize.Order"));
         for (SubjectOrder order : orders.getList()) {
-            order.setCover(ImageFile.middleUrl(order.getCover()));
+            order.setCover(completeMiddleImg(order.getCover()));
         }
 
         return MomiaHttpResponse.SUCCESS(orders);
@@ -211,7 +210,7 @@ public class UserV1Api extends AbstractApi {
     private void processFavorites(PagedList<Favorite> favorites) {
         for (Favorite favorite : favorites.getList()) {
             JSONObject ref = favorite.getRef();
-            ref.put("cover", ImageFile.middleUrl(ref.getString("cover")));
+            ref.put("cover", completeMiddleImg(ref.getString("cover")));
         }
     }
 
@@ -222,7 +221,7 @@ public class UserV1Api extends AbstractApi {
 
         User user = userServiceApi.get(utoken);
         PagedList<UserFeed> pagedFeeds = feedServiceApi.listFeedsOfUser(user.getId(), start, Configuration.getInt("PageSize.Feed"));
-        processFeeds(pagedFeeds.getList());
+        completeFeedsImgs(pagedFeeds.getList());
 
         return MomiaHttpResponse.SUCCESS(pagedFeeds);
     }
@@ -234,11 +233,11 @@ public class UserV1Api extends AbstractApi {
         if (start == 0) {
             User user = userServiceApi.get(userId);
             if (!user.exists()) return MomiaHttpResponse.FAILED("用户不存在");
-            infoJson.put("user", processUser(user));
+            infoJson.put("user", completeUserImgs(user));
         }
 
         PagedList<UserFeed> pagedFeeds = feedServiceApi.listFeedsOfUser(userId, start, Configuration.getInt("PageSize.Feed"));
-        processFeeds(pagedFeeds.getList());
+        completeFeedsImgs(pagedFeeds.getList());
         infoJson.put("feeds", pagedFeeds);
 
         return MomiaHttpResponse.SUCCESS(infoJson);

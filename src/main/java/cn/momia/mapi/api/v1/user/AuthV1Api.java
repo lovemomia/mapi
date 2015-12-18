@@ -45,7 +45,7 @@ public class AuthV1Api extends AbstractApi {
         if (StringUtils.isBlank(password)) return MomiaHttpResponse.FAILED("密码不能为空");
         if (StringUtils.isBlank(code)) return MomiaHttpResponse.FAILED("验证码不能为空");
 
-        User user = processUser(authServiceApi.register(nickName, mobile, password, code));
+        User user = completeUserImgs(authServiceApi.register(nickName, mobile, password, code));
         distributeInviteCoupon(user.getId(), mobile);
         generateImToken(user.getId(), user.getToken(), user.getNickName(), user.getAvatar());
 
@@ -73,7 +73,7 @@ public class AuthV1Api extends AbstractApi {
         if (MobileUtil.isInvalid(mobile)) return MomiaHttpResponse.FAILED("无效的手机号码");
         if (StringUtils.isBlank(password)) return MomiaHttpResponse.FAILED("密码不能为空");
 
-        return MomiaHttpResponse.SUCCESS(processUser(authServiceApi.login(mobile, password)));
+        return MomiaHttpResponse.SUCCESS(completeUserImgs(authServiceApi.login(mobile, password)));
     }
 
     @RequestMapping(value = "/password", method = RequestMethod.POST)
@@ -82,6 +82,6 @@ public class AuthV1Api extends AbstractApi {
         if (StringUtils.isBlank(password)) return MomiaHttpResponse.FAILED("密码不能为空");
         if (StringUtils.isBlank(code)) return MomiaHttpResponse.FAILED("验证码不能为空");
 
-        return MomiaHttpResponse.SUCCESS(processUser(authServiceApi.updatePassword(mobile, password, code)));
+        return MomiaHttpResponse.SUCCESS(completeUserImgs(authServiceApi.updatePassword(mobile, password, code)));
     }
 }
