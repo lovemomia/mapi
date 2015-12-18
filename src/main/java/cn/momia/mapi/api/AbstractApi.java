@@ -1,6 +1,7 @@
 package cn.momia.mapi.api;
 
 import cn.momia.api.course.dto.Course;
+import cn.momia.api.course.dto.Subject;
 import cn.momia.api.course.dto.UserCourseComment;
 import cn.momia.api.feed.dto.UserFeed;
 import cn.momia.api.user.dto.Child;
@@ -9,6 +10,8 @@ import cn.momia.common.client.ClientType;
 import cn.momia.common.webapp.config.Configuration;
 import cn.momia.common.webapp.ctrl.BaseController;
 import cn.momia.image.api.ImageFile;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
@@ -79,6 +82,33 @@ public abstract class AbstractApi extends BaseController {
         }
 
         return completedImgs;
+    }
+
+    protected void completeLargeImg(Subject subject) {
+        subject.setCover(ImageFile.largeUrl(subject.getCover()));
+        subject.setImgs(completeLargeImgs(subject.getImgs()));
+    }
+
+    protected void completeLargeImg(Course course) {
+        course.setCover(ImageFile.largeUrl(course.getCover()));
+        course.setImgs(completeLargeImgs(course.getImgs()));
+        completeCourseBookImgs(course.getBook());
+    }
+
+    private void completeCourseBookImgs(JSONObject book) {
+        if (book == null) return;
+
+        List<String> imgs = new ArrayList<String>();
+        List<String> largeImgs = new ArrayList<String>();
+        JSONArray imgsJson = book.getJSONArray("imgs");
+        for (int i = 0; i < imgsJson.size(); i++) {
+            String img = imgsJson.getString(i);
+            imgs.add(ImageFile.middleUrl(img));
+            largeImgs.add(ImageFile.url(img));
+        }
+
+        book.put("imgs", imgs);
+        book.put("largeImgs", largeImgs);
     }
 
     protected void processCourses(List<? extends Course> courses) {
