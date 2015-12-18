@@ -10,7 +10,6 @@ import cn.momia.api.user.dto.User;
 import cn.momia.common.api.dto.PagedList;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.common.webapp.config.Configuration;
-import cn.momia.image.api.ImageFile;
 import cn.momia.mapi.api.AbstractApi;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -24,7 +23,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -41,18 +39,18 @@ public class CourseV2Api extends AbstractApi {
                                  @RequestParam(required = false, defaultValue = "") String pos) {
         if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        Course course = processCourse(courseServiceApi.get(id, pos));
+        Course course = completeLargeImg(courseServiceApi.get(id, pos));
         JSONObject courseJson = (JSONObject) JSON.toJSON(course);
         if (!StringUtils.isBlank(utoken)) {
             User user = userServiceApi.get(utoken);
             courseJson.put("favored", courseServiceApi.isFavored(user.getId(), id));
         }
 
-        List<Teacher> teachers = processTeachers(courseServiceApi.teacher(id, 0, Configuration.getInt("PageSize.CourseTeacher")).getList());
+        List<Teacher> teachers = completeTeachersImgs(courseServiceApi.teacher(id, 0, Configuration.getInt("PageSize.CourseTeacher")).getList());
         if (!teachers.isEmpty()) courseJson.put("teachers", teachers);
 
         PagedList<UserCourseComment> pagedComments = courseServiceApi.queryCommentsByCourse(id, 0, 1);
-        processCourseComments(pagedComments.getList());
+        completeCourseCommentsImgs(pagedComments.getList());
         if (!pagedComments.getList().isEmpty()) courseJson.put("comments", pagedComments);
 
         try {
@@ -63,7 +61,7 @@ public class CourseV2Api extends AbstractApi {
                 JSONArray contentJson = detailBlockJson.getJSONArray("content");
                 for (int j = 0; j < contentJson.size(); j++) {
                     JSONObject contentBlockJson = contentJson.getJSONObject(j);
-                    if (contentBlockJson.containsKey("img")) contentBlockJson.put("img", ImageFile.largeUrl(contentBlockJson.getString("img")));
+                    if (contentBlockJson.containsKey("img")) contentBlockJson.put("img", completeLargeImg(contentBlockJson.getString("img")));
                 }
             }
             courseJson.put("goal", detail.getAbstracts());
@@ -73,38 +71,5 @@ public class CourseV2Api extends AbstractApi {
         }
 
         return MomiaHttpResponse.SUCCESS(courseJson);
-    }
-
-    private Course processCourse(Course course) {
-        course.setCover(ImageFile.largeUrl(course.getCover()));
-
-        course.setImgs(completeLargeImgs(course.getImgs()));
-        processCourseBook(course.getBook());
-
-        return course;
-    }
-
-    private void processCourseBook(JSONObject book) {
-        if (book == null) return;
-
-        List<String> imgs = new ArrayList<String>();
-        List<String> largeImgs = new ArrayList<String>();
-        JSONArray imgsJson = book.getJSONArray("imgs");
-        for (int i = 0; i < imgsJson.size(); i++) {
-            String img = imgsJson.getString(i);
-            imgs.add(ImageFile.smallUrl(img));
-            largeImgs.add(ImageFile.url(img));
-        }
-
-        book.put("imgs", imgs);
-        book.put("largeImgs", largeImgs);
-    }
-
-    private List<Teacher> processTeachers(List<Teacher> teachers) {
-        for (Teacher teacher : teachers) {
-            teacher.setAvatar(ImageFile.smallUrl(teacher.getAvatar()));
-        }
-
-        return teachers;
     }
 }

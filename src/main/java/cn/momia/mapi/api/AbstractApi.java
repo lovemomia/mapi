@@ -2,6 +2,7 @@ package cn.momia.mapi.api;
 
 import cn.momia.api.course.dto.Course;
 import cn.momia.api.course.dto.Subject;
+import cn.momia.api.course.dto.Teacher;
 import cn.momia.api.course.dto.UserCourseComment;
 import cn.momia.api.feed.dto.UserFeed;
 import cn.momia.api.user.dto.Child;
@@ -45,7 +46,7 @@ public abstract class AbstractApi extends BaseController {
 
         List<String> completedImgs = new ArrayList<String>();
         for (String img : imgs) {
-            completedImgs.add(ImageFile.url(img));
+            completedImgs.add(completeImg(img));
         }
 
         return completedImgs;
@@ -60,10 +61,14 @@ public abstract class AbstractApi extends BaseController {
 
         List<String> completedImgs = new ArrayList<String>();
         for (String img : imgs) {
-            completedImgs.add(ImageFile.largeUrl(img));
+            completedImgs.add(completeLargeImg(img));
         }
 
         return completedImgs;
+    }
+
+    protected String completeLargeImg(String img) {
+        return ImageFile.largeUrl(img);
     }
 
     protected List<String> completeMiddleImgs(List<String> imgs) {
@@ -71,7 +76,7 @@ public abstract class AbstractApi extends BaseController {
 
         List<String> completedImgs = new ArrayList<String>();
         for (String img : imgs) {
-            completedImgs.add(ImageFile.middleUrl(img));
+            completedImgs.add(completeMiddleImg(img));
         }
 
         return completedImgs;
@@ -86,7 +91,7 @@ public abstract class AbstractApi extends BaseController {
 
         List<String> completedImgs = new ArrayList<String>();
         for (String img : imgs) {
-            completedImgs.add(ImageFile.smallUrl(img));
+            completedImgs.add(completeSmallImg(img));
         }
 
         return completedImgs;
@@ -97,14 +102,14 @@ public abstract class AbstractApi extends BaseController {
     }
 
     protected Subject completeLargeImg(Subject subject) {
-        subject.setCover(ImageFile.largeUrl(subject.getCover()));
+        subject.setCover(completeLargeImg(subject.getCover()));
         subject.setImgs(completeLargeImgs(subject.getImgs()));
 
         return subject;
     }
 
     protected Course completeLargeImg(Course course) {
-        course.setCover(ImageFile.largeUrl(course.getCover()));
+        course.setCover(completeLargeImg(course.getCover()));
         course.setImgs(completeLargeImgs(course.getImgs()));
         course.setBook(completeCourseBookImgs(course.getBook()));
 
@@ -119,8 +124,8 @@ public abstract class AbstractApi extends BaseController {
         JSONArray imgsJson = book.getJSONArray("imgs");
         for (int i = 0; i < imgsJson.size(); i++) {
             String img = imgsJson.getString(i);
-            imgs.add(ImageFile.middleUrl(img));
-            largeImgs.add(ImageFile.url(img));
+            imgs.add(completeMiddleImg(img));
+            largeImgs.add(completeImg(img));
         }
 
         book.put("imgs", imgs);
@@ -129,19 +134,39 @@ public abstract class AbstractApi extends BaseController {
         return book;
     }
 
-    protected void processCourses(List<? extends Course> courses) {
+    protected List<? extends Course> completeLargeCoursesImgs(List<? extends Course> courses) {
         for (Course course : courses) {
-            course.setCover(ImageFile.middleUrl(course.getCover()));
+            course.setCover(completeLargeImg(course.getCover()));
         }
+
+        return courses;
     }
 
-    protected void processCourseComments(List<UserCourseComment> comments) {
+    protected List<? extends Course> completeMiddleCoursesImgs(List<? extends Course> courses) {
+        for (Course course : courses) {
+            course.setCover(completeMiddleImg(course.getCover()));
+        }
+
+        return courses;
+    }
+
+    protected List<UserCourseComment> completeCourseCommentsImgs(List<UserCourseComment> comments) {
         for (UserCourseComment comment : comments) {
-            comment.setAvatar(ImageFile.smallUrl(comment.getAvatar()));
+            comment.setAvatar(completeSmallImg(comment.getAvatar()));
             List<String> imgs = comment.getImgs();
             comment.setImgs(completeSmallImgs(imgs));
             comment.setLargeImgs(completeLargeImgs(imgs));
         }
+
+        return comments;
+    }
+
+    protected List<Teacher> completeTeachersImgs(List<Teacher> teachers) {
+        for (Teacher teacher : teachers) {
+            teacher.setAvatar(completeSmallImg(teacher.getAvatar()));
+        }
+
+        return teachers;
     }
 
     protected List<UserFeed> completeFeedsImgs(List<UserFeed> feeds) {
@@ -156,7 +181,7 @@ public abstract class AbstractApi extends BaseController {
         List<String> imgs = feed.getImgs();
         feed.setImgs(completeMiddleImgs(imgs));
         feed.setLargeImgs(completeLargeImgs(imgs));
-        feed.setAvatar(ImageFile.smallUrl(feed.getAvatar()));
+        feed.setAvatar(completeSmallImg(feed.getAvatar()));
 
         return feed;
     }
@@ -170,8 +195,8 @@ public abstract class AbstractApi extends BaseController {
     }
 
     protected User completeUserImgs(User user) {
-        user.setAvatar(ImageFile.smallUrl(user.getAvatar()));
-        if (user.getCover() != null) user.setCover(ImageFile.largeUrl(user.getCover()));
+        user.setAvatar(completeSmallImg(user.getAvatar()));
+        if (user.getCover() != null) user.setCover(completeLargeImg(user.getCover()));
         if (user.getChildren() != null) completeChildrenImgs(user.getChildren());
 
         return user;
@@ -186,7 +211,7 @@ public abstract class AbstractApi extends BaseController {
     }
 
     protected Child completeChildImg(Child child) {
-        child.setAvatar(ImageFile.smallUrl(child.getAvatar()));
+        child.setAvatar(completeSmallImg(child.getAvatar()));
         return child;
     }
 }

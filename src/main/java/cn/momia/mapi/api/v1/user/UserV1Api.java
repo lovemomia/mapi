@@ -132,7 +132,7 @@ public class UserV1Api extends AbstractApi {
 
         User user = userServiceApi.get(utoken);
         PagedList<BookedCourse> courses = courseServiceApi.queryNotFinishedByUser(user.getId(), start, Configuration.getInt("PageSize.Course"));
-        processCourses(courses.getList());
+        completeMiddleCoursesImgs(courses.getList());
 
         return MomiaHttpResponse.SUCCESS(courses);
     }
@@ -143,7 +143,7 @@ public class UserV1Api extends AbstractApi {
 
         User user = userServiceApi.get(utoken);
         PagedList<BookedCourse> courses = courseServiceApi.queryFinishedByUser(user.getId(), start, Configuration.getInt("PageSize.Course"));
-        processCourses(courses.getList());
+        completeMiddleCoursesImgs(courses.getList());
 
         return MomiaHttpResponse.SUCCESS(courses);
     }
@@ -197,17 +197,17 @@ public class UserV1Api extends AbstractApi {
         switch (type) {
             case Favorite.Type.SUBJECT:
                 favorites = subjectServiceApi.listFavorites(user.getId(), start, Configuration.getInt("PageSize.Favorite"));
-                processFavorites(favorites);
+                completeFavoritesImgs(favorites);
                 break;
             default:
                 favorites = courseServiceApi.listFavorites(user.getId(), start, Configuration.getInt("PageSize.Favorite"));
-                processFavorites(favorites);
+                completeFavoritesImgs(favorites);
         }
 
         return MomiaHttpResponse.SUCCESS(favorites);
     }
 
-    private void processFavorites(PagedList<Favorite> favorites) {
+    private void completeFavoritesImgs(PagedList<Favorite> favorites) {
         for (Favorite favorite : favorites.getList()) {
             JSONObject ref = favorite.getRef();
             ref.put("cover", completeMiddleImg(ref.getString("cover")));

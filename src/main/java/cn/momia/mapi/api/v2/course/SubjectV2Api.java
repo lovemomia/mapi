@@ -12,7 +12,6 @@ import cn.momia.api.user.dto.Contact;
 import cn.momia.common.api.dto.PagedList;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.common.webapp.config.Configuration;
-import cn.momia.image.api.ImageFile;
 import cn.momia.mapi.api.AbstractApi;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
@@ -46,9 +45,7 @@ public class SubjectV2Api extends AbstractApi {
     private PagedList<Course> getTrialSubjects(int cityId, int start) {
         try {
             PagedList<Course> courses = courseServiceApi.listTrial(cityId, start, Configuration.getInt("PageSize.Trial"));
-            for (Course course : courses.getList()) {
-                course.setCover(ImageFile.largeUrl(course.getCover()));
-            }
+            completeLargeCoursesImgs(courses.getList());
 
             return courses;
         } catch (Exception e) {
@@ -62,11 +59,10 @@ public class SubjectV2Api extends AbstractApi {
         if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
         Subject subject = subjectServiceApi.get(id);
-        subject.setCover(ImageFile.largeUrl(subject.getCover()));
-        subject.setImgs(completeLargeImgs(subject.getImgs()));
+        completeLargeImg(subject);
 
         PagedList<Course> courses = courseServiceApi.query(id, 0, Configuration.getInt("PageSize.Course"));
-        processCourses(courses.getList());
+        completeMiddleCoursesImgs(courses.getList());
 
         long userId = StringUtils.isBlank(utoken) ? 0 : userServiceApi.get(utoken).getId();
         PagedList<UserFeed> feeds = feedServiceApi.queryBySubject(userId, id, 0, Configuration.getInt("PageSize.Feed"));
