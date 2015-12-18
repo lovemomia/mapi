@@ -7,7 +7,7 @@ import cn.momia.api.user.AuthServiceApi;
 import cn.momia.api.user.dto.User;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.common.util.MobileUtil;
-import cn.momia.mapi.api.v1.AbstractV1Api;
+import cn.momia.mapi.api.AbstractApi;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/v1/auth")
-public class AuthV1Api extends AbstractV1Api {
+public class AuthV1Api extends AbstractApi {
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthV1Api.class);
 
     @Autowired private SmsServiceApi smsServiceApi;

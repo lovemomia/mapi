@@ -3,7 +3,7 @@ package cn.momia.mapi.api.v1.course;
 import cn.momia.api.course.PaymentServiceApi;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.common.util.XmlUtil;
-import cn.momia.mapi.api.v1.AbstractV1Api;
+import cn.momia.mapi.api.AbstractApi;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -19,7 +19,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/v1/payment")
-public class PaymentV1Api extends AbstractV1Api {
+public class PaymentV1Api extends AbstractApi {
     private static final Logger LOGGER = LoggerFactory.getLogger(PaymentV1Api.class);
 
     @Autowired private PaymentServiceApi paymentServiceApi;

@@ -12,7 +12,7 @@ import cn.momia.api.user.dto.User;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.common.util.TimeUtil;
 import cn.momia.image.api.ImageFile;
-import cn.momia.mapi.api.v1.AbstractV1Api;
+import cn.momia.mapi.api.AbstractApi;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Sets;
@@ -34,7 +34,7 @@ import java.util.Set;
 
 @RestController
 @RequestMapping("/v1/im")
-public class ImV1Api extends AbstractV1Api {
+public class ImV1Api extends AbstractApi {
     @Autowired private CourseServiceApi courseServiceApi;
     @Autowired private FeedServiceApi feedServiceApi;
     @Autowired private ImServiceApi imServiceApi;

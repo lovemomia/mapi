@@ -3,7 +3,7 @@ package cn.momia.mapi.api.v1.user;
 import cn.momia.api.user.ChildServiceApi;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.common.util.SexUtil;
-import cn.momia.mapi.api.v1.AbstractV1Api;
+import cn.momia.mapi.api.AbstractApi;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -16,7 +16,7 @@ import java.util.Date;
 
 @RestController
 @RequestMapping("/v1/user/child")
-public class ChildV1Api extends AbstractV1Api {
+public class ChildV1Api extends AbstractApi {
     @Autowired private ChildServiceApi childServiceApi;
 
     @RequestMapping(method = RequestMethod.POST)

@@ -10,7 +10,7 @@ import cn.momia.common.api.dto.PagedList;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.common.webapp.config.Configuration;
 import cn.momia.image.api.ImageFile;
-import cn.momia.mapi.api.v2.AbstractV2Api;
+import cn.momia.mapi.api.AbstractApi;
 import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +26,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/v2/index")
-public class IndexV2Api extends AbstractV2Api {
+public class IndexV2Api extends AbstractApi {
     private static final Logger LOGGER = LoggerFactory.getLogger(IndexV2Api.class);
 
     @Autowired private EventServiceApi eventServiceApi;

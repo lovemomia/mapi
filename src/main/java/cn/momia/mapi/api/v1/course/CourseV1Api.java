@@ -15,7 +15,7 @@ import cn.momia.common.api.dto.PagedList;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.common.webapp.config.Configuration;
 import cn.momia.image.api.ImageFile;
-import cn.momia.mapi.api.v1.AbstractV1Api;
+import cn.momia.mapi.api.AbstractApi;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -32,7 +32,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping(value = "/v1/course")
-public class CourseV1Api extends AbstractV1Api {
+public class CourseV1Api extends AbstractApi {
     @Autowired private CourseServiceApi courseServiceApi;
     @Autowired private ImServiceApi imServiceApi;
     @Autowired private UserServiceApi userServiceApi;

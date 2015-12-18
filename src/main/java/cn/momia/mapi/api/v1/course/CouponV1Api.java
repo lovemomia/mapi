@@ -6,7 +6,7 @@ import cn.momia.api.user.dto.User;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.common.util.MobileUtil;
 import cn.momia.common.webapp.config.Configuration;
-import cn.momia.mapi.api.v1.AbstractV1Api;
+import cn.momia.mapi.api.AbstractApi;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/v1/coupon")
-public class CouponV1Api extends AbstractV1Api {
+public class CouponV1Api extends AbstractApi {
     @Autowired private CouponServiceApi couponServiceApi;
     @Autowired private UserServiceApi userServiceApi;
 

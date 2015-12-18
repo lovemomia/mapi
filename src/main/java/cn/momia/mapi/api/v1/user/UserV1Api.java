@@ -19,7 +19,7 @@ import cn.momia.api.user.UserServiceApi;
 import cn.momia.common.util.SexUtil;
 import cn.momia.common.webapp.config.Configuration;
 import cn.momia.image.api.ImageFile;
-import cn.momia.mapi.api.v1.AbstractV1Api;
+import cn.momia.mapi.api.AbstractApi;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +33,7 @@ import java.util.Date;
 
 @RestController
 @RequestMapping("/v1/user")
-public class UserV1Api extends AbstractV1Api {
+public class UserV1Api extends AbstractApi {
     @Autowired private CourseServiceApi courseServiceApi;
     @Autowired private SubjectServiceApi subjectServiceApi;
     @Autowired private CouponServiceApi couponServiceApi;
