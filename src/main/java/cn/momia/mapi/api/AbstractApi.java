@@ -25,6 +25,11 @@ public abstract class AbstractApi extends BaseController {
         return StringUtils.isBlank(request.getParameter("terminal")) ? ClientType.WAP : ClientType.APP;
     }
 
+    protected String getVersion(HttpServletRequest request) {
+        String version = request.getParameter("v");
+        return StringUtils.isBlank(version) ? "" : version;
+    }
+
     protected String buildAction(String uri, int clientType) {
         if (ClientType.isApp(clientType)) {
             if (uri.startsWith("http")) return Configuration.getString("AppConf.Name") + "://web?url=" + URLEncoder.encode(uri);
