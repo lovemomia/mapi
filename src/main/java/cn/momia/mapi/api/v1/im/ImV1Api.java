@@ -2,7 +2,6 @@ package cn.momia.mapi.api.v1.im;
 
 import cn.momia.api.course.CourseServiceApi;
 import cn.momia.api.course.dto.CourseSku;
-import cn.momia.api.feed.FeedServiceApi;
 import cn.momia.api.im.ImServiceApi;
 import cn.momia.api.im.dto.Group;
 import cn.momia.api.im.dto.ImUser;
@@ -35,7 +34,6 @@ import java.util.Set;
 @RequestMapping("/v1/im")
 public class ImV1Api extends AbstractApi {
     @Autowired private CourseServiceApi courseServiceApi;
-    @Autowired private FeedServiceApi feedServiceApi;
     @Autowired private ImServiceApi imServiceApi;
     @Autowired private UserServiceApi userServiceApi;
 
@@ -67,7 +65,7 @@ public class ImV1Api extends AbstractApi {
         imUser.setAvatar(completeSmallImg(imUser.getAvatar()));
 
         JSONObject imUserJson = (JSONObject) JSON.toJSON(imUser);
-        List<String> latestImgs = feedServiceApi.getLatestImgs(userId);
+        List<String> latestImgs = courseServiceApi.getLatestImgs(userId);
         if (!latestImgs.isEmpty()) {
             imUserJson.put("imgs", completeMiddleImgs(latestImgs));
         }
