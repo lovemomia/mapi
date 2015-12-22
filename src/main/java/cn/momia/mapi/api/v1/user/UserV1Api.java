@@ -8,7 +8,9 @@ import cn.momia.api.course.dto.BookedCourse;
 import cn.momia.api.course.dto.Favorite;
 import cn.momia.api.course.dto.SubjectPackage;
 import cn.momia.api.course.dto.SubjectOrder;
+import cn.momia.api.course.dto.TimelineUnit;
 import cn.momia.api.course.dto.UserCoupon;
+import cn.momia.api.course.dto.UserCourseComment;
 import cn.momia.api.feed.FeedServiceApi;
 import cn.momia.api.feed.dto.UserFeed;
 import cn.momia.api.im.ImServiceApi;
@@ -29,6 +31,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Date;
+import java.util.List;
 
 @RestController
 @RequestMapping("/v1/user")
@@ -241,5 +244,31 @@ public class UserV1Api extends AbstractApi {
         infoJson.put("feeds", pagedFeeds);
 
         return MomiaHttpResponse.SUCCESS(infoJson);
+    }
+
+    @RequestMapping(value = "/timeline", method = RequestMethod.GET)
+    public MomiaHttpResponse timeline(@RequestParam(value = "uid") long userId, @RequestParam int start) {
+        JSONObject timelineJson = new JSONObject();
+
+        if (start == 0) {
+            User user = userServiceApi.get(userId);
+            if (!user.exists()) return MomiaHttpResponse.FAILED("用户不存在");
+            timelineJson.put("user", completeUserImgs(user));
+        }
+
+        PagedList<TimelineUnit> timeline = courseServiceApi.timelineOfUser(userId, start, Configuration.getInt("PageSize.Timeline"));
+        completeTimelineImgs(timeline.getList());
+        timelineJson.put("timeline", timeline);
+
+        return MomiaHttpResponse.SUCCESS(timelineJson);
+    }
+
+    private List<TimelineUnit> completeTimelineImgs(List<TimelineUnit> list) {
+        for (TimelineUnit unit : list) {
+            UserCourseComment comment = unit.getComment();
+            if (comment != null) completeCourseCommentImgs(comment);
+        }
+
+        return list;
     }
 }

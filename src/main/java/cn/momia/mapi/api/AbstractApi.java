@@ -157,13 +157,19 @@ public abstract class AbstractApi extends BaseController {
 
     protected List<UserCourseComment> completeCourseCommentsImgs(List<UserCourseComment> comments) {
         for (UserCourseComment comment : comments) {
-            comment.setAvatar(completeSmallImg(comment.getAvatar()));
-            List<String> imgs = comment.getImgs();
-            comment.setImgs(completeSmallImgs(imgs));
-            comment.setLargeImgs(completeLargeImgs(imgs));
+            completeCourseCommentImgs(comment);
         }
 
         return comments;
+    }
+
+    protected UserCourseComment completeCourseCommentImgs(UserCourseComment comment) {
+        comment.setAvatar(completeSmallImg(comment.getAvatar()));
+        List<String> imgs = comment.getImgs();
+        comment.setImgs(completeSmallImgs(imgs));
+        comment.setLargeImgs(completeLargeImgs(imgs));
+
+        return comment;
     }
 
     protected List<Teacher> completeTeachersImgs(List<Teacher> teachers) {
