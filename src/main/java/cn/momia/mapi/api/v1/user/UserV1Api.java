@@ -248,6 +248,8 @@ public class UserV1Api extends AbstractApi {
 
     @RequestMapping(value = "/timeline", method = RequestMethod.GET)
     public MomiaHttpResponse timeline(@RequestParam(value = "uid") long userId, @RequestParam int start) {
+        if (userId <=0 || start <= 0) return MomiaHttpResponse.BAD_REQUEST;
+
         JSONObject timelineJson = new JSONObject();
 
         if (start == 0) {
@@ -270,5 +272,24 @@ public class UserV1Api extends AbstractApi {
         }
 
         return list;
+    }
+
+    @RequestMapping(value = "/comment/timeline", method = RequestMethod.GET)
+    public MomiaHttpResponse commentTimeline(@RequestParam(value = "uid") long userId, @RequestParam int start) {
+        if (userId <=0 || start <= 0) return MomiaHttpResponse.BAD_REQUEST;
+
+        JSONObject timelineJson = new JSONObject();
+
+        if (start == 0) {
+            User user = userServiceApi.get(userId);
+            if (!user.exists()) return MomiaHttpResponse.FAILED("用户不存在");
+            timelineJson.put("user", completeUserImgs(user));
+        }
+
+        PagedList<TimelineUnit> timeline = courseServiceApi.commentTimelineOfUser(userId, start, Configuration.getInt("PageSize.Timeline"));
+        completeTimelineImgs(timeline.getList());
+        timelineJson.put("timeline", timeline);
+
+        return MomiaHttpResponse.SUCCESS(timelineJson);
     }
 }
