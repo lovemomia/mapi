@@ -19,4 +19,12 @@ public class TeacherV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         return MomiaHttpResponse.SUCCESS(teacherServiceApi.status(utoken));
     }
+
+    @RequestMapping(value = "/signup", method = RequestMethod.POST)
+    public MomiaHttpResponse signup(@RequestParam String utoken, @RequestParam String teacher) {
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (StringUtils.isBlank(teacher)) return MomiaHttpResponse.BAD_REQUEST;
+
+        return MomiaHttpResponse.SUCCESS(teacherServiceApi.signup(utoken, teacher));
+    }
 }
