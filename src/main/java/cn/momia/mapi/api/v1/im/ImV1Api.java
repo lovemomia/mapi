@@ -2,7 +2,6 @@ package cn.momia.mapi.api.v1.im;
 
 import cn.momia.api.course.CourseServiceApi;
 import cn.momia.api.course.dto.CourseSku;
-import cn.momia.api.feed.FeedServiceApi;
 import cn.momia.api.im.ImServiceApi;
 import cn.momia.api.im.dto.Group;
 import cn.momia.api.im.dto.ImUser;
@@ -11,8 +10,7 @@ import cn.momia.api.user.UserServiceApi;
 import cn.momia.api.user.dto.User;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.common.util.TimeUtil;
-import cn.momia.image.api.ImageFile;
-import cn.momia.mapi.api.v1.AbstractV1Api;
+import cn.momia.mapi.api.AbstractApi;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Sets;
@@ -34,9 +32,8 @@ import java.util.Set;
 
 @RestController
 @RequestMapping("/v1/im")
-public class ImV1Api extends AbstractV1Api {
+public class ImV1Api extends AbstractApi {
     @Autowired private CourseServiceApi courseServiceApi;
-    @Autowired private FeedServiceApi feedServiceApi;
     @Autowired private ImServiceApi imServiceApi;
     @Autowired private UserServiceApi userServiceApi;
 
@@ -45,7 +42,7 @@ public class ImV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
 
         User user = userServiceApi.get(utoken);
-        return MomiaHttpResponse.SUCCESS(imServiceApi.generateImToken(utoken, user.getNickName(), ImageFile.smallUrl(user.getAvatar())));
+        return MomiaHttpResponse.SUCCESS(imServiceApi.generateImToken(utoken, user.getNickName(), completeSmallImg(user.getAvatar())));
     }
 
     @RequestMapping(value = "/token", method = RequestMethod.GET)
@@ -54,7 +51,7 @@ public class ImV1Api extends AbstractV1Api {
         String imToken = imServiceApi.getImToken(utoken);
         if (StringUtils.isBlank(imToken)) {
             User user = userServiceApi.get(utoken);
-            imToken = imServiceApi.generateImToken(utoken, user.getNickName(), ImageFile.smallUrl(user.getAvatar()));
+            imToken = imServiceApi.generateImToken(utoken, user.getNickName(), completeSmallImg(user.getAvatar()));
         }
 
         return MomiaHttpResponse.SUCCESS(imToken);
@@ -65,10 +62,10 @@ public class ImV1Api extends AbstractV1Api {
         if (userId <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
         ImUser imUser = imServiceApi.getImUser(userId);
-        imUser.setAvatar(ImageFile.smallUrl(imUser.getAvatar()));
+        imUser.setAvatar(completeSmallImg(imUser.getAvatar()));
 
         JSONObject imUserJson = (JSONObject) JSON.toJSON(imUser);
-        List<String> latestImgs = feedServiceApi.getLatestImgs(userId);
+        List<String> latestImgs = courseServiceApi.getLatestImgs(userId);
         if (!latestImgs.isEmpty()) {
             imUserJson.put("imgs", completeMiddleImgs(latestImgs));
         }
@@ -101,7 +98,7 @@ public class ImV1Api extends AbstractV1Api {
         List<ImUser> customers = new ArrayList<ImUser>();
         List<ImUser> members = imServiceApi.listGroupMembers(utoken, id);
         for (ImUser member : members) {
-            member.setAvatar(ImageFile.smallUrl(member.getAvatar()));
+            member.setAvatar(completeSmallImg(member.getAvatar()));
             if (member.getRole() == User.Role.TEACHER) teachers.add(member);
             else customers.add(member);
         }

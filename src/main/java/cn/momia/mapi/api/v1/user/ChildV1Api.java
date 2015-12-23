@@ -3,7 +3,7 @@ package cn.momia.mapi.api.v1.user;
 import cn.momia.api.user.ChildServiceApi;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.common.util.SexUtil;
-import cn.momia.mapi.api.v1.AbstractV1Api;
+import cn.momia.mapi.api.AbstractApi;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -16,7 +16,7 @@ import java.util.Date;
 
 @RestController
 @RequestMapping("/v1/user/child")
-public class ChildV1Api extends AbstractV1Api {
+public class ChildV1Api extends AbstractApi {
     @Autowired private ChildServiceApi childServiceApi;
 
     @RequestMapping(method = RequestMethod.POST)
@@ -24,7 +24,7 @@ public class ChildV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (StringUtils.isBlank(children)) return MomiaHttpResponse.BAD_REQUEST;
 
-        return MomiaHttpResponse.SUCCESS(processUser(childServiceApi.add(utoken, children)));
+        return MomiaHttpResponse.SUCCESS(completeUserImgs(childServiceApi.add(utoken, children)));
     }
 
     @RequestMapping(method = RequestMethod.GET)
@@ -32,13 +32,13 @@ public class ChildV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (childId <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        return MomiaHttpResponse.SUCCESS(processChild(childServiceApi.get(utoken, childId)));
+        return MomiaHttpResponse.SUCCESS(completeChildImg(childServiceApi.get(utoken, childId)));
     }
 
     @RequestMapping(value = "/list", method = RequestMethod.GET)
     public MomiaHttpResponse listChildren(@RequestParam String utoken) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        return MomiaHttpResponse.SUCCESS(processChildren(childServiceApi.list(utoken)));
+        return MomiaHttpResponse.SUCCESS(completeChildrenImgs(childServiceApi.list(utoken)));
     }
 
     @RequestMapping(value = "/avatar", method = RequestMethod.POST)
@@ -49,7 +49,7 @@ public class ChildV1Api extends AbstractV1Api {
         if (childId <= 0) return MomiaHttpResponse.BAD_REQUEST;
         if (StringUtils.isBlank(avatar)) return MomiaHttpResponse.FAILED("孩子头像不能为空");
 
-        return MomiaHttpResponse.SUCCESS(processUser(childServiceApi.updateAvatar(utoken, childId, avatar)));
+        return MomiaHttpResponse.SUCCESS(completeUserImgs(childServiceApi.updateAvatar(utoken, childId, avatar)));
     }
 
     @RequestMapping(value = "/name", method = RequestMethod.POST)
@@ -60,7 +60,7 @@ public class ChildV1Api extends AbstractV1Api {
         if (childId <= 0) return MomiaHttpResponse.BAD_REQUEST;
         if (StringUtils.isBlank(name)) return MomiaHttpResponse.FAILED("孩子姓名不能为空");
 
-        return MomiaHttpResponse.SUCCESS(processUser(childServiceApi.updateName(utoken, childId, name)));
+        return MomiaHttpResponse.SUCCESS(completeUserImgs(childServiceApi.updateName(utoken, childId, name)));
     }
 
     @RequestMapping(value = "/sex", method = RequestMethod.POST)
@@ -71,7 +71,7 @@ public class ChildV1Api extends AbstractV1Api {
         if (childId <= 0) return MomiaHttpResponse.BAD_REQUEST;
         if (SexUtil.isInvalid(sex)) return MomiaHttpResponse.FAILED("无效的孩子性别");
 
-        return MomiaHttpResponse.SUCCESS(processUser(childServiceApi.updateSex(utoken, childId, sex)));
+        return MomiaHttpResponse.SUCCESS(completeUserImgs(childServiceApi.updateSex(utoken, childId, sex)));
     }
 
     @RequestMapping(value = "/birthday", method = RequestMethod.POST)
@@ -82,7 +82,7 @@ public class ChildV1Api extends AbstractV1Api {
         if (childId <= 0) return MomiaHttpResponse.BAD_REQUEST;
         if (birthday == null) return MomiaHttpResponse.FAILED("无效的孩子生日");
 
-        return MomiaHttpResponse.SUCCESS(processUser(childServiceApi.updateBirthday(utoken, childId, birthday)));
+        return MomiaHttpResponse.SUCCESS(completeUserImgs(childServiceApi.updateBirthday(utoken, childId, birthday)));
     }
 
     @RequestMapping(value = "/delete", method = RequestMethod.POST)
@@ -90,6 +90,6 @@ public class ChildV1Api extends AbstractV1Api {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (childId <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        return MomiaHttpResponse.SUCCESS(processUser(childServiceApi.delete(utoken, childId)));
+        return MomiaHttpResponse.SUCCESS(completeUserImgs(childServiceApi.delete(utoken, childId)));
     }
 }

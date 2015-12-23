@@ -14,10 +14,8 @@ import cn.momia.api.user.dto.User;
 import cn.momia.common.api.dto.PagedList;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.common.webapp.config.Configuration;
-import cn.momia.image.api.ImageFile;
-import cn.momia.mapi.api.v1.AbstractV1Api;
+import cn.momia.mapi.api.AbstractApi;
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +30,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping(value = "/v1/course")
-public class CourseV1Api extends AbstractV1Api {
+public class CourseV1Api extends AbstractApi {
     @Autowired private CourseServiceApi courseServiceApi;
     @Autowired private ImServiceApi imServiceApi;
     @Autowired private UserServiceApi userServiceApi;
@@ -43,50 +41,17 @@ public class CourseV1Api extends AbstractV1Api {
                                  @RequestParam(required = false, defaultValue = "") String pos) {
         if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        Course course = processCourse(courseServiceApi.get(id, pos));
+        Course course = completeLargeImg(courseServiceApi.get(id, pos));
         JSONObject courseJson = (JSONObject) JSON.toJSON(course);
         if (!StringUtils.isBlank(utoken)) {
             User user = userServiceApi.get(utoken);
             courseJson.put("favored", courseServiceApi.isFavored(user.getId(), id));
         }
 
-        List<Teacher> teachers = processTeachers(courseServiceApi.teacher(id, 0, Configuration.getInt("PageSize.CourseTeacher")).getList());
+        List<Teacher> teachers = completeTeachersImgs(courseServiceApi.teacher(id, 0, Configuration.getInt("PageSize.CourseTeacher")).getList());
         if (!teachers.isEmpty()) courseJson.put("teachers", teachers);
 
         return MomiaHttpResponse.SUCCESS(courseJson);
-    }
-
-    private Course processCourse(Course course) {
-        course.setCover(ImageFile.largeUrl(course.getCover()));
-
-        course.setImgs(completeLargeImgs(course.getImgs()));
-        processCourseBook(course.getBook());
-
-        return course;
-    }
-
-    private void processCourseBook(JSONObject book) {
-        if (book == null) return;
-
-        List<String> imgs = new ArrayList<String>();
-        List<String> largeImgs = new ArrayList<String>();
-        JSONArray imgsJson = book.getJSONArray("imgs");
-        for (int i = 0; i < imgsJson.size(); i++) {
-            String img = imgsJson.getString(i);
-            imgs.add(ImageFile.smallUrl(img));
-            largeImgs.add(ImageFile.url(img));
-        }
-
-        book.put("imgs", imgs);
-        book.put("largeImgs", largeImgs);
-    }
-
-    private List<Teacher> processTeachers(List<Teacher> teachers) {
-        for (Teacher teacher : teachers) {
-            teacher.setAvatar(ImageFile.smallUrl(teacher.getAvatar()));
-        }
-
-        return teachers;
     }
 
     @RequestMapping(value = "/detail", method = RequestMethod.GET)
@@ -110,7 +75,7 @@ public class CourseV1Api extends AbstractV1Api {
         if (id <= 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
         PagedList<Teacher> teachers = courseServiceApi.teacher(id, start, Configuration.getInt("PageSize.Teacher"));
-        processTeachers(teachers.getList());
+        completeTeachersImgs(teachers.getList());
 
         return MomiaHttpResponse.SUCCESS(teachers);
     }
@@ -120,7 +85,7 @@ public class CourseV1Api extends AbstractV1Api {
         if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
         Institution institution = courseServiceApi.institution(id);
-        institution.setCover(ImageFile.largeUrl(institution.getCover()));
+        institution.setCover(completeLargeImg(institution.getCover()));
 
         return MomiaHttpResponse.SUCCESS(institution);
     }
@@ -246,7 +211,7 @@ public class CourseV1Api extends AbstractV1Api {
     public MomiaHttpResponse listComment(@RequestParam long id, @RequestParam int start) {
         if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
         PagedList<UserCourseComment> pagedComments = courseServiceApi.queryCommentsByCourse(id, start, Configuration.getInt("PageSize.CourseComment"));
-        processCourseComments(pagedComments.getList());
+        completeCourseCommentsImgs(pagedComments.getList());
 
         return MomiaHttpResponse.SUCCESS(pagedComments);
     }

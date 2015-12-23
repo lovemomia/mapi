@@ -2,7 +2,7 @@ package cn.momia.mapi.api.v1.base;
 
 import cn.momia.api.base.FeedbackServiceApi;
 import cn.momia.common.api.http.MomiaHttpResponse;
-import cn.momia.mapi.api.v1.AbstractV1Api;
+import cn.momia.mapi.api.AbstractApi;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/v1/feedback")
-public class FeedbackV1Api extends AbstractV1Api {
+public class FeedbackV1Api extends AbstractApi {
     @Autowired private FeedbackServiceApi feedbackServiceApi;
 
     @RequestMapping(method = RequestMethod.POST)

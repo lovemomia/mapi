@@ -11,8 +11,7 @@ import cn.momia.api.user.dto.User;
 import cn.momia.common.api.dto.PagedList;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.common.webapp.config.Configuration;
-import cn.momia.image.api.ImageFile;
-import cn.momia.mapi.api.v1.AbstractV1Api;
+import cn.momia.mapi.api.AbstractApi;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
@@ -28,7 +27,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/v1/feed")
-public class FeedV1Api extends AbstractV1Api {
+public class FeedV1Api extends AbstractApi {
     private static final Logger LOGGER = LoggerFactory.getLogger(FeedV1Api.class);
 
     @Autowired private CourseServiceApi courseServiceApi;
@@ -60,7 +59,7 @@ public class FeedV1Api extends AbstractV1Api {
         }
 
         PagedList<UserFeed> pagedFeeds = feedServiceApi.list(userId, start, Configuration.getInt("PageSize.Feed"));
-        processFeeds(pagedFeeds.getList());
+        completeFeedsImgs(pagedFeeds.getList());
 
         return MomiaHttpResponse.SUCCESS(pagedFeeds);
     }
@@ -73,7 +72,7 @@ public class FeedV1Api extends AbstractV1Api {
 
         long userId = StringUtils.isBlank(utoken) ? 0 : userServiceApi.get(utoken).getId();
         PagedList<UserFeed> pagedFeeds = feedServiceApi.queryBySubject(userId, subjectId, start, Configuration.getInt("PageSize.Feed"));
-        processFeeds(pagedFeeds.getList());
+        completeFeedsImgs(pagedFeeds.getList());
 
         return MomiaHttpResponse.SUCCESS(pagedFeeds);
     }
@@ -88,13 +87,13 @@ public class FeedV1Api extends AbstractV1Api {
 
         if (start == 0) {
             Course course = courseServiceApi.get(courseId, Course.ShowType.BASE);
-            course.setCover(ImageFile.largeUrl(course.getCover()));
+            course.setCover(completeMiddleImg(course.getCover()));
             courseFeedsJson.put("course", course);
         }
 
         long userId = StringUtils.isBlank(utoken) ? 0 : userServiceApi.get(utoken).getId();
         PagedList<UserFeed> pagedFeeds = feedServiceApi.queryByCourse(userId, courseId, start, Configuration.getInt("PageSize.Feed"));
-        processFeeds(pagedFeeds.getList());
+        completeFeedsImgs(pagedFeeds.getList());
         courseFeedsJson.put("feeds", pagedFeeds);
 
         return MomiaHttpResponse.SUCCESS(courseFeedsJson);
@@ -114,7 +113,7 @@ public class FeedV1Api extends AbstractV1Api {
         }
         
         for (Course course : pagedCourses.getList()) {
-            course.setCover(ImageFile.largeUrl(course.getCover()));
+            course.setCover(completeMiddleImg(course.getCover()));
         }
 
         return MomiaHttpResponse.SUCCESS(pagedCourses);
@@ -158,12 +157,12 @@ public class FeedV1Api extends AbstractV1Api {
 
         long userId = StringUtils.isBlank(utoken) ? 0 : userServiceApi.get(utoken).getId();
         UserFeed feed = feedServiceApi.get(userId, id);
-        processFeed(feed);
+        completeFeedImgs(feed);
 
         PagedList<User> staredUsers = feedServiceApi.listStars(id, 0, Configuration.getInt("PageSize.FeedDetailStar"));
-        processUsers(staredUsers.getList());
+        completeUsersImgs(staredUsers.getList());
         PagedList<UserFeedComment> comments = feedServiceApi.listComments(id, 0, Configuration.getInt("PageSize.FeedDetailComment"));
-        processComments(comments.getList());
+        completeCommentsImgs(comments.getList());
 
         JSONObject feedDetailJson = new JSONObject();
         feedDetailJson.put("feed", feed);
@@ -173,7 +172,7 @@ public class FeedV1Api extends AbstractV1Api {
         if (feed.getCourseId() > 0) {
             try {
                 Course course = courseServiceApi.get(feed.getCourseId(), Course.ShowType.BASE);
-                course.setCover(ImageFile.largeUrl(course.getCover()));
+                course.setCover(completeMiddleImg(course.getCover()));
 
                 feedDetailJson.put("course", course);
             } catch (Exception e) {
@@ -184,9 +183,9 @@ public class FeedV1Api extends AbstractV1Api {
         return MomiaHttpResponse.SUCCESS(feedDetailJson);
     }
 
-    private void processComments(List<UserFeedComment> comments) {
+    private void completeCommentsImgs(List<UserFeedComment> comments) {
         for (UserFeedComment comment : comments) {
-            comment.setAvatar(ImageFile.smallUrl(comment.getAvatar()));
+            comment.setAvatar(completeSmallImg(comment.getAvatar()));
         }
     }
 
@@ -206,7 +205,7 @@ public class FeedV1Api extends AbstractV1Api {
         if (id <= 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
         PagedList<UserFeedComment> pagedComments = feedServiceApi.listComments(id, start, Configuration.getInt("PageSize.FeedComment"));
-        processComments(pagedComments.getList());
+        completeCommentsImgs(pagedComments.getList());
 
         return MomiaHttpResponse.SUCCESS(pagedComments);
     }

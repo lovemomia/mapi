@@ -18,8 +18,7 @@ import cn.momia.api.user.dto.User;
 import cn.momia.common.api.dto.PagedList;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.common.webapp.config.Configuration;
-import cn.momia.image.api.ImageFile;
-import cn.momia.mapi.api.v1.AbstractV1Api;
+import cn.momia.mapi.api.AbstractApi;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -35,7 +34,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/v1/subject")
-public class SubjectV1Api extends AbstractV1Api {
+public class SubjectV1Api extends AbstractApi {
     @Autowired private CourseServiceApi courseServiceApi;
     @Autowired private SubjectServiceApi subjectServiceApi;
     @Autowired private CouponServiceApi couponServiceApi;
@@ -47,14 +46,13 @@ public class SubjectV1Api extends AbstractV1Api {
         if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
         Subject subject = subjectServiceApi.get(id);
-        subject.setCover(ImageFile.largeUrl(subject.getCover()));
-        subject.setImgs(completeLargeImgs(subject.getImgs()));
+        completeLargeImg(subject);
 
         PagedList<Course> courses = courseServiceApi.query(id, 0, 2);
-        processCourses(courses.getList());
+        completeMiddleCoursesImgs(courses.getList());
 
         PagedList<UserCourseComment> comments = subjectServiceApi.queryCommentsBySubject(id, 0, 2);
-        processCourseComments(comments.getList());
+        completeCourseCommentsImgs(comments.getList());
 
         JSONObject responseJson = new JSONObject();
         responseJson.put("subject", subject);
@@ -76,7 +74,7 @@ public class SubjectV1Api extends AbstractV1Api {
         SortType sortType = MetaUtil.getSortType(sort);
 
         PagedList<Course> courses = courseServiceApi.query(id, packageId, ageRange.getMin(), ageRange.getMax(), sortType.getId(), start, Configuration.getInt("PageSize.Course"));
-        processCourses(courses.getList());
+        completeMiddleCoursesImgs(courses.getList());
 
         JSONObject responseJson = new JSONObject();
         responseJson.put("ages", MetaUtil.listAgeRanges());
@@ -93,7 +91,7 @@ public class SubjectV1Api extends AbstractV1Api {
         if (id <= 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
         PagedList<UserCourseComment> pageComments = subjectServiceApi.queryCommentsBySubject(id, start, Configuration.getInt("PageSize.CourseComment"));
-        processCourseComments(pageComments.getList());
+        completeCourseCommentsImgs(pageComments.getList());
 
         return MomiaHttpResponse.SUCCESS(pageComments);
     }
@@ -189,7 +187,7 @@ public class SubjectV1Api extends AbstractV1Api {
         if (orderId <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
         SubjectOrder order = orderServiceApi.get(utoken, orderId);
-        order.setCover(ImageFile.middleUrl(order.getCover()));
+        order.setCover(completeMiddleImg(order.getCover()));
 
         return MomiaHttpResponse.SUCCESS(order);
     }

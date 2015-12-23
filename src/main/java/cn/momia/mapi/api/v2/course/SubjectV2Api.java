@@ -5,6 +5,7 @@ import cn.momia.api.course.SubjectServiceApi;
 import cn.momia.api.course.dto.Course;
 import cn.momia.api.course.dto.Subject;
 import cn.momia.api.course.dto.SubjectSku;
+import cn.momia.api.course.dto.UserCourseComment;
 import cn.momia.api.feed.FeedServiceApi;
 import cn.momia.api.feed.dto.UserFeed;
 import cn.momia.api.user.UserServiceApi;
@@ -12,8 +13,7 @@ import cn.momia.api.user.dto.Contact;
 import cn.momia.common.api.dto.PagedList;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.common.webapp.config.Configuration;
-import cn.momia.image.api.ImageFile;
-import cn.momia.mapi.api.v2.AbstractV2Api;
+import cn.momia.mapi.api.AbstractApi;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -29,7 +29,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/v2/subject")
-public class SubjectV2Api extends AbstractV2Api {
+public class SubjectV2Api extends AbstractApi {
     private static final Logger LOGGER = LoggerFactory.getLogger(SubjectV2Api.class);
 
     @Autowired private SubjectServiceApi subjectServiceApi;
@@ -46,9 +46,7 @@ public class SubjectV2Api extends AbstractV2Api {
     private PagedList<Course> getTrialSubjects(int cityId, int start) {
         try {
             PagedList<Course> courses = courseServiceApi.listTrial(cityId, start, Configuration.getInt("PageSize.Trial"));
-            for (Course course : courses.getList()) {
-                course.setCover(ImageFile.largeUrl(course.getCover()));
-            }
+            completeLargeCoursesImgs(courses.getList());
 
             return courses;
         } catch (Exception e) {
@@ -62,20 +60,23 @@ public class SubjectV2Api extends AbstractV2Api {
         if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
         Subject subject = subjectServiceApi.get(id);
-        subject.setCover(ImageFile.largeUrl(subject.getCover()));
-        subject.setImgs(completeLargeImgs(subject.getImgs()));
+        completeLargeImg(subject);
 
         PagedList<Course> courses = courseServiceApi.query(id, 0, Configuration.getInt("PageSize.Course"));
-        processCourses(courses.getList());
+        completeMiddleCoursesImgs(courses.getList());
 
         long userId = StringUtils.isBlank(utoken) ? 0 : userServiceApi.get(utoken).getId();
         PagedList<UserFeed> feeds = feedServiceApi.queryBySubject(userId, id, 0, Configuration.getInt("PageSize.Feed"));
-        processFeeds(feeds.getList());
+        completeFeedsImgs(feeds.getList());
+
+        PagedList<UserCourseComment> comments = subjectServiceApi.queryCommentsBySubject(id, 0, Configuration.getInt("PageSize.CourseComment"));
+        completeCourseCommentsImgs(comments.getList());
 
         JSONObject responseJson = new JSONObject();
         responseJson.put("subject", subject);
         responseJson.put("courses", courses);
         responseJson.put("feeds", feeds);
+        responseJson.put("comments", comments);
 
         return MomiaHttpResponse.SUCCESS(responseJson);
     }
