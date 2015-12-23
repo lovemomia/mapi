@@ -248,7 +248,7 @@ public class UserV1Api extends AbstractApi {
 
     @RequestMapping(value = "/timeline", method = RequestMethod.GET)
     public MomiaHttpResponse timeline(@RequestParam(value = "uid") long userId, @RequestParam int start) {
-        if (userId <=0 || start <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (userId <=0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
         JSONObject timelineJson = new JSONObject();
 
@@ -276,7 +276,7 @@ public class UserV1Api extends AbstractApi {
 
     @RequestMapping(value = "/comment/timeline", method = RequestMethod.GET)
     public MomiaHttpResponse commentTimeline(@RequestParam(value = "uid") long userId, @RequestParam int start) {
-        if (userId <=0 || start <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (userId <=0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
         JSONObject timelineJson = new JSONObject();
 
