@@ -159,4 +159,28 @@ public class TeacherV1Api extends AbstractApi {
 
         return MomiaHttpResponse.SUCCESS(studentJson);
     }
+
+    @RequestMapping(value = "/student/record", method = RequestMethod.POST)
+    public MomiaHttpResponse record(@RequestParam String utoken,
+                                    @RequestParam(value = "cid") long childId,
+                                    @RequestParam(value = "coid") long courseId,
+                                    @RequestParam(value = "sid") long courseSkuId,
+                                    @RequestParam String record) {
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (courseId <= 0 || courseSkuId <= 0 || childId <= 0 || StringUtils.isBlank(record)) return MomiaHttpResponse.BAD_REQUEST;
+
+        return MomiaHttpResponse.SUCCESS(teacherServiceApi.record(utoken, childId, courseId, courseSkuId, record));
+    }
+
+    @RequestMapping(value = "/student/comment", method = RequestMethod.POST)
+    public MomiaHttpResponse comment(@RequestParam String utoken,
+                                     @RequestParam(value = "cid") long childId,
+                                     @RequestParam(value = "coid") long courseId,
+                                     @RequestParam(value = "sid") long courseSkuId,
+                                     @RequestParam String comment) {
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (courseId <= 0 || courseSkuId <= 0 || childId <= 0 || StringUtils.isBlank(comment)) return MomiaHttpResponse.BAD_REQUEST;
+
+        return MomiaHttpResponse.SUCCESS(teacherServiceApi.comment(utoken, childId, courseId, courseSkuId, comment));
+    }
 }
