@@ -177,6 +177,18 @@ public class TeacherV1Api extends AbstractApi {
         return MomiaHttpResponse.SUCCESS(courses);
     }
 
+    @RequestMapping(value = "/course/checkin", method = RequestMethod.POST)
+    public MomiaHttpResponse checkin(@RequestParam String utoken,
+                                     @RequestParam(value = "uid") long userId,
+                                     @RequestParam(value = "pid") long packageId,
+                                     @RequestParam(value = "coid") long courseId,
+                                     @RequestParam(value = "sid") long courseSkuId) {
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (userId <= 0 || packageId <= 0 || courseId <= 0 || courseSkuId <= 0) return MomiaHttpResponse.BAD_REQUEST;
+
+        return MomiaHttpResponse.SUCCESS(teacherServiceApi.checkin(utoken, userId, packageId, courseId, courseSkuId));
+    }
+
     @RequestMapping(value = "/student", method = RequestMethod.GET)
     public MomiaHttpResponse student(@RequestParam String utoken, @RequestParam(value = "cid") long childId, @RequestParam int start) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
