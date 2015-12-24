@@ -1,13 +1,19 @@
 package cn.momia.mapi.api.v1.teacher;
 
 import cn.momia.api.teacher.TeacherServiceApi;
+import cn.momia.api.teacher.dto.ChildComment;
 import cn.momia.api.teacher.dto.Material;
 import cn.momia.api.teacher.dto.Teacher;
+import cn.momia.api.user.ChildServiceApi;
+import cn.momia.api.user.dto.Child;
 import cn.momia.common.api.dto.PagedList;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.common.util.SexUtil;
+import cn.momia.common.util.TimeUtil;
 import cn.momia.common.webapp.config.Configuration;
 import cn.momia.mapi.api.AbstractApi;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -22,6 +28,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/v1/teacher")
 public class TeacherV1Api extends AbstractApi {
+    @Autowired private ChildServiceApi childServiceApi;
     @Autowired private TeacherServiceApi teacherServiceApi;
 
     @RequestMapping(value = "/status", method = RequestMethod.GET)
@@ -127,5 +134,29 @@ public class TeacherV1Api extends AbstractApi {
         }
 
         return materials;
+    }
+
+    @RequestMapping(value = "/student", method = RequestMethod.GET)
+    public MomiaHttpResponse student(@RequestParam String utoken, @RequestParam(value = "cid") long childId, @RequestParam int start) {
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (childId <= 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
+
+        JSONObject studentJson = new JSONObject();
+
+        if (start == 0) {
+            Child child = childServiceApi.get(utoken, childId);
+            if (!child.exists()) return MomiaHttpResponse.FAILED("孩子信息不存在");
+
+            JSONObject childJson = (JSONObject) JSON.toJSON(child);
+            childJson.put("avatar", completeSmallImg(child.getAvatar()));
+            childJson.put("age", TimeUtil.formatAge(child.getBirthday()));
+
+            studentJson.put("child", childJson);
+        }
+
+        PagedList<ChildComment> comments = teacherServiceApi.listChildComments(utoken, childId, start, Configuration.getInt("PageSize.ChildComment"));
+        studentJson.put("comments", comments);
+
+        return MomiaHttpResponse.SUCCESS(studentJson);
     }
 }
