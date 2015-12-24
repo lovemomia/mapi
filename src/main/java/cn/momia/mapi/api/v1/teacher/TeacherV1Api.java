@@ -2,6 +2,8 @@ package cn.momia.mapi.api.v1.teacher;
 
 import cn.momia.api.teacher.TeacherServiceApi;
 import cn.momia.api.teacher.dto.ChildComment;
+import cn.momia.api.teacher.dto.ChildRecord;
+import cn.momia.api.teacher.dto.ChildTag;
 import cn.momia.api.teacher.dto.Material;
 import cn.momia.api.teacher.dto.Teacher;
 import cn.momia.api.user.ChildServiceApi;
@@ -147,17 +149,43 @@ public class TeacherV1Api extends AbstractApi {
             Child child = childServiceApi.get(utoken, childId);
             if (!child.exists()) return MomiaHttpResponse.FAILED("孩子信息不存在");
 
-            JSONObject childJson = (JSONObject) JSON.toJSON(child);
-            childJson.put("avatar", completeSmallImg(child.getAvatar()));
-            childJson.put("age", TimeUtil.formatAge(child.getBirthday()));
-
-            studentJson.put("child", childJson);
+            studentJson.put("child", buildChildJson(child));
         }
 
         PagedList<ChildComment> comments = teacherServiceApi.listChildComments(utoken, childId, start, Configuration.getInt("PageSize.ChildComment"));
         studentJson.put("comments", comments);
 
         return MomiaHttpResponse.SUCCESS(studentJson);
+    }
+
+    private JSONObject buildChildJson(Child child) {
+        JSONObject childJson = (JSONObject) JSON.toJSON(child);
+        childJson.put("avatar", completeSmallImg(child.getAvatar()));
+        childJson.put("age", TimeUtil.formatAge(child.getBirthday()));
+
+        return childJson;
+    }
+
+    @RequestMapping(value = "/student/record", method = RequestMethod.GET)
+    public MomiaHttpResponse record(@RequestParam String utoken,
+                                    @RequestParam(value = "cid") long childId,
+                                    @RequestParam(value = "coid") long courseId,
+                                    @RequestParam(value = "sid") long courseSkuId) {
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (courseId <= 0 || courseSkuId <= 0 || childId <= 0) return MomiaHttpResponse.BAD_REQUEST;
+
+        Child child = childServiceApi.get(utoken, childId);
+        if (!child.exists()) return MomiaHttpResponse.FAILED("孩子信息不存在");
+
+        List<ChildTag> tags = teacherServiceApi.listAllChildTags();
+        ChildRecord record = teacherServiceApi.getChildRecord(utoken, childId, courseId, courseSkuId);
+
+        JSONObject recordJson = new JSONObject();
+        recordJson.put("child", buildChildJson(child));
+        recordJson.put("tags", tags);
+        recordJson.put("record", record);
+
+        return MomiaHttpResponse.SUCCESS(recordJson);
     }
 
     @RequestMapping(value = "/student/record", method = RequestMethod.POST)
