@@ -1,9 +1,12 @@
 package cn.momia.mapi.api.v1.teacher;
 
 import cn.momia.api.teacher.TeacherServiceApi;
+import cn.momia.api.teacher.dto.Material;
 import cn.momia.api.teacher.dto.Teacher;
+import cn.momia.common.api.dto.PagedList;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.common.util.SexUtil;
+import cn.momia.common.webapp.config.Configuration;
 import cn.momia.mapi.api.AbstractApi;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Date;
+import java.util.List;
 
 @RestController
 @RequestMapping("/v1/teacher")
@@ -91,5 +95,37 @@ public class TeacherV1Api extends AbstractApi {
         if (StringUtils.isBlank(address)) return MomiaHttpResponse.FAILED("住址不能为空");
 
         return MomiaHttpResponse.SUCCESS(completeTeacherImgs(teacherServiceApi.updateAddress(utoken, address)));
+    }
+
+    @RequestMapping(value = "/material", method = RequestMethod.GET)
+    public MomiaHttpResponse getMaterial(@RequestParam String utoken, @RequestParam(value = "mid") int materialId) {
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (materialId <= 0) return MomiaHttpResponse.BAD_REQUEST;
+
+        return MomiaHttpResponse.SUCCESS(completeMaterialImgs(teacherServiceApi.getMaterial(utoken, materialId)));
+    }
+
+    private Material completeMaterialImgs(Material material) {
+        material.setCover(completeMiddleImg(material.getCover()));
+        return material;
+    }
+
+    @RequestMapping(value = "/material/list", method = RequestMethod.GET)
+    public MomiaHttpResponse listMaterials(@RequestParam String utoken, @RequestParam int start) {
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (start < 0) return MomiaHttpResponse.BAD_REQUEST;
+
+        PagedList<Material> pagedMaterials = teacherServiceApi.listMaterials(utoken, start, Configuration.getInt("PageSize.Material"));
+        completeMaterialsImgs(pagedMaterials.getList());
+
+        return MomiaHttpResponse.SUCCESS(pagedMaterials);
+    }
+
+    private List<Material> completeMaterialsImgs(List<Material> materials) {
+        for (Material material : materials) {
+            completeMaterialImgs(material);
+        }
+
+        return materials;
     }
 }

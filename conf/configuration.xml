@@ -57,5 +57,6 @@
         <FeedDetailComment>20</FeedDetailComment>
         <FeedTag>10</FeedTag>
         <Timeline>20</Timeline>
+        <Material>20</Material>
     </PageSize>
 </Configuration>
