@@ -1,5 +1,8 @@
 package cn.momia.mapi.api.v1.teacher;
 
+import cn.momia.api.course.CourseServiceApi;
+import cn.momia.api.course.dto.Course;
+import cn.momia.api.course.dto.TeacherCourse;
 import cn.momia.api.teacher.TeacherServiceApi;
 import cn.momia.api.teacher.dto.ChildComment;
 import cn.momia.api.teacher.dto.ChildRecord;
@@ -7,7 +10,9 @@ import cn.momia.api.teacher.dto.ChildTag;
 import cn.momia.api.teacher.dto.Material;
 import cn.momia.api.teacher.dto.Teacher;
 import cn.momia.api.user.ChildServiceApi;
+import cn.momia.api.user.UserServiceApi;
 import cn.momia.api.user.dto.Child;
+import cn.momia.api.user.dto.User;
 import cn.momia.common.api.dto.PagedList;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.common.util.SexUtil;
@@ -30,7 +35,9 @@ import java.util.List;
 @RestController
 @RequestMapping("/v1/teacher")
 public class TeacherV1Api extends AbstractApi {
+    @Autowired private CourseServiceApi courseServiceApi;
     @Autowired private ChildServiceApi childServiceApi;
+    @Autowired private UserServiceApi userServiceApi;
     @Autowired private TeacherServiceApi teacherServiceApi;
 
     @RequestMapping(value = "/status", method = RequestMethod.GET)
@@ -136,6 +143,38 @@ public class TeacherV1Api extends AbstractApi {
         }
 
         return materials;
+    }
+
+    @RequestMapping(value = "/course/notfinished", method = RequestMethod.GET)
+    public MomiaHttpResponse notfinished(@RequestParam String utoken, @RequestParam int start) {
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (start < 0) return MomiaHttpResponse.BAD_REQUEST;
+
+        User user = userServiceApi.get(utoken);
+        PagedList<TeacherCourse> courses = courseServiceApi.queryNotFinishedByTeacher(user.getId(), start, Configuration.getInt("PageSize.Course"));
+        completeMiddleTeacherCoursesImgs(courses.getList());
+
+        return MomiaHttpResponse.SUCCESS(courses);
+    }
+
+    private List<TeacherCourse> completeMiddleTeacherCoursesImgs(List<TeacherCourse> teacherCourses) {
+        for (TeacherCourse teacherCourse : teacherCourses) {
+            teacherCourse.setCover(completeMiddleImg(teacherCourse.getCover()));
+        }
+
+        return teacherCourses;
+    }
+
+    @RequestMapping(value = "/course/finished", method = RequestMethod.GET)
+    public MomiaHttpResponse finished(@RequestParam String utoken, @RequestParam int start) {
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (start < 0) return MomiaHttpResponse.BAD_REQUEST;
+
+        User user = userServiceApi.get(utoken);
+        PagedList<TeacherCourse> courses = courseServiceApi.queryFinishedByTeacher(user.getId(), start, Configuration.getInt("PageSize.Course"));
+        completeMiddleTeacherCoursesImgs(courses.getList());
+
+        return MomiaHttpResponse.SUCCESS(courses);
     }
 
     @RequestMapping(value = "/student", method = RequestMethod.GET)
