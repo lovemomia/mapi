@@ -54,6 +54,54 @@ public class TeacherV1Api extends AbstractApi {
         return MomiaHttpResponse.SUCCESS(teacherServiceApi.signup(utoken, teacher));
     }
 
+    @RequestMapping(value = "/experience", method = RequestMethod.POST)
+    public MomiaHttpResponse addExperience(@RequestParam String utoken, @RequestParam String experience) {
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (StringUtils.isBlank(experience)) return MomiaHttpResponse.BAD_REQUEST;
+
+        return MomiaHttpResponse.SUCCESS(teacherServiceApi.addExperience(utoken, experience));
+    }
+
+    @RequestMapping(value = "/experience", method = RequestMethod.GET)
+    public MomiaHttpResponse getExperience(@RequestParam String utoken, @RequestParam long id) {
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
+
+        return MomiaHttpResponse.SUCCESS(teacherServiceApi.getExperience(utoken, id));
+    }
+
+    @RequestMapping(value = "/experience/delete", method = RequestMethod.POST)
+    public MomiaHttpResponse addExperience(@RequestParam String utoken, @RequestParam long id) {
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
+
+        return MomiaHttpResponse.SUCCESS(teacherServiceApi.deleteExperience(utoken, id));
+    }
+
+    @RequestMapping(value = "/education", method = RequestMethod.POST)
+    public MomiaHttpResponse addEducation(@RequestParam String utoken, @RequestParam String education) {
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (StringUtils.isBlank(education)) return MomiaHttpResponse.BAD_REQUEST;
+
+        return MomiaHttpResponse.SUCCESS(teacherServiceApi.addEducation(utoken, education));
+    }
+
+    @RequestMapping(value = "/education", method = RequestMethod.GET)
+    public MomiaHttpResponse getEducation(@RequestParam String utoken, @RequestParam long id) {
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
+
+        return MomiaHttpResponse.SUCCESS(teacherServiceApi.getEducation(utoken, id));
+    }
+
+    @RequestMapping(value = "/education/delete", method = RequestMethod.POST)
+    public MomiaHttpResponse addEducation(@RequestParam String utoken, @RequestParam long id) {
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
+
+        return MomiaHttpResponse.SUCCESS(teacherServiceApi.deleteEducation(utoken, id));
+    }
+
     @RequestMapping(method = RequestMethod.GET)
     public MomiaHttpResponse get(@RequestParam String utoken) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
