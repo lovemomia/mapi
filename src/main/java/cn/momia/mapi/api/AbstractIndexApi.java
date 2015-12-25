@@ -21,7 +21,7 @@ public class AbstractIndexApi extends AbstractApi {
         List<Banner> filteredBanners = new ArrayList<Banner>();
         for (Banner banner : banners) {
             if (banner.getPlatform() != 0 && banner.getPlatform() != clientType) continue;
-            if (banner.getPlatform() == ClientType.APP &&
+            if (clientType == ClientType.APP &&
                     !StringUtils.isBlank(banner.getVersion()) &&
                     !StringUtils.isBlank(version) &&
                     banner.getVersion().compareTo(version) > 0) continue;
@@ -38,7 +38,7 @@ public class AbstractIndexApi extends AbstractApi {
         List<Icon> filteredIcons = new ArrayList<Icon>();
         for (Icon icon : icons) {
             if (icon.getPlatform() != 0 && icon.getPlatform() != clientType) continue;
-            if (icon.getPlatform() == ClientType.APP &&
+            if (clientType == ClientType.APP &&
                     !StringUtils.isBlank(icon.getVersion()) &&
                     !StringUtils.isBlank(version) &&
                     icon.getVersion().compareTo(version) > 0) continue;
@@ -55,7 +55,7 @@ public class AbstractIndexApi extends AbstractApi {
         List<Event> filteredEvents = new ArrayList<Event>();
         for (Event event : events) {
             if (event.getPlatform() != 0 && event.getPlatform() != clientType) continue;
-            if (event.getPlatform() == ClientType.APP &&
+            if (clientType == ClientType.APP &&
                     !StringUtils.isBlank(event.getVersion()) &&
                     !StringUtils.isBlank(version) &&
                     event.getVersion().compareTo(version) > 0) continue;
