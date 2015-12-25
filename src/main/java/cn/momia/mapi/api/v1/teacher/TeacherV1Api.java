@@ -192,6 +192,24 @@ public class TeacherV1Api extends AbstractApi {
         return materials;
     }
 
+    @RequestMapping(value = "/course/ongoing", method = RequestMethod.GET)
+    public MomiaHttpResponse ongoing(@RequestParam String utoken) {
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+
+        JSONObject resultJson = new JSONObject();
+
+        User user = userServiceApi.get(utoken);
+        TeacherCourse teacherCourse = courseServiceApi.getOngoingTeacherCourse(user.getId());
+        if (teacherCourse.exists()) {
+            teacherCourse.setCover(completeMiddleImg(teacherCourse.getCover()));
+            resultJson.put("course", teacherCourse);
+
+            resultJson.put("students", completeStudentsImgs(teacherServiceApi.ongoingStudents(utoken, teacherCourse.getCourseId(), teacherCourse.getCourseSkuId())));
+        }
+
+        return MomiaHttpResponse.SUCCESS(resultJson);
+    }
+
     @RequestMapping(value = "/course/notfinished", method = RequestMethod.GET)
     public MomiaHttpResponse notfinished(@RequestParam String utoken, @RequestParam int start) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
