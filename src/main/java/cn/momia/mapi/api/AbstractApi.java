@@ -215,13 +215,13 @@ public abstract class AbstractApi extends BaseController {
 
     protected List<Child> completeChildrenImgs(List<Child> children) {
         for (Child child : children) {
-            completeChildImg(child);
+            completeChildImgs(child);
         }
 
         return children;
     }
 
-    protected Child completeChildImg(Child child) {
+    protected Child completeChildImgs(Child child) {
         child.setAvatar(completeSmallImg(child.getAvatar()));
         return child;
     }

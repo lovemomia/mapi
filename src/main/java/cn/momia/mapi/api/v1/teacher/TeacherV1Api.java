@@ -1,13 +1,13 @@
 package cn.momia.mapi.api.v1.teacher;
 
 import cn.momia.api.course.CourseServiceApi;
-import cn.momia.api.course.dto.Course;
 import cn.momia.api.course.dto.TeacherCourse;
 import cn.momia.api.teacher.TeacherServiceApi;
 import cn.momia.api.teacher.dto.ChildComment;
 import cn.momia.api.teacher.dto.ChildRecord;
 import cn.momia.api.teacher.dto.ChildTag;
 import cn.momia.api.teacher.dto.Material;
+import cn.momia.api.teacher.dto.Student;
 import cn.momia.api.teacher.dto.Teacher;
 import cn.momia.api.user.ChildServiceApi;
 import cn.momia.api.user.UserServiceApi;
@@ -19,7 +19,6 @@ import cn.momia.common.util.SexUtil;
 import cn.momia.common.util.TimeUtil;
 import cn.momia.common.webapp.config.Configuration;
 import cn.momia.mapi.api.AbstractApi;
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -213,6 +212,32 @@ public class TeacherV1Api extends AbstractApi {
         return teacherCourses;
     }
 
+    @RequestMapping(value = "/course/notfinished/student", method = RequestMethod.GET)
+    public MomiaHttpResponse notfinishedStudents(@RequestParam String utoken,
+                                                 @RequestParam(value = "coid") long courseId,
+                                                 @RequestParam(value = "sid") long courseSkuId) {
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (courseId <= 0 || courseSkuId <= 0) return MomiaHttpResponse.BAD_REQUEST;
+
+        List<Student> students = teacherServiceApi.notfinishedStudents(utoken, courseId, courseSkuId);
+        completeStudentsImgs(students);
+
+        return MomiaHttpResponse.SUCCESS(students);
+    }
+
+    private List<Student> completeStudentsImgs(List<Student> students) {
+        for (Student student : students) {
+            completeStudentImgs(student);
+        }
+
+        return students;
+    }
+
+    private Student completeStudentImgs(Student student) {
+        student.setAvatar(completeSmallImg(student.getAvatar()));
+        return student;
+    }
+
     @RequestMapping(value = "/course/finished", method = RequestMethod.GET)
     public MomiaHttpResponse finished(@RequestParam String utoken, @RequestParam int start) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
@@ -223,6 +248,19 @@ public class TeacherV1Api extends AbstractApi {
         completeMiddleTeacherCoursesImgs(courses.getList());
 
         return MomiaHttpResponse.SUCCESS(courses);
+    }
+
+    @RequestMapping(value = "/course/finished/student", method = RequestMethod.GET)
+    public MomiaHttpResponse finishedStudents(@RequestParam String utoken,
+                                              @RequestParam(value = "coid") long courseId,
+                                              @RequestParam(value = "sid") long courseSkuId) {
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (courseId <= 0 || courseSkuId <= 0) return MomiaHttpResponse.BAD_REQUEST;
+
+        List<Student> students = teacherServiceApi.finishedStudents(utoken, courseId, courseSkuId);
+        completeStudentsImgs(students);
+
+        return MomiaHttpResponse.SUCCESS(students);
     }
 
     @RequestMapping(value = "/course/checkin", method = RequestMethod.POST)
@@ -248,7 +286,7 @@ public class TeacherV1Api extends AbstractApi {
             Child child = childServiceApi.get(utoken, childId);
             if (!child.exists()) return MomiaHttpResponse.FAILED("孩子信息不存在");
 
-            studentJson.put("child", buildChildJson(child));
+            studentJson.put("child", completeStudentImgs(buildStudent(child)));
         }
 
         PagedList<ChildComment> comments = teacherServiceApi.listChildComments(utoken, childId, start, Configuration.getInt("PageSize.ChildComment"));
@@ -257,12 +295,16 @@ public class TeacherV1Api extends AbstractApi {
         return MomiaHttpResponse.SUCCESS(studentJson);
     }
 
-    private JSONObject buildChildJson(Child child) {
-        JSONObject childJson = (JSONObject) JSON.toJSON(child);
-        childJson.put("avatar", completeSmallImg(child.getAvatar()));
-        childJson.put("age", TimeUtil.formatAge(child.getBirthday()));
+    private Student buildStudent(Child child) {
+        Student student = new Student();
+        student.setId(child.getId());
+        student.setUserId(child.getUserId());
+        student.setAvatar(child.getAvatar());
+        student.setName(child.getName());
+        student.setBirthday(child.getBirthday());
+        student.setSex(child.getSex());
 
-        return childJson;
+        return student;
     }
 
     @RequestMapping(value = "/student/record", method = RequestMethod.GET)
@@ -280,7 +322,7 @@ public class TeacherV1Api extends AbstractApi {
         ChildRecord record = teacherServiceApi.getChildRecord(utoken, childId, courseId, courseSkuId);
 
         JSONObject recordJson = new JSONObject();
-        recordJson.put("child", buildChildJson(child));
+        recordJson.put("child", completeStudentImgs(buildStudent(child)));
         recordJson.put("tags", tags);
         recordJson.put("record", record);
 

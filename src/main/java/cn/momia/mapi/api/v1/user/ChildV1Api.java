@@ -32,7 +32,7 @@ public class ChildV1Api extends AbstractApi {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (childId <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        return MomiaHttpResponse.SUCCESS(completeChildImg(childServiceApi.get(utoken, childId)));
+        return MomiaHttpResponse.SUCCESS(completeChildImgs(childServiceApi.get(utoken, childId)));
     }
 
     @RequestMapping(value = "/list", method = RequestMethod.GET)
