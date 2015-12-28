@@ -7,7 +7,7 @@ import cn.momia.api.course.dto.UserCourseComment;
 import cn.momia.api.feed.dto.UserFeed;
 import cn.momia.api.user.dto.Child;
 import cn.momia.api.user.dto.User;
-import cn.momia.common.client.ClientType;
+import cn.momia.common.api.client.ClientType;
 import cn.momia.common.webapp.config.Configuration;
 import cn.momia.common.webapp.ctrl.BaseController;
 import cn.momia.image.api.ImageFile;
