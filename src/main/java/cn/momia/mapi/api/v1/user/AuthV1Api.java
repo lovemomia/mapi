@@ -47,14 +47,14 @@ public class AuthV1Api extends AbstractApi {
 
         User user = completeUserImgs(authServiceApi.register(nickName, mobile, password, code));
         distributeInviteCoupon(user.getId(), mobile);
-        generateImToken(user.getId(), user.getToken(), user.getNickName(), user.getAvatar());
+        generateImToken(user.getId(), user.getNickName(), user.getAvatar());
 
         return MomiaHttpResponse.SUCCESS(user);
     }
 
-    private void generateImToken(long userId, String utoken, String nickName, String avatar) {
+    private void generateImToken(long userId, String nickName, String avatar) {
         try {
-            imServiceApi.generateImToken(utoken, nickName, avatar);
+            imServiceApi.generateImToken(userId, nickName, avatar);
         } catch (Exception e) {
             LOGGER.error("fail to generate im token for user: {}", userId, e);
         }

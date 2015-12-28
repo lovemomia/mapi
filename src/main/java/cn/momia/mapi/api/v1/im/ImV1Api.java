@@ -4,14 +4,12 @@ import cn.momia.api.course.CourseServiceApi;
 import cn.momia.api.course.dto.CourseSku;
 import cn.momia.api.im.ImServiceApi;
 import cn.momia.api.im.dto.Group;
-import cn.momia.api.im.dto.ImUser;
 import cn.momia.api.im.dto.Member;
 import cn.momia.api.user.UserServiceApi;
 import cn.momia.api.user.dto.User;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.common.util.TimeUtil;
 import cn.momia.mapi.api.AbstractApi;
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
@@ -42,17 +40,23 @@ public class ImV1Api extends AbstractApi {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
 
         User user = userServiceApi.get(utoken);
-        return MomiaHttpResponse.SUCCESS(imServiceApi.generateImToken(utoken, user.getNickName(), completeSmallImg(user.getAvatar())));
+        return MomiaHttpResponse.SUCCESS(doGenerateImToken(user));
+    }
+
+    private String doGenerateImToken(User user) {
+        String imToken = imServiceApi.generateImToken(user.getId(), user.getNickName(), completeSmallImg(user.getAvatar()));
+        if (!StringUtils.isBlank(imToken)) userServiceApi.updateImToken(user.getToken(), imToken);
+
+        return imToken;
     }
 
     @RequestMapping(value = "/token", method = RequestMethod.GET)
     public MomiaHttpResponse getImToken(@RequestParam String utoken) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        String imToken = imServiceApi.getImToken(utoken);
-        if (StringUtils.isBlank(imToken)) {
-            User user = userServiceApi.get(utoken);
-            imToken = imServiceApi.generateImToken(utoken, user.getNickName(), completeSmallImg(user.getAvatar()));
-        }
+
+        User user = userServiceApi.get(utoken);
+        String imToken = user.getImToken();
+        if (StringUtils.isBlank(imToken)) imToken = doGenerateImToken(user);
 
         return MomiaHttpResponse.SUCCESS(imToken);
     }
@@ -61,10 +65,9 @@ public class ImV1Api extends AbstractApi {
     public MomiaHttpResponse getImUser(@RequestParam(value = "uid") long userId) {
         if (userId <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        ImUser imUser = imServiceApi.getImUser(userId);
-        imUser.setAvatar(completeSmallImg(imUser.getAvatar()));
+        User user = userServiceApi.get(userId);
+        JSONObject imUserJson = createImUser(user);
 
-        JSONObject imUserJson = (JSONObject) JSON.toJSON(imUser);
         List<String> latestImgs = courseServiceApi.getLatestImgs(userId);
         if (!latestImgs.isEmpty()) {
             imUserJson.put("imgs", completeMiddleImgs(latestImgs));
@@ -73,11 +76,23 @@ public class ImV1Api extends AbstractApi {
         return MomiaHttpResponse.SUCCESS(imUserJson);
     }
 
+    private JSONObject createImUser(User user) {
+        JSONObject imUserJson = new JSONObject();
+        imUserJson.put("id", user.getId());
+        imUserJson.put("nickName", user.getNickName());
+        imUserJson.put("avatar", completeSmallImg(user.getAvatar()));
+        imUserJson.put("role", user.getRole());
+
+        return imUserJson;
+    }
+
     @RequestMapping(value = "/group", method = RequestMethod.GET)
-    public MomiaHttpResponse getGroupInfo(@RequestParam long id) {
-        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
-        Group group = imServiceApi.getGroup(id);
+    public MomiaHttpResponse getGroupInfo(@RequestParam(value = "id") long groupId) {
+        if (groupId <= 0) return MomiaHttpResponse.BAD_REQUEST;
+
+        Group group = imServiceApi.getGroup(groupId);
         CourseSku sku = courseServiceApi.getSku(group.getCourseId(), group.getCourseSkuId());
+
         JSONObject groupInfo = new JSONObject();
         groupInfo.put("groupId", group.getGroupId());
         groupInfo.put("groupName", group.getGroupName());
@@ -90,31 +105,49 @@ public class ImV1Api extends AbstractApi {
     }
 
     @RequestMapping(value = "/group/member", method = RequestMethod.GET)
-    public MomiaHttpResponse listGroupMembers(@RequestParam String utoken, @RequestParam long id) {
+    public MomiaHttpResponse listGroupMembers(@RequestParam String utoken, @RequestParam(value = "id") long groupId) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (groupId <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        List<ImUser> teachers = new ArrayList<ImUser>();
-        List<ImUser> customers = new ArrayList<ImUser>();
-        List<ImUser> members = imServiceApi.listGroupMembers(utoken, id);
-        for (ImUser member : members) {
-            member.setAvatar(completeSmallImg(member.getAvatar()));
-            if (member.getRole() == User.Role.TEACHER) teachers.add(member);
-            else customers.add(member);
+        User user = userServiceApi.get(utoken);
+        List<Member> members = imServiceApi.listGroupMembers(user.getId(), groupId);
+
+        Set<Long> userIds = new HashSet<Long>();
+        for (Member member : members) {
+            userIds.add(member.getUserId());
         }
 
-        JSONObject resultJson = new JSONObject();
-        resultJson.put("teachers", teachers);
-        resultJson.put("customers", customers);
+        List<User> users = userServiceApi.list(userIds, User.Type.BASE);
+        Map<Long, User> usersMap = new HashMap<Long, User>();
+        for (User memberUser : users) {
+            usersMap.put(memberUser.getId(), memberUser);
+        }
 
-        return MomiaHttpResponse.SUCCESS(resultJson);
+        List<JSONObject> teachers = new ArrayList<JSONObject>();
+        List<JSONObject> customers = new ArrayList<JSONObject>();
+        for (Member member : members) {
+            User memberUser = usersMap.get(member.getUserId());
+            if (memberUser == null) continue;
+
+            JSONObject imUserJson = createImUser(user);
+            if (member.isTeacher()) teachers.add(imUserJson);
+            else customers.add(imUserJson);
+        }
+
+        JSONObject responseJson = new JSONObject();
+        responseJson.put("teachers", teachers);
+        responseJson.put("customers", customers);
+
+        return MomiaHttpResponse.SUCCESS(responseJson);
     }
 
     @RequestMapping(value = "/user/group", method = RequestMethod.GET)
     public MomiaHttpResponse listUserGroups(@RequestParam String utoken) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
 
-        List<Member> members = imServiceApi.queryMembersByUser(utoken);
+        User user = userServiceApi.get(utoken);
+
+        List<Member> members = imServiceApi.queryMembersByUser(user.getId());
         Set<Long> groupIds = new HashSet<Long>();
         for (Member member : members) {
             groupIds.add(member.getGroupId());

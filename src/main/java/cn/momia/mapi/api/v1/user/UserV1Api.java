@@ -57,7 +57,7 @@ public class UserV1Api extends AbstractApi {
         if (nickName.contains("官方")) return MomiaHttpResponse.FAILED("用户昵称不能包含“官方”");
 
         User user = completeUserImgs(userServiceApi.updateNickName(utoken, nickName));
-        imServiceApi.updateImNickName(user.getToken(), user.getNickName());
+        imServiceApi.updateImNickName(user.getId(), user.getNickName());
 
         return MomiaHttpResponse.SUCCESS(user);
     }
@@ -68,7 +68,7 @@ public class UserV1Api extends AbstractApi {
         if (StringUtils.isBlank(avatar)) return MomiaHttpResponse.FAILED("用户头像不能为空");
 
         User user = completeUserImgs(userServiceApi.updateAvatar(utoken, avatar));
-        imServiceApi.updateImAvatar(user.getToken(), user.getAvatar());
+        imServiceApi.updateImAvatar(user.getId(), user.getAvatar());
 
         return MomiaHttpResponse.SUCCESS(user);
     }
