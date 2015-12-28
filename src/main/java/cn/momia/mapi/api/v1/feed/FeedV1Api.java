@@ -3,13 +3,14 @@ package cn.momia.mapi.api.v1.feed;
 import cn.momia.api.course.CourseServiceApi;
 import cn.momia.api.course.dto.Course;
 import cn.momia.api.feed.FeedServiceApi;
-import cn.momia.api.feed.dto.UserFeedComment;
+import cn.momia.api.feed.dto.FeedComment;
 import cn.momia.api.feed.dto.UserFeed;
 import cn.momia.api.feed.dto.FeedTag;
 import cn.momia.api.user.UserServiceApi;
 import cn.momia.api.user.dto.User;
 import cn.momia.common.api.dto.PagedList;
 import cn.momia.common.api.http.MomiaHttpResponse;
+import cn.momia.common.util.TimeUtil;
 import cn.momia.common.webapp.config.Configuration;
 import cn.momia.mapi.api.AbstractApi;
 import com.alibaba.fastjson.JSON;
@@ -23,7 +24,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/v1/feed")
@@ -159,15 +165,13 @@ public class FeedV1Api extends AbstractApi {
         UserFeed feed = feedServiceApi.get(userId, id);
         completeFeedImgs(feed);
 
-        PagedList<User> staredUsers = feedServiceApi.listStars(id, 0, Configuration.getInt("PageSize.FeedDetailStar"));
-        completeUsersImgs(staredUsers.getList());
-        PagedList<UserFeedComment> comments = feedServiceApi.listComments(id, 0, Configuration.getInt("PageSize.FeedDetailComment"));
-        completeCommentsImgs(comments.getList());
+        PagedList<Long> pagedStaredUserIds = feedServiceApi.listStaredUserIds(id, 0, Configuration.getInt("PageSize.FeedDetailStar"));
+        PagedList<FeedComment> pagedFeedComments = feedServiceApi.listComments(id, 0, Configuration.getInt("PageSize.FeedDetailComment"));
 
         JSONObject feedDetailJson = new JSONObject();
         feedDetailJson.put("feed", feed);
-        feedDetailJson.put("staredUsers", staredUsers);
-        feedDetailJson.put("comments", comments);
+        feedDetailJson.put("staredUsers", buildStaredUsers(pagedStaredUserIds));
+        feedDetailJson.put("comments", buildUserFeedComments(pagedFeedComments));
 
         if (feed.getCourseId() > 0) {
             try {
@@ -183,10 +187,54 @@ public class FeedV1Api extends AbstractApi {
         return MomiaHttpResponse.SUCCESS(feedDetailJson);
     }
 
-    private void completeCommentsImgs(List<UserFeedComment> comments) {
-        for (UserFeedComment comment : comments) {
-            comment.setAvatar(completeSmallImg(comment.getAvatar()));
+    private PagedList<User> buildStaredUsers(PagedList<Long> pagedStaredUserIds) {
+        List<User> staredUsers = userServiceApi.list(pagedStaredUserIds.getList(), User.Type.MINI);
+        completeUsersImgs(staredUsers);
+
+        PagedList<User> pagedStaredUsers = new PagedList<User>();
+        pagedStaredUsers.setTotalCount(pagedStaredUserIds.getTotalCount());
+        pagedStaredUsers.setNextIndex(pagedStaredUserIds.getNextIndex());
+        pagedStaredUsers.setList(staredUsers);
+
+        return pagedStaredUsers;
+    }
+
+    private PagedList<JSONObject> buildUserFeedComments(PagedList<FeedComment> pagedFeedComments) {
+        Set<Long> userIds = new HashSet<Long>();
+        for (FeedComment comment : pagedFeedComments.getList()) {
+            userIds.add(comment.getUserId());
         }
+        List<User> users = userServiceApi.list(userIds, User.Type.MINI);
+        Map<Long, User> usersMap = new HashMap<Long, User>();
+        for (User user : users) {
+            usersMap.put(user.getId(), user);
+        }
+
+        List<JSONObject> userFeedComments = new ArrayList<JSONObject>();
+        for (FeedComment comment : pagedFeedComments.getList()) {
+            User user = usersMap.get(comment.getUserId());
+            if (user == null) continue;
+
+            userFeedComments.add(buildUserFeedComment(comment, user));
+        }
+
+        PagedList<JSONObject> pagedUserFeedComments = new PagedList<JSONObject>();
+        pagedUserFeedComments.setTotalCount(pagedFeedComments.getTotalCount());
+        pagedUserFeedComments.setNextIndex(pagedFeedComments.getNextIndex());
+        pagedUserFeedComments.setList(userFeedComments);
+
+        return pagedUserFeedComments;
+    }
+
+    private JSONObject buildUserFeedComment(FeedComment comment, User user) {
+        JSONObject userFeedComment = new JSONObject();
+        userFeedComment.put("id", comment.getId());
+        userFeedComment.put("content", comment.getContent());
+        userFeedComment.put("addTime", TimeUtil.formatAddTime(comment.getAddTime()));
+        userFeedComment.put("nickName", user.getNickName());
+        userFeedComment.put("avatar", completeSmallImg(user.getAvatar()));
+
+        return userFeedComment;
     }
 
     @RequestMapping(value = "/delete", method = RequestMethod.POST)
@@ -204,10 +252,8 @@ public class FeedV1Api extends AbstractApi {
     public MomiaHttpResponse listComments(@RequestParam long id, @RequestParam int start) {
         if (id <= 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        PagedList<UserFeedComment> pagedComments = feedServiceApi.listComments(id, start, Configuration.getInt("PageSize.FeedComment"));
-        completeCommentsImgs(pagedComments.getList());
-
-        return MomiaHttpResponse.SUCCESS(pagedComments);
+        PagedList<FeedComment> pagedComments = feedServiceApi.listComments(id, start, Configuration.getInt("PageSize.FeedComment"));
+        return MomiaHttpResponse.SUCCESS(buildUserFeedComments(pagedComments));
     }
 
     @RequestMapping(value = "/comment/add", method = RequestMethod.POST)
