@@ -9,6 +9,7 @@ import cn.momia.api.teacher.dto.ChildTag;
 import cn.momia.api.teacher.dto.Material;
 import cn.momia.api.teacher.dto.Student;
 import cn.momia.api.teacher.dto.Teacher;
+import cn.momia.api.teacher.dto.TeacherStatus;
 import cn.momia.api.user.ChildServiceApi;
 import cn.momia.api.user.UserServiceApi;
 import cn.momia.api.user.dto.Child;
@@ -16,9 +17,9 @@ import cn.momia.api.user.dto.User;
 import cn.momia.common.api.dto.PagedList;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.common.util.SexUtil;
-import cn.momia.common.util.TimeUtil;
 import cn.momia.common.webapp.config.Configuration;
 import cn.momia.mapi.api.AbstractApi;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +43,21 @@ public class TeacherV1Api extends AbstractApi {
     @RequestMapping(value = "/status", method = RequestMethod.GET)
     public MomiaHttpResponse status(@RequestParam String utoken) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        return MomiaHttpResponse.SUCCESS(teacherServiceApi.status(utoken));
+
+        TeacherStatus status = teacherServiceApi.status(utoken);
+        if (status.getStatus() == TeacherStatus.Status.NOT_EXIST) return MomiaHttpResponse.SUCCESS(status);
+
+        Teacher teacher = completeTeacherImgs(teacherServiceApi.get(utoken));
+        JSONObject statusJson = (JSONObject) JSON.toJSON(teacher);
+        statusJson.put("status", status.getStatus());
+        statusJson.put("msg", status.getMsg());
+
+        return MomiaHttpResponse.SUCCESS(statusJson);
+    }
+
+    private Teacher completeTeacherImgs(Teacher teacher) {
+        teacher.setPic(completeSmallImg(teacher.getPic()));
+        return teacher;
     }
 
     @RequestMapping(value = "/signup", method = RequestMethod.POST)
@@ -105,11 +120,6 @@ public class TeacherV1Api extends AbstractApi {
     public MomiaHttpResponse get(@RequestParam String utoken) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         return MomiaHttpResponse.SUCCESS(completeTeacherImgs(teacherServiceApi.get(utoken)));
-    }
-
-    private Teacher completeTeacherImgs(Teacher teacher) {
-        teacher.setPic(completeSmallImg(teacher.getPic()));
-        return teacher;
     }
 
     @RequestMapping(value = "/pic", method = RequestMethod.POST)
