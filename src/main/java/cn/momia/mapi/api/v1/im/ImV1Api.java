@@ -8,7 +8,7 @@ import cn.momia.api.im.dto.Member;
 import cn.momia.api.user.UserServiceApi;
 import cn.momia.api.user.dto.User;
 import cn.momia.common.api.http.MomiaHttpResponse;
-import cn.momia.common.util.TimeUtil;
+import cn.momia.common.api.util.TimeUtil;
 import cn.momia.mapi.api.AbstractApi;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Sets;

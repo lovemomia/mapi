@@ -4,7 +4,7 @@ import cn.momia.api.course.CouponServiceApi;
 import cn.momia.api.user.UserServiceApi;
 import cn.momia.api.user.dto.User;
 import cn.momia.common.api.http.MomiaHttpResponse;
-import cn.momia.common.util.MobileUtil;
+import cn.momia.common.api.util.MobileUtil;
 import cn.momia.common.webapp.config.Configuration;
 import cn.momia.mapi.api.AbstractApi;
 import com.alibaba.fastjson.JSONObject;

@@ -6,7 +6,7 @@ import cn.momia.api.im.ImServiceApi;
 import cn.momia.api.user.AuthServiceApi;
 import cn.momia.api.user.dto.User;
 import cn.momia.common.api.http.MomiaHttpResponse;
-import cn.momia.common.util.MobileUtil;
+import cn.momia.common.api.util.MobileUtil;
 import cn.momia.mapi.api.AbstractApi;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

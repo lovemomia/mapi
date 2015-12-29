@@ -2,7 +2,7 @@ package cn.momia.mapi.api.v1.course;
 
 import cn.momia.api.course.PaymentServiceApi;
 import cn.momia.common.api.http.MomiaHttpResponse;
-import cn.momia.common.util.XmlUtil;
+import cn.momia.common.api.util.XmlUtil;
 import cn.momia.mapi.api.AbstractApi;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;

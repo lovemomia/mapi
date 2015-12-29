@@ -18,7 +18,7 @@ import cn.momia.api.user.dto.User;
 import cn.momia.common.api.dto.PagedList;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.api.user.UserServiceApi;
-import cn.momia.common.util.SexUtil;
+import cn.momia.common.api.util.SexUtil;
 import cn.momia.common.webapp.config.Configuration;
 import cn.momia.mapi.api.FeedRelatedApi;
 import com.alibaba.fastjson.JSONObject;
