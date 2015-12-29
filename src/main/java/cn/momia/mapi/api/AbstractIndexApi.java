@@ -13,13 +13,13 @@ import java.util.List;
 public class AbstractIndexApi extends AbstractApi {
     @Autowired private EventServiceApi eventServiceApi;
 
-    protected List<Banner> getBanners(int cityId, int clientType, String clientVersion) {
+    protected List<Banner> getBanners(int cityId, int platform, String clientVersion) {
         List<Banner> banners = eventServiceApi.listBanners(cityId);
         List<Banner> filteredBanners = new ArrayList<Banner>();
         for (Banner banner : banners) {
-            if (banner.isInvalid(clientType, clientVersion)) continue;
+            if (banner.isInvalid(platform, clientVersion)) continue;
             banner.setCover(completeImg(banner.getCover()));
-            banner.setAction(buildAction(banner.getAction(), clientType));
+            banner.setAction(buildAction(banner.getAction(), platform));
             filteredBanners.add(banner);
         }
 
@@ -27,13 +27,13 @@ public class AbstractIndexApi extends AbstractApi {
         return filteredBanners.size() > maxCount ? filteredBanners.subList(0, maxCount) : filteredBanners;
     }
 
-    protected List<Icon> getIcons(int cityId, int clientType, String clientVersion) {
+    protected List<Icon> getIcons(int cityId, int platform, String clientVersion) {
         List<Icon> icons = eventServiceApi.listIcons(cityId);
         List<Icon> filteredIcons = new ArrayList<Icon>();
         for (Icon icon : icons) {
-            if (icon.isInvalid(clientType, clientVersion)) continue;
+            if (icon.isInvalid(platform, clientVersion)) continue;
             icon.setImg(completeImg(icon.getImg()));
-            icon.setAction(buildAction(icon.getAction(), clientType));
+            icon.setAction(buildAction(icon.getAction(), platform));
             filteredIcons.add(icon);
         }
 
@@ -41,13 +41,13 @@ public class AbstractIndexApi extends AbstractApi {
         return filteredIcons.size() > maxCount ? filteredIcons.subList(0, maxCount) : filteredIcons;
     }
 
-    protected List<Event> getEvents(int cityId, int clientType, String clientVersion) {
+    protected List<Event> getEvents(int cityId, int platform, String clientVersion) {
         List<Event> events = eventServiceApi.listEvents(cityId);
         List<Event> filteredEvents = new ArrayList<Event>();
         for (Event event : events) {
-            if (event.isInvalid(clientType, clientVersion)) continue;
+            if (event.isInvalid(platform, clientVersion)) continue;
             event.setImg(completeImg(event.getImg()));
-            event.setAction(buildAction(event.getAction(), clientType));
+            event.setAction(buildAction(event.getAction(), platform));
             filteredEvents.add(event);
         }
 

@@ -6,7 +6,7 @@ import cn.momia.api.course.dto.Teacher;
 import cn.momia.api.course.dto.UserCourseComment;
 import cn.momia.api.user.dto.Child;
 import cn.momia.api.user.dto.User;
-import cn.momia.common.api.client.ClientType;
+import cn.momia.common.api.platform.Platform;
 import cn.momia.common.webapp.config.Configuration;
 import cn.momia.common.webapp.ctrl.BaseController;
 import cn.momia.image.api.ImageFile;
@@ -20,8 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class AbstractApi extends BaseController {
-    protected int getClientType(HttpServletRequest request) {
-        return StringUtils.isBlank(request.getParameter("terminal")) ? ClientType.WAP : ClientType.APP;
+    protected int getPlatform(HttpServletRequest request) {
+        return StringUtils.isBlank(request.getParameter("terminal")) ? Platform.WAP : Platform.APP;
     }
 
     protected String getVersion(HttpServletRequest request) {
@@ -29,8 +29,8 @@ public abstract class AbstractApi extends BaseController {
         return StringUtils.isBlank(version) ? "" : version;
     }
 
-    protected String buildAction(String uri, int clientType) {
-        if (ClientType.isApp(clientType)) {
+    protected String buildAction(String uri, int platform) {
+        if (Platform.isApp(platform)) {
             if (uri.startsWith("http")) return Configuration.getString("AppConf.Name") + "://web?url=" + URLEncoder.encode(uri);
             return Configuration.getString("AppConf.Name") + "://" + uri;
         }

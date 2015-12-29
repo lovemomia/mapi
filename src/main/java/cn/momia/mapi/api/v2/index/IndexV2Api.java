@@ -32,12 +32,12 @@ public class IndexV2Api extends AbstractIndexApi {
 
         JSONObject indexJson = new JSONObject();
         if (start == 0) {
-            int clientType = getClientType(request);
+            int platform = getPlatform(request);
             String version = getVersion(request);
 
-            indexJson.put("banners", getBanners(cityId, clientType, version));
-            indexJson.put("icons", getIcons(cityId, clientType, version));
-            indexJson.put("events", getEvents(cityId, clientType, version));
+            indexJson.put("banners", getBanners(cityId, platform, version));
+            indexJson.put("icons", getIcons(cityId, platform, version));
+            indexJson.put("events", getEvents(cityId, platform, version));
         }
         indexJson.put("courses", getRecommendCourses(cityId, start));
 
