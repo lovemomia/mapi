@@ -41,6 +41,11 @@
         </dependency>
         <dependency>
             <groupId>cn.momia</groupId>
+            <artifactId>duola-api-poi</artifactId>
+            <version>1.1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>cn.momia</groupId>
             <artifactId>duola-api-teacher</artifactId>
             <version>1.1.0</version>
         </dependency>
