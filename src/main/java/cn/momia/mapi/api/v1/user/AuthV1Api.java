@@ -1,6 +1,6 @@
 package cn.momia.mapi.api.v1.user;
 
-import cn.momia.api.base.SmsServiceApi;
+import cn.momia.api.user.SmsServiceApi;
 import cn.momia.api.course.CouponServiceApi;
 import cn.momia.api.im.ImServiceApi;
 import cn.momia.api.user.AuthServiceApi;

@@ -1,9 +1,9 @@
 package cn.momia.mapi.api;
 
-import cn.momia.api.event.EventServiceApi;
-import cn.momia.api.event.dto.Banner;
-import cn.momia.api.event.dto.Event;
-import cn.momia.api.event.dto.Icon;
+import cn.momia.api.operate.ConfigServiceApi;
+import cn.momia.api.operate.dto.Banner;
+import cn.momia.api.operate.dto.Event;
+import cn.momia.api.operate.dto.Icon;
 import cn.momia.common.webapp.config.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -11,10 +11,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AbstractIndexApi extends AbstractApi {
-    @Autowired private EventServiceApi eventServiceApi;
+    @Autowired private ConfigServiceApi configServiceApi;
 
     protected List<Banner> getBanners(int cityId, int platform, String clientVersion) {
-        List<Banner> banners = eventServiceApi.listBanners(cityId);
+        List<Banner> banners = configServiceApi.listBanners(cityId);
         List<Banner> filteredBanners = new ArrayList<Banner>();
         for (Banner banner : banners) {
             if (banner.isInvalid(platform, clientVersion)) continue;
@@ -28,7 +28,7 @@ public class AbstractIndexApi extends AbstractApi {
     }
 
     protected List<Icon> getIcons(int cityId, int platform, String clientVersion) {
-        List<Icon> icons = eventServiceApi.listIcons(cityId);
+        List<Icon> icons = configServiceApi.listIcons(cityId);
         List<Icon> filteredIcons = new ArrayList<Icon>();
         for (Icon icon : icons) {
             if (icon.isInvalid(platform, clientVersion)) continue;
@@ -42,7 +42,7 @@ public class AbstractIndexApi extends AbstractApi {
     }
 
     protected List<Event> getEvents(int cityId, int platform, String clientVersion) {
-        List<Event> events = eventServiceApi.listEvents(cityId);
+        List<Event> events = configServiceApi.listEvents(cityId);
         List<Event> filteredEvents = new ArrayList<Event>();
         for (Event event : events) {
             if (event.isInvalid(platform, clientVersion)) continue;

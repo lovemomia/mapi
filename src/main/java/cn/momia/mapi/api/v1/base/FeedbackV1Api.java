@@ -1,6 +1,6 @@
 package cn.momia.mapi.api.v1.base;
 
-import cn.momia.api.base.FeedbackServiceApi;
+import cn.momia.api.operate.FeedbackServiceApi;
 import cn.momia.common.core.http.MomiaHttpResponse;
 import cn.momia.mapi.api.AbstractApi;
 import org.apache.commons.lang3.StringUtils;
