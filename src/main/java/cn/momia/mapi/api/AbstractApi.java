@@ -4,7 +4,6 @@ import cn.momia.api.course.dto.Course;
 import cn.momia.api.course.dto.Subject;
 import cn.momia.api.course.dto.Teacher;
 import cn.momia.api.course.dto.UserCourseComment;
-import cn.momia.api.feed.dto.UserFeed;
 import cn.momia.api.user.dto.Child;
 import cn.momia.api.user.dto.User;
 import cn.momia.common.api.client.ClientType;
@@ -178,23 +177,6 @@ public abstract class AbstractApi extends BaseController {
         }
 
         return teachers;
-    }
-
-    protected List<UserFeed> completeFeedsImgs(List<UserFeed> feeds) {
-        for (UserFeed feed : feeds) {
-            completeFeedImgs(feed);
-        }
-
-        return feeds;
-    }
-
-    protected UserFeed completeFeedImgs(UserFeed feed) {
-        List<String> imgs = feed.getImgs();
-        feed.setImgs(completeMiddleImgs(imgs));
-        feed.setLargeImgs(completeLargeImgs(imgs));
-        feed.setAvatar(completeSmallImg(feed.getAvatar()));
-
-        return feed;
     }
 
     protected List<User> completeUsersImgs(List<User> users) {

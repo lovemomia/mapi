@@ -7,13 +7,13 @@ import cn.momia.api.course.dto.Subject;
 import cn.momia.api.course.dto.SubjectSku;
 import cn.momia.api.course.dto.UserCourseComment;
 import cn.momia.api.feed.FeedServiceApi;
-import cn.momia.api.feed.dto.UserFeed;
+import cn.momia.api.feed.dto.Feed;
 import cn.momia.api.user.UserServiceApi;
 import cn.momia.api.user.dto.Contact;
 import cn.momia.common.api.dto.PagedList;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.common.webapp.config.Configuration;
-import cn.momia.mapi.api.AbstractApi;
+import cn.momia.mapi.api.FeedRelatedApi;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -29,7 +29,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/v2/subject")
-public class SubjectV2Api extends AbstractApi {
+public class SubjectV2Api extends FeedRelatedApi {
     private static final Logger LOGGER = LoggerFactory.getLogger(SubjectV2Api.class);
 
     @Autowired private SubjectServiceApi subjectServiceApi;
@@ -66,8 +66,7 @@ public class SubjectV2Api extends AbstractApi {
         completeMiddleCoursesImgs(courses.getList());
 
         long userId = StringUtils.isBlank(utoken) ? 0 : userServiceApi.get(utoken).getId();
-        PagedList<UserFeed> feeds = feedServiceApi.queryBySubject(userId, id, 0, Configuration.getInt("PageSize.Feed"));
-        completeFeedsImgs(feeds.getList());
+        PagedList<Feed> feeds = feedServiceApi.queryBySubject(id, 0, Configuration.getInt("PageSize.Feed"));
 
         PagedList<UserCourseComment> comments = subjectServiceApi.queryCommentsBySubject(id, 0, Configuration.getInt("PageSize.CourseComment"));
         completeCourseCommentsImgs(comments.getList());
@@ -75,7 +74,7 @@ public class SubjectV2Api extends AbstractApi {
         JSONObject responseJson = new JSONObject();
         responseJson.put("subject", subject);
         responseJson.put("courses", courses);
-        responseJson.put("feeds", feeds);
+        responseJson.put("feeds", buildPagedUserFeeds(userId, feeds));
         responseJson.put("comments", comments);
 
         return MomiaHttpResponse.SUCCESS(responseJson);

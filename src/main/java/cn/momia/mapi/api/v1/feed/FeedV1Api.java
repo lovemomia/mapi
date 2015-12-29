@@ -3,8 +3,8 @@ package cn.momia.mapi.api.v1.feed;
 import cn.momia.api.course.CourseServiceApi;
 import cn.momia.api.course.dto.Course;
 import cn.momia.api.feed.FeedServiceApi;
+import cn.momia.api.feed.dto.Feed;
 import cn.momia.api.feed.dto.FeedComment;
-import cn.momia.api.feed.dto.UserFeed;
 import cn.momia.api.feed.dto.FeedTag;
 import cn.momia.api.user.UserServiceApi;
 import cn.momia.api.user.dto.User;
@@ -12,7 +12,7 @@ import cn.momia.common.api.dto.PagedList;
 import cn.momia.common.api.http.MomiaHttpResponse;
 import cn.momia.common.util.TimeUtil;
 import cn.momia.common.webapp.config.Configuration;
-import cn.momia.mapi.api.AbstractApi;
+import cn.momia.mapi.api.FeedRelatedApi;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
@@ -33,7 +33,7 @@ import java.util.Set;
 
 @RestController
 @RequestMapping("/v1/feed")
-public class FeedV1Api extends AbstractApi {
+public class FeedV1Api extends FeedRelatedApi {
     private static final Logger LOGGER = LoggerFactory.getLogger(FeedV1Api.class);
 
     @Autowired private CourseServiceApi courseServiceApi;
@@ -64,10 +64,8 @@ public class FeedV1Api extends AbstractApi {
             userId = user.getId();
         }
 
-        PagedList<UserFeed> pagedFeeds = feedServiceApi.list(userId, start, Configuration.getInt("PageSize.Feed"));
-        completeFeedsImgs(pagedFeeds.getList());
-
-        return MomiaHttpResponse.SUCCESS(pagedFeeds);
+        PagedList<Feed> pagedFeeds = feedServiceApi.list(userId, start, Configuration.getInt("PageSize.Feed"));
+        return MomiaHttpResponse.SUCCESS(buildPagedUserFeeds(userId, pagedFeeds));
     }
 
     @RequestMapping(value = "/subject", method = RequestMethod.GET)
@@ -77,10 +75,9 @@ public class FeedV1Api extends AbstractApi {
         if (subjectId <= 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
         long userId = StringUtils.isBlank(utoken) ? 0 : userServiceApi.get(utoken).getId();
-        PagedList<UserFeed> pagedFeeds = feedServiceApi.queryBySubject(userId, subjectId, start, Configuration.getInt("PageSize.Feed"));
-        completeFeedsImgs(pagedFeeds.getList());
+        PagedList<Feed> pagedFeeds = feedServiceApi.queryBySubject(subjectId, start, Configuration.getInt("PageSize.Feed"));
 
-        return MomiaHttpResponse.SUCCESS(pagedFeeds);
+        return MomiaHttpResponse.SUCCESS(buildPagedUserFeeds(userId, pagedFeeds));
     }
 
     @RequestMapping(value = "/course", method = RequestMethod.GET)
@@ -98,9 +95,8 @@ public class FeedV1Api extends AbstractApi {
         }
 
         long userId = StringUtils.isBlank(utoken) ? 0 : userServiceApi.get(utoken).getId();
-        PagedList<UserFeed> pagedFeeds = feedServiceApi.queryByCourse(userId, courseId, start, Configuration.getInt("PageSize.Feed"));
-        completeFeedsImgs(pagedFeeds.getList());
-        courseFeedsJson.put("feeds", pagedFeeds);
+        PagedList<Feed> pagedFeeds = feedServiceApi.queryByCourse(courseId, start, Configuration.getInt("PageSize.Feed"));
+        courseFeedsJson.put("feeds", buildPagedUserFeeds(userId, pagedFeeds));
 
         return MomiaHttpResponse.SUCCESS(courseFeedsJson);
     }
@@ -162,14 +158,13 @@ public class FeedV1Api extends AbstractApi {
         if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
         long userId = StringUtils.isBlank(utoken) ? 0 : userServiceApi.get(utoken).getId();
-        UserFeed feed = feedServiceApi.get(userId, id);
-        completeFeedImgs(feed);
+        Feed feed = feedServiceApi.get(id);
 
         PagedList<Long> pagedStaredUserIds = feedServiceApi.listStaredUserIds(id, 0, Configuration.getInt("PageSize.FeedDetailStar"));
         PagedList<FeedComment> pagedFeedComments = feedServiceApi.listComments(id, 0, Configuration.getInt("PageSize.FeedDetailComment"));
 
         JSONObject feedDetailJson = new JSONObject();
-        feedDetailJson.put("feed", feed);
+        feedDetailJson.put("feed", buildUserFeed(userId, feed));
         feedDetailJson.put("staredUsers", buildStaredUsers(pagedStaredUserIds));
         feedDetailJson.put("comments", buildUserFeedComments(pagedFeedComments));
 
