@@ -1,7 +1,7 @@
 package cn.momia.mapi.api.v1.base;
 
 import cn.momia.api.base.MetaServiceApi;
-import cn.momia.common.api.http.MomiaHttpResponse;
+import cn.momia.common.core.http.MomiaHttpResponse;
 import cn.momia.mapi.api.AbstractApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;

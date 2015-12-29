@@ -6,7 +6,7 @@ import cn.momia.api.course.dto.Teacher;
 import cn.momia.api.course.dto.UserCourseComment;
 import cn.momia.api.user.dto.Child;
 import cn.momia.api.user.dto.User;
-import cn.momia.common.api.platform.Platform;
+import cn.momia.common.core.platform.Platform;
 import cn.momia.common.webapp.config.Configuration;
 import cn.momia.common.webapp.ctrl.BaseController;
 import cn.momia.image.api.ImageFile;

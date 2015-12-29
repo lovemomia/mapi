@@ -2,8 +2,8 @@ package cn.momia.mapi.api.v2.index;
 
 import cn.momia.api.course.CourseServiceApi;
 import cn.momia.api.course.dto.Course;
-import cn.momia.common.api.dto.PagedList;
-import cn.momia.common.api.http.MomiaHttpResponse;
+import cn.momia.common.core.dto.PagedList;
+import cn.momia.common.core.http.MomiaHttpResponse;
 import cn.momia.common.webapp.config.Configuration;
 import cn.momia.mapi.api.AbstractIndexApi;
 import com.alibaba.fastjson.JSONObject;
