@@ -5,7 +5,6 @@ import cn.momia.api.course.dto.TeacherCourse;
 import cn.momia.api.teacher.TeacherServiceApi;
 import cn.momia.api.teacher.dto.ChildComment;
 import cn.momia.api.teacher.dto.ChildRecord;
-import cn.momia.api.teacher.dto.ChildTag;
 import cn.momia.api.teacher.dto.Material;
 import cn.momia.api.teacher.dto.Student;
 import cn.momia.api.teacher.dto.Teacher;
@@ -13,6 +12,7 @@ import cn.momia.api.teacher.dto.TeacherStatus;
 import cn.momia.api.user.ChildServiceApi;
 import cn.momia.api.user.UserServiceApi;
 import cn.momia.api.user.dto.Child;
+import cn.momia.api.user.dto.ChildTag;
 import cn.momia.api.user.dto.User;
 import cn.momia.common.core.dto.PagedList;
 import cn.momia.common.core.http.MomiaHttpResponse;
@@ -295,7 +295,7 @@ public class TeacherV1Api extends AbstractApi {
         Child child = childServiceApi.get(utoken, childId);
         if (!child.exists()) return MomiaHttpResponse.FAILED("孩子信息不存在");
 
-        List<ChildTag> tags = teacherServiceApi.listAllChildTags();
+        List<ChildTag> tags = childServiceApi.listAllTags();
         ChildRecord record = teacherServiceApi.getChildRecord(utoken, childId, courseId, courseSkuId);
 
         JSONObject recordJson = new JSONObject();
