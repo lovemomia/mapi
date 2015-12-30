@@ -4,7 +4,6 @@ import cn.momia.api.course.CourseServiceApi;
 import cn.momia.api.course.dto.TeacherCourse;
 import cn.momia.api.teacher.TeacherServiceApi;
 import cn.momia.api.teacher.dto.ChildComment;
-import cn.momia.api.teacher.dto.ChildRecord;
 import cn.momia.api.teacher.dto.Material;
 import cn.momia.api.teacher.dto.Student;
 import cn.momia.api.teacher.dto.Teacher;
@@ -12,6 +11,7 @@ import cn.momia.api.teacher.dto.TeacherStatus;
 import cn.momia.api.user.ChildServiceApi;
 import cn.momia.api.user.UserServiceApi;
 import cn.momia.api.user.dto.Child;
+import cn.momia.api.user.dto.ChildRecord;
 import cn.momia.api.user.dto.ChildTag;
 import cn.momia.api.user.dto.User;
 import cn.momia.common.core.dto.PagedList;
@@ -296,7 +296,7 @@ public class TeacherV1Api extends AbstractApi {
         if (!child.exists()) return MomiaHttpResponse.FAILED("孩子信息不存在");
 
         List<ChildTag> tags = childServiceApi.listAllTags();
-        ChildRecord record = teacherServiceApi.getChildRecord(utoken, childId, courseId, courseSkuId);
+        ChildRecord record = childServiceApi.getRecord(utoken, childId, courseId, courseSkuId);
 
         JSONObject recordJson = new JSONObject();
         recordJson.put("child", completeStudentImgs(buildStudent(child)));
@@ -315,7 +315,7 @@ public class TeacherV1Api extends AbstractApi {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (courseId <= 0 || courseSkuId <= 0 || childId <= 0 || StringUtils.isBlank(record)) return MomiaHttpResponse.BAD_REQUEST;
 
-        return MomiaHttpResponse.SUCCESS(teacherServiceApi.record(utoken, childId, courseId, courseSkuId, record));
+        return MomiaHttpResponse.SUCCESS(childServiceApi.record(utoken, childId, courseId, courseSkuId, record));
     }
 
     @RequestMapping(value = "/student/comment", method = RequestMethod.POST)
