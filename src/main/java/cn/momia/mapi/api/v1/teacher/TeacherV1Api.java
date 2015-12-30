@@ -2,10 +2,10 @@ package cn.momia.mapi.api.v1.teacher;
 
 import cn.momia.api.course.CourseServiceApi;
 import cn.momia.api.course.dto.Course;
+import cn.momia.api.course.dto.CourseMaterial;
 import cn.momia.api.course.dto.CourseSku;
 import cn.momia.api.course.dto.TeacherCourse;
 import cn.momia.api.teacher.OldTeacherServiceApi;
-import cn.momia.api.teacher.dto.Material;
 import cn.momia.api.teacher.dto.Student;
 import cn.momia.api.user.ChildServiceApi;
 import cn.momia.api.user.TeacherServiceApi;
@@ -126,10 +126,10 @@ public class TeacherV1Api extends AbstractApi {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (materialId <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        return MomiaHttpResponse.SUCCESS(completeMaterialImgs(oldTeacherServiceApi.getMaterial(utoken, materialId)));
+        return MomiaHttpResponse.SUCCESS(completeMaterialImgs(courseServiceApi.getMaterial(utoken, materialId)));
     }
 
-    private Material completeMaterialImgs(Material material) {
+    private CourseMaterial completeMaterialImgs(CourseMaterial material) {
         material.setCover(completeMiddleImg(material.getCover()));
         return material;
     }
@@ -139,14 +139,14 @@ public class TeacherV1Api extends AbstractApi {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        PagedList<Material> pagedMaterials = oldTeacherServiceApi.listMaterials(utoken, start, Configuration.getInt("PageSize.Material"));
+        PagedList<CourseMaterial> pagedMaterials = courseServiceApi.listMaterials(utoken, start, Configuration.getInt("PageSize.Material"));
         completeMaterialsImgs(pagedMaterials.getList());
 
         return MomiaHttpResponse.SUCCESS(pagedMaterials);
     }
 
-    private List<Material> completeMaterialsImgs(List<Material> materials) {
-        for (Material material : materials) {
+    private List<CourseMaterial> completeMaterialsImgs(List<CourseMaterial> materials) {
+        for (CourseMaterial material : materials) {
             completeMaterialImgs(material);
         }
 
