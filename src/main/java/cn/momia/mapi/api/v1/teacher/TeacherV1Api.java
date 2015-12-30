@@ -265,13 +265,25 @@ public class TeacherV1Api extends AbstractApi {
             Child child = childServiceApi.get(utoken, childId);
             if (!child.exists()) return MomiaHttpResponse.FAILED("孩子信息不存在");
 
-            studentJson.put("child", completeStudentImgs(buildStudent(child)));
+            studentJson.put("child", buildStudent(child));
         }
 
         PagedList<ChildComment> pagedComments = childServiceApi.listComments(utoken, childId, start, Configuration.getInt("PageSize.ChildComment"));
         studentJson.put("comments", buildStudentComments(pagedComments));
 
         return MomiaHttpResponse.SUCCESS(studentJson);
+    }
+
+    private JSONObject buildStudent(Child child) {
+        JSONObject student = new JSONObject();
+        student.put("id", child.getId());
+        student.put("userId", child.getUserId());
+        student.put("avatar", completeSmallImg(child.getAvatar()));
+        student.put("name", child.getName());
+        student.put("birthday", child.getBirthday());
+        student.put("sex", child.getSex());
+
+        return student;
     }
 
     private PagedList<JSONObject> buildStudentComments(PagedList<ChildComment> pagedComments) {
@@ -326,18 +338,6 @@ public class TeacherV1Api extends AbstractApi {
         return pagedStudentComments;
     }
 
-    private Student buildStudent(Child child) {
-        Student student = new Student();
-        student.setId(child.getId());
-        student.setUserId(child.getUserId());
-        student.setAvatar(child.getAvatar());
-        student.setName(child.getName());
-        student.setBirthday(child.getBirthday());
-        student.setSex(child.getSex());
-
-        return student;
-    }
-
     @RequestMapping(value = "/student/record", method = RequestMethod.GET)
     public MomiaHttpResponse record(@RequestParam String utoken,
                                     @RequestParam(value = "cid") long childId,
@@ -353,7 +353,7 @@ public class TeacherV1Api extends AbstractApi {
         ChildRecord record = childServiceApi.getRecord(utoken, childId, courseId, courseSkuId);
 
         JSONObject recordJson = new JSONObject();
-        recordJson.put("child", completeStudentImgs(buildStudent(child)));
+        recordJson.put("child", buildStudent(child));
         recordJson.put("tags", tags);
         recordJson.put("record", record);
 
