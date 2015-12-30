@@ -5,8 +5,7 @@ import cn.momia.api.course.dto.Course;
 import cn.momia.api.course.dto.CourseMaterial;
 import cn.momia.api.course.dto.CourseSku;
 import cn.momia.api.course.dto.TeacherCourse;
-import cn.momia.api.teacher.OldTeacherServiceApi;
-import cn.momia.api.teacher.dto.Student;
+import cn.momia.api.course.dto.Student;
 import cn.momia.api.user.ChildServiceApi;
 import cn.momia.api.user.TeacherServiceApi;
 import cn.momia.api.user.UserServiceApi;
@@ -45,7 +44,6 @@ public class TeacherV1Api extends AbstractApi {
     @Autowired private ChildServiceApi childServiceApi;
     @Autowired private UserServiceApi userServiceApi;
     @Autowired private TeacherServiceApi teacherServiceApi;
-    @Autowired private OldTeacherServiceApi oldTeacherServiceApi;
 
     @RequestMapping(value = "/status", method = RequestMethod.GET)
     public MomiaHttpResponse status(@RequestParam String utoken) {
@@ -165,7 +163,7 @@ public class TeacherV1Api extends AbstractApi {
             teacherCourse.setCover(completeMiddleImg(teacherCourse.getCover()));
             resultJson.put("course", teacherCourse);
 
-            resultJson.put("students", completeStudentsImgs(oldTeacherServiceApi.ongoingStudents(utoken, teacherCourse.getCourseId(), teacherCourse.getCourseSkuId())));
+            resultJson.put("students", completeStudentsImgs(courseServiceApi.ongoingStudents(utoken, teacherCourse.getCourseId(), teacherCourse.getCourseSkuId())));
         }
 
         return MomiaHttpResponse.SUCCESS(resultJson);
@@ -191,6 +189,18 @@ public class TeacherV1Api extends AbstractApi {
         return teacherCourses;
     }
 
+    @RequestMapping(value = "/course/checkin", method = RequestMethod.POST)
+    public MomiaHttpResponse checkin(@RequestParam String utoken,
+                                     @RequestParam(value = "uid") long userId,
+                                     @RequestParam(value = "pid") long packageId,
+                                     @RequestParam(value = "coid") long courseId,
+                                     @RequestParam(value = "sid") long courseSkuId) {
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (userId <= 0 || packageId <= 0 || courseId <= 0 || courseSkuId <= 0) return MomiaHttpResponse.BAD_REQUEST;
+
+        return MomiaHttpResponse.SUCCESS(courseServiceApi.checkin(utoken, userId, packageId, courseId, courseSkuId));
+    }
+
     @RequestMapping(value = "/course/notfinished/student", method = RequestMethod.GET)
     public MomiaHttpResponse notfinishedStudents(@RequestParam String utoken,
                                                  @RequestParam(value = "coid") long courseId,
@@ -198,7 +208,7 @@ public class TeacherV1Api extends AbstractApi {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (courseId <= 0 || courseSkuId <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        List<Student> students = oldTeacherServiceApi.notfinishedStudents(utoken, courseId, courseSkuId);
+        List<Student> students = courseServiceApi.notfinishedStudents(utoken, courseId, courseSkuId);
         completeStudentsImgs(students);
 
         return MomiaHttpResponse.SUCCESS(students);
@@ -236,22 +246,10 @@ public class TeacherV1Api extends AbstractApi {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (courseId <= 0 || courseSkuId <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        List<Student> students = oldTeacherServiceApi.finishedStudents(utoken, courseId, courseSkuId);
+        List<Student> students = courseServiceApi.finishedStudents(utoken, courseId, courseSkuId);
         completeStudentsImgs(students);
 
         return MomiaHttpResponse.SUCCESS(students);
-    }
-
-    @RequestMapping(value = "/course/checkin", method = RequestMethod.POST)
-    public MomiaHttpResponse checkin(@RequestParam String utoken,
-                                     @RequestParam(value = "uid") long userId,
-                                     @RequestParam(value = "pid") long packageId,
-                                     @RequestParam(value = "coid") long courseId,
-                                     @RequestParam(value = "sid") long courseSkuId) {
-        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (userId <= 0 || packageId <= 0 || courseId <= 0 || courseSkuId <= 0) return MomiaHttpResponse.BAD_REQUEST;
-
-        return MomiaHttpResponse.SUCCESS(oldTeacherServiceApi.checkin(utoken, userId, packageId, courseId, courseSkuId));
     }
 
     @RequestMapping(value = "/student", method = RequestMethod.GET)
