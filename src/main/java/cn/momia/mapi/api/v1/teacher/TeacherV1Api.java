@@ -4,17 +4,18 @@ import cn.momia.api.course.CourseServiceApi;
 import cn.momia.api.course.dto.Course;
 import cn.momia.api.course.dto.CourseSku;
 import cn.momia.api.course.dto.TeacherCourse;
-import cn.momia.api.teacher.TeacherServiceApi;
+import cn.momia.api.teacher.OldTeacherServiceApi;
 import cn.momia.api.teacher.dto.Material;
 import cn.momia.api.teacher.dto.Student;
-import cn.momia.api.teacher.dto.Teacher;
-import cn.momia.api.teacher.dto.TeacherStatus;
 import cn.momia.api.user.ChildServiceApi;
+import cn.momia.api.user.TeacherServiceApi;
 import cn.momia.api.user.UserServiceApi;
 import cn.momia.api.user.dto.Child;
 import cn.momia.api.user.dto.ChildComment;
 import cn.momia.api.user.dto.ChildRecord;
 import cn.momia.api.user.dto.ChildTag;
+import cn.momia.api.user.dto.Teacher;
+import cn.momia.api.user.dto.TeacherStatus;
 import cn.momia.api.user.dto.User;
 import cn.momia.common.core.dto.PagedList;
 import cn.momia.common.core.http.MomiaHttpResponse;
@@ -44,6 +45,7 @@ public class TeacherV1Api extends AbstractApi {
     @Autowired private ChildServiceApi childServiceApi;
     @Autowired private UserServiceApi userServiceApi;
     @Autowired private TeacherServiceApi teacherServiceApi;
+    @Autowired private OldTeacherServiceApi oldTeacherServiceApi;
 
     @RequestMapping(value = "/status", method = RequestMethod.GET)
     public MomiaHttpResponse status(@RequestParam String utoken) {
@@ -70,7 +72,7 @@ public class TeacherV1Api extends AbstractApi {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (StringUtils.isBlank(teacher)) return MomiaHttpResponse.BAD_REQUEST;
 
-        return MomiaHttpResponse.SUCCESS(teacherServiceApi.signup(utoken, teacher));
+        return MomiaHttpResponse.SUCCESS(teacherServiceApi.add(utoken, teacher));
     }
 
     @RequestMapping(value = "/experience", method = RequestMethod.POST)
@@ -132,7 +134,7 @@ public class TeacherV1Api extends AbstractApi {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (materialId <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        return MomiaHttpResponse.SUCCESS(completeMaterialImgs(teacherServiceApi.getMaterial(utoken, materialId)));
+        return MomiaHttpResponse.SUCCESS(completeMaterialImgs(oldTeacherServiceApi.getMaterial(utoken, materialId)));
     }
 
     private Material completeMaterialImgs(Material material) {
@@ -145,7 +147,7 @@ public class TeacherV1Api extends AbstractApi {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        PagedList<Material> pagedMaterials = teacherServiceApi.listMaterials(utoken, start, Configuration.getInt("PageSize.Material"));
+        PagedList<Material> pagedMaterials = oldTeacherServiceApi.listMaterials(utoken, start, Configuration.getInt("PageSize.Material"));
         completeMaterialsImgs(pagedMaterials.getList());
 
         return MomiaHttpResponse.SUCCESS(pagedMaterials);
@@ -171,7 +173,7 @@ public class TeacherV1Api extends AbstractApi {
             teacherCourse.setCover(completeMiddleImg(teacherCourse.getCover()));
             resultJson.put("course", teacherCourse);
 
-            resultJson.put("students", completeStudentsImgs(teacherServiceApi.ongoingStudents(utoken, teacherCourse.getCourseId(), teacherCourse.getCourseSkuId())));
+            resultJson.put("students", completeStudentsImgs(oldTeacherServiceApi.ongoingStudents(utoken, teacherCourse.getCourseId(), teacherCourse.getCourseSkuId())));
         }
 
         return MomiaHttpResponse.SUCCESS(resultJson);
@@ -204,7 +206,7 @@ public class TeacherV1Api extends AbstractApi {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (courseId <= 0 || courseSkuId <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        List<Student> students = teacherServiceApi.notfinishedStudents(utoken, courseId, courseSkuId);
+        List<Student> students = oldTeacherServiceApi.notfinishedStudents(utoken, courseId, courseSkuId);
         completeStudentsImgs(students);
 
         return MomiaHttpResponse.SUCCESS(students);
@@ -242,7 +244,7 @@ public class TeacherV1Api extends AbstractApi {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (courseId <= 0 || courseSkuId <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        List<Student> students = teacherServiceApi.finishedStudents(utoken, courseId, courseSkuId);
+        List<Student> students = oldTeacherServiceApi.finishedStudents(utoken, courseId, courseSkuId);
         completeStudentsImgs(students);
 
         return MomiaHttpResponse.SUCCESS(students);
@@ -257,7 +259,7 @@ public class TeacherV1Api extends AbstractApi {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (userId <= 0 || packageId <= 0 || courseId <= 0 || courseSkuId <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        return MomiaHttpResponse.SUCCESS(teacherServiceApi.checkin(utoken, userId, packageId, courseId, courseSkuId));
+        return MomiaHttpResponse.SUCCESS(oldTeacherServiceApi.checkin(utoken, userId, packageId, courseId, courseSkuId));
     }
 
     @RequestMapping(value = "/student", method = RequestMethod.GET)
