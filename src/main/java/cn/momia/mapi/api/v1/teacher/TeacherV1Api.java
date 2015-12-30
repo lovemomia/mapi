@@ -1,6 +1,8 @@
 package cn.momia.mapi.api.v1.teacher;
 
 import cn.momia.api.course.CourseServiceApi;
+import cn.momia.api.course.dto.Course;
+import cn.momia.api.course.dto.CourseSku;
 import cn.momia.api.course.dto.TeacherCourse;
 import cn.momia.api.teacher.TeacherServiceApi;
 import cn.momia.api.teacher.dto.Material;
@@ -16,6 +18,7 @@ import cn.momia.api.user.dto.ChildTag;
 import cn.momia.api.user.dto.User;
 import cn.momia.common.core.dto.PagedList;
 import cn.momia.common.core.http.MomiaHttpResponse;
+import cn.momia.common.core.util.TimeUtil;
 import cn.momia.common.webapp.config.Configuration;
 import cn.momia.mapi.api.AbstractApi;
 import com.alibaba.fastjson.JSON;
@@ -27,7 +30,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/v1/teacher")
@@ -266,10 +274,62 @@ public class TeacherV1Api extends AbstractApi {
             studentJson.put("child", completeStudentImgs(buildStudent(child)));
         }
 
-        PagedList<ChildComment> comments = childServiceApi.listComments(utoken, childId, start, Configuration.getInt("PageSize.ChildComment"));
-        studentJson.put("comments", comments);
+        PagedList<ChildComment> pagedComments = childServiceApi.listComments(utoken, childId, start, Configuration.getInt("PageSize.ChildComment"));
+        studentJson.put("comments", buildStudentComments(pagedComments));
 
         return MomiaHttpResponse.SUCCESS(studentJson);
+    }
+
+    private PagedList<JSONObject> buildStudentComments(PagedList<ChildComment> pagedComments) {
+        Set<Long> teacherUserIds = new HashSet<Long>();
+        Set<Long> courseIds = new HashSet<Long>();
+        Set<Long> courseSkuIds = new HashSet<Long>();
+        for (ChildComment comment : pagedComments.getList()) {
+            teacherUserIds.add(comment.getTeacherUserId());
+            courseIds.add(comment.getCourseId());
+            courseSkuIds.add(comment.getCourseSkuId());
+        }
+
+        List<User> teacherUsers = userServiceApi.list(teacherUserIds, User.Type.MINI);
+        Map<Long, User> teacherUsersMap = new HashMap<Long, User>();
+        for (User user : teacherUsers) {
+            teacherUsersMap.put(user.getId(), user);
+        }
+
+        List<Course> courses = courseServiceApi.list(courseIds);
+        Map<Long, Course> coursesMap = new HashMap<Long, Course>();
+        for (Course course : courses) {
+            coursesMap.put(course.getId(), course);
+        }
+
+        List<CourseSku> skus = courseServiceApi.listSkus(courseSkuIds);
+        Map<Long, CourseSku> skusMap = new HashMap<Long, CourseSku>();
+        for (CourseSku sku : skus) {
+            skusMap.put(sku.getId(), sku);
+        }
+
+        List<JSONObject> studentComments = new ArrayList<JSONObject>();
+        for (ChildComment comment : pagedComments.getList()) {
+            User teacherUser = teacherUsersMap.get(comment.getTeacherUserId());
+            Course course = coursesMap.get(comment.getCourseId());
+            CourseSku sku = skusMap.get(comment.getCourseSkuId());
+            if (teacherUser == null || course == null || sku == null) continue;
+
+            JSONObject studentComment = new JSONObject();
+            studentComment.put("date", TimeUtil.SHORT_DATE_FORMAT.format(sku.getStartTime()));
+            studentComment.put("title", course.getTitle());
+            studentComment.put("content", comment.getContent());
+            studentComment.put("teacher", teacherUser.getNickName());
+
+            studentComments.add(studentComment);
+        }
+
+        PagedList<JSONObject> pagedStudentComments = new PagedList<JSONObject>();
+        pagedStudentComments.setTotalCount(pagedComments.getTotalCount());
+        pagedStudentComments.setNextIndex(pagedComments.getNextIndex());
+        pagedStudentComments.setList(studentComments);
+
+        return pagedStudentComments;
     }
 
     private Student buildStudent(Child child) {
