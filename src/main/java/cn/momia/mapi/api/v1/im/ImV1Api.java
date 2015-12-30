@@ -127,7 +127,7 @@ public class ImV1Api extends AbstractApi {
             User memberUser = usersMap.get(groupMember.getUserId());
             if (memberUser == null) continue;
 
-            JSONObject imUserJson = createImUserInfo(user);
+            JSONObject imUserJson = createImUserInfo(memberUser);
             if (groupMember.isTeacher()) teachers.add(imUserJson);
             else customers.add(imUserJson);
         }
