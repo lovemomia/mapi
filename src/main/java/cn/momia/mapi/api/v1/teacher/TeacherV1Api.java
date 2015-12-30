@@ -52,8 +52,6 @@ public class TeacherV1Api extends AbstractApi {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
 
         TeacherStatus status = teacherServiceApi.status(utoken);
-        if (status.getStatus() == TeacherStatus.Status.NOT_EXIST) return MomiaHttpResponse.SUCCESS(status);
-
         Teacher teacher = completeTeacherImgs(teacherServiceApi.get(utoken));
         JSONObject statusJson = (JSONObject) JSON.toJSON(teacher);
         statusJson.put("status", status.getStatus());
@@ -121,12 +119,6 @@ public class TeacherV1Api extends AbstractApi {
         if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
         return MomiaHttpResponse.SUCCESS(teacherServiceApi.deleteEducation(utoken, id));
-    }
-
-    @RequestMapping(method = RequestMethod.GET)
-    public MomiaHttpResponse get(@RequestParam String utoken) {
-        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        return MomiaHttpResponse.SUCCESS(completeTeacherImgs(teacherServiceApi.get(utoken)));
     }
 
     @RequestMapping(value = "/material", method = RequestMethod.GET)
