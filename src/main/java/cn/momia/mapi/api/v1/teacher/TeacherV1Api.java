@@ -3,7 +3,6 @@ package cn.momia.mapi.api.v1.teacher;
 import cn.momia.api.course.CourseServiceApi;
 import cn.momia.api.course.dto.TeacherCourse;
 import cn.momia.api.teacher.TeacherServiceApi;
-import cn.momia.api.teacher.dto.ChildComment;
 import cn.momia.api.teacher.dto.Material;
 import cn.momia.api.teacher.dto.Student;
 import cn.momia.api.teacher.dto.Teacher;
@@ -11,6 +10,7 @@ import cn.momia.api.teacher.dto.TeacherStatus;
 import cn.momia.api.user.ChildServiceApi;
 import cn.momia.api.user.UserServiceApi;
 import cn.momia.api.user.dto.Child;
+import cn.momia.api.user.dto.ChildComment;
 import cn.momia.api.user.dto.ChildRecord;
 import cn.momia.api.user.dto.ChildTag;
 import cn.momia.api.user.dto.User;
@@ -266,7 +266,7 @@ public class TeacherV1Api extends AbstractApi {
             studentJson.put("child", completeStudentImgs(buildStudent(child)));
         }
 
-        PagedList<ChildComment> comments = teacherServiceApi.listChildComments(utoken, childId, start, Configuration.getInt("PageSize.ChildComment"));
+        PagedList<ChildComment> comments = childServiceApi.listComments(utoken, childId, start, Configuration.getInt("PageSize.ChildComment"));
         studentJson.put("comments", comments);
 
         return MomiaHttpResponse.SUCCESS(studentJson);
@@ -327,6 +327,6 @@ public class TeacherV1Api extends AbstractApi {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (courseId <= 0 || courseSkuId <= 0 || childId <= 0 || StringUtils.isBlank(comment)) return MomiaHttpResponse.BAD_REQUEST;
 
-        return MomiaHttpResponse.SUCCESS(teacherServiceApi.comment(utoken, childId, courseId, courseSkuId, comment));
+        return MomiaHttpResponse.SUCCESS(childServiceApi.comment(utoken, childId, courseId, courseSkuId, comment));
     }
 }
