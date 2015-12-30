@@ -4,11 +4,11 @@ import cn.momia.api.course.CourseServiceApi;
 import cn.momia.api.course.dto.CourseSku;
 import cn.momia.api.im.ImServiceApi;
 import cn.momia.api.im.dto.Group;
-import cn.momia.api.im.dto.Member;
+import cn.momia.api.im.dto.GroupMember;
+import cn.momia.api.im.dto.UserGroup;
 import cn.momia.api.user.UserServiceApi;
 import cn.momia.api.user.dto.User;
 import cn.momia.common.core.http.MomiaHttpResponse;
-import cn.momia.common.core.util.TimeUtil;
 import cn.momia.mapi.api.AbstractApi;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Sets;
@@ -20,8 +20,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -62,28 +60,28 @@ public class ImV1Api extends AbstractApi {
     }
 
     @RequestMapping(value = "/user", method = RequestMethod.GET)
-    public MomiaHttpResponse getImUser(@RequestParam(value = "uid") long userId) {
+    public MomiaHttpResponse getImUserInfo(@RequestParam(value = "uid") long userId) {
         if (userId <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
         User user = userServiceApi.get(userId);
-        JSONObject imUserJson = createImUser(user);
+        JSONObject imUserInfoJson = createImUserInfo(user);
 
         List<String> latestImgs = courseServiceApi.getLatestImgs(userId);
         if (!latestImgs.isEmpty()) {
-            imUserJson.put("imgs", completeMiddleImgs(latestImgs));
+            imUserInfoJson.put("imgs", completeMiddleImgs(latestImgs));
         }
 
-        return MomiaHttpResponse.SUCCESS(imUserJson);
+        return MomiaHttpResponse.SUCCESS(imUserInfoJson);
     }
 
-    private JSONObject createImUser(User user) {
-        JSONObject imUserJson = new JSONObject();
-        imUserJson.put("id", user.getId());
-        imUserJson.put("nickName", user.getNickName());
-        imUserJson.put("avatar", completeSmallImg(user.getAvatar()));
-        imUserJson.put("role", user.getRole());
+    private JSONObject createImUserInfo(User user) {
+        JSONObject imUserInfoJson = new JSONObject();
+        imUserInfoJson.put("id", user.getId());
+        imUserInfoJson.put("nickName", user.getNickName());
+        imUserInfoJson.put("avatar", completeSmallImg(user.getAvatar()));
+        imUserInfoJson.put("role", user.getRole());
 
-        return imUserJson;
+        return imUserInfoJson;
     }
 
     @RequestMapping(value = "/group", method = RequestMethod.GET)
@@ -110,11 +108,11 @@ public class ImV1Api extends AbstractApi {
         if (groupId <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
         User user = userServiceApi.get(utoken);
-        List<Member> members = imServiceApi.listGroupMembers(user.getId(), groupId);
+        List<GroupMember> groupMembers = imServiceApi.listGroupMembers(user.getId(), groupId);
 
         Set<Long> userIds = new HashSet<Long>();
-        for (Member member : members) {
-            userIds.add(member.getUserId());
+        for (GroupMember groupMember : groupMembers) {
+            userIds.add(groupMember.getUserId());
         }
 
         List<User> users = userServiceApi.list(userIds, User.Type.BASE);
@@ -125,12 +123,12 @@ public class ImV1Api extends AbstractApi {
 
         List<JSONObject> teachers = new ArrayList<JSONObject>();
         List<JSONObject> customers = new ArrayList<JSONObject>();
-        for (Member member : members) {
-            User memberUser = usersMap.get(member.getUserId());
+        for (GroupMember groupMember : groupMembers) {
+            User memberUser = usersMap.get(groupMember.getUserId());
             if (memberUser == null) continue;
 
-            JSONObject imUserJson = createImUser(user);
-            if (member.isTeacher()) teachers.add(imUserJson);
+            JSONObject imUserJson = createImUserInfo(user);
+            if (groupMember.isTeacher()) teachers.add(imUserJson);
             else customers.add(imUserJson);
         }
 
@@ -146,41 +144,17 @@ public class ImV1Api extends AbstractApi {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
 
         User user = userServiceApi.get(utoken);
+        List<UserGroup> userGroups = imServiceApi.listUserGroups(user.getId());
 
-        List<Member> members = imServiceApi.queryMembersByUser(user.getId());
-        Set<Long> groupIds = new HashSet<Long>();
-        for (Member member : members) {
-            groupIds.add(member.getGroupId());
-        }
-        List<Group> groups = imServiceApi.listGroups(groupIds);
-        Map<Long, Group> groupsMap = new HashMap<Long, Group>();
         Set<Long> courseIds = new HashSet<Long>();
-        for (Group group : groups) {
-            groupsMap.put(group.getGroupId(), group);
-            courseIds.add(group.getCourseId());
+        for (UserGroup userGroup : userGroups) {
+            courseIds.add(userGroup.getCourseId());
         }
         Map<Long, String> tipsOfCourses = courseServiceApi.queryTips(courseIds);
 
-        List<JSONObject> userGroups = new ArrayList<JSONObject>();
-        for (Member member : members) {
-            Group group = groupsMap.get(member.getGroupId());
-            if (group == null) continue;
-
-            JSONObject userGroup = new JSONObject();
-            userGroup.put("groupId", member.getGroupId());
-            userGroup.put("groupName", group.getGroupName());
-            userGroup.put("addTime", TimeUtil.STANDARD_DATE_FORMAT.format(member.getAddTime()));
-            userGroup.put("tips", tipsOfCourses.get(String.valueOf(group.getCourseId())));  // FIXME
-
-            userGroups.add(userGroup);
+        for (UserGroup userGroup : userGroups) {
+            userGroup.setTips(tipsOfCourses.get(String.valueOf(userGroup.getCourseId())));
         }
-
-        Collections.sort(userGroups, new Comparator<JSONObject>() {
-            @Override
-            public int compare(JSONObject o1, JSONObject o2) {
-                return o1.getString("groupName").compareTo(o2.getString("groupName"));
-            }
-        });
 
         return MomiaHttpResponse.SUCCESS(userGroups);
     }
