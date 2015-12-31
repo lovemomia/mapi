@@ -114,9 +114,7 @@ public class FeedV1Api extends FeedRelatedApi {
             pagedCourses = courseServiceApi.listFinished(0, start, Configuration.getInt("PageSize.Course"));
         }
         
-        for (Course course : pagedCourses.getList()) {
-            course.setCover(completeMiddleImg(course.getCover()));
-        }
+        completeMiddleCoursesImgs(pagedCourses.getList());
 
         return MomiaHttpResponse.SUCCESS(pagedCourses);
     }
