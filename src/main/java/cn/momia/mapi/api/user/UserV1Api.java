@@ -9,7 +9,7 @@ import cn.momia.api.course.dto.favorite.Favorite;
 import cn.momia.api.course.dto.SubjectPackage;
 import cn.momia.api.course.dto.SubjectOrder;
 import cn.momia.api.course.dto.TimelineUnit;
-import cn.momia.api.course.dto.UserCoupon;
+import cn.momia.api.course.dto.coupon.UserCoupon;
 import cn.momia.api.course.dto.UserCourseComment;
 import cn.momia.api.feed.FeedServiceApi;
 import cn.momia.api.feed.dto.Feed;

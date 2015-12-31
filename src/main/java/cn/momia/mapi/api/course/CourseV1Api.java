@@ -8,6 +8,7 @@ import cn.momia.api.course.dto.DatedCourseSkus;
 import cn.momia.api.course.dto.UserCourseComment;
 import cn.momia.api.course.dto.Teacher;
 import cn.momia.api.im.ImServiceApi;
+import cn.momia.api.poi.PoiServiceApi;
 import cn.momia.api.poi.dto.Institution;
 import cn.momia.api.user.UserServiceApi;
 import cn.momia.api.user.dto.User;
@@ -32,6 +33,7 @@ import java.util.List;
 @RequestMapping(value = "/v1/course")
 public class CourseV1Api extends AbstractApi {
     @Autowired private CourseServiceApi courseServiceApi;
+    @Autowired private PoiServiceApi poiServiceApi;
     @Autowired private ImServiceApi imServiceApi;
     @Autowired private UserServiceApi userServiceApi;
 
@@ -84,7 +86,10 @@ public class CourseV1Api extends AbstractApi {
     public MomiaHttpResponse institution(@RequestParam long id) {
         if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        Institution institution = courseServiceApi.institution(id);
+        int institutionId = courseServiceApi.getInstitutionId(id);
+        Institution institution = poiServiceApi.getInstitution(institutionId);
+        if (!institution.exists()) return MomiaHttpResponse.FAILED("机构信息不存在");
+
         institution.setCover(completeLargeImg(institution.getCover()));
 
         return MomiaHttpResponse.SUCCESS(institution);
