@@ -1,7 +1,7 @@
 package cn.momia.mapi.api.feed;
 
 import cn.momia.api.course.CourseServiceApi;
-import cn.momia.api.course.dto.Course;
+import cn.momia.api.course.dto.course.Course;
 import cn.momia.api.feed.FeedServiceApi;
 import cn.momia.api.feed.dto.Feed;
 import cn.momia.api.feed.dto.FeedComment;

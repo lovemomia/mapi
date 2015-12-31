@@ -1,7 +1,7 @@
 package cn.momia.mapi.api.index;
 
 import cn.momia.api.course.CourseServiceApi;
-import cn.momia.api.course.dto.Course;
+import cn.momia.api.course.dto.course.Course;
 import cn.momia.common.core.dto.PagedList;
 import cn.momia.common.core.http.MomiaHttpResponse;
 import cn.momia.common.webapp.config.Configuration;

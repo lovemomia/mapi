@@ -1,11 +1,11 @@
 package cn.momia.mapi.api.teacher;
 
 import cn.momia.api.course.CourseServiceApi;
-import cn.momia.api.course.dto.Course;
+import cn.momia.api.course.dto.course.Course;
 import cn.momia.api.course.dto.material.CourseMaterial;
-import cn.momia.api.course.dto.CourseSku;
-import cn.momia.api.course.dto.TeacherCourse;
-import cn.momia.api.course.dto.Student;
+import cn.momia.api.course.dto.course.CourseSku;
+import cn.momia.api.course.dto.teacher.TeacherCourse;
+import cn.momia.api.course.dto.teacher.Student;
 import cn.momia.api.user.ChildServiceApi;
 import cn.momia.api.user.TeacherServiceApi;
 import cn.momia.api.user.UserServiceApi;

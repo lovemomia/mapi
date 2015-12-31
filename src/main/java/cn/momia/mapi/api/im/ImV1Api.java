@@ -1,7 +1,7 @@
 package cn.momia.mapi.api.im;
 
 import cn.momia.api.course.CourseServiceApi;
-import cn.momia.api.course.dto.CourseSku;
+import cn.momia.api.course.dto.course.CourseSku;
 import cn.momia.api.im.ImServiceApi;
 import cn.momia.api.im.dto.Group;
 import cn.momia.api.im.dto.GroupMember;

@@ -2,10 +2,10 @@ package cn.momia.mapi.api.course;
 
 import cn.momia.api.course.CourseServiceApi;
 import cn.momia.api.course.SubjectServiceApi;
-import cn.momia.api.course.dto.Course;
-import cn.momia.api.course.dto.Subject;
-import cn.momia.api.course.dto.SubjectSku;
-import cn.momia.api.course.dto.UserCourseComment;
+import cn.momia.api.course.dto.course.Course;
+import cn.momia.api.course.dto.subject.Subject;
+import cn.momia.api.course.dto.subject.SubjectSku;
+import cn.momia.api.course.dto.comment.UserCourseComment;
 import cn.momia.api.feed.FeedServiceApi;
 import cn.momia.api.feed.dto.Feed;
 import cn.momia.api.user.UserServiceApi;

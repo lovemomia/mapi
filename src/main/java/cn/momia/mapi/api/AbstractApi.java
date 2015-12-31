@@ -1,9 +1,9 @@
 package cn.momia.mapi.api;
 
-import cn.momia.api.course.dto.Course;
-import cn.momia.api.course.dto.Subject;
-import cn.momia.api.course.dto.Teacher;
-import cn.momia.api.course.dto.UserCourseComment;
+import cn.momia.api.course.dto.course.Course;
+import cn.momia.api.course.dto.subject.Subject;
+import cn.momia.api.course.dto.teacher.Teacher;
+import cn.momia.api.course.dto.comment.UserCourseComment;
 import cn.momia.api.user.dto.Child;
 import cn.momia.api.user.dto.User;
 import cn.momia.common.core.platform.Platform;
