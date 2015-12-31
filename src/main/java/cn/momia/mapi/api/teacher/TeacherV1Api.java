@@ -1,4 +1,4 @@
-package cn.momia.mapi.api.v1.teacher;
+package cn.momia.mapi.api.teacher;
 
 import cn.momia.api.course.CourseServiceApi;
 import cn.momia.api.course.dto.Course;

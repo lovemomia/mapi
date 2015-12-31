@@ -1,4 +1,4 @@
-package cn.momia.mapi.api.v1.course;
+package cn.momia.mapi.api.course;
 
 import cn.momia.api.course.CouponServiceApi;
 import cn.momia.api.course.CourseServiceApi;

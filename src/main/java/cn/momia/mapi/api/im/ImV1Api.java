@@ -1,4 +1,4 @@
-package cn.momia.mapi.api.v1.im;
+package cn.momia.mapi.api.im;
 
 import cn.momia.api.course.CourseServiceApi;
 import cn.momia.api.course.dto.CourseSku;

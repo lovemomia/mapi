@@ -1,4 +1,4 @@
-package cn.momia.mapi.api.v1.base;
+package cn.momia.mapi.api.operate;
 
 import cn.momia.api.operate.FeedbackServiceApi;
 import cn.momia.common.core.http.MomiaHttpResponse;
@@ -19,8 +19,6 @@ public class FeedbackV1Api extends AbstractApi {
     public MomiaHttpResponse addFeedback(@RequestParam String content, @RequestParam String contact) {
         if (StringUtils.isBlank(content)) return MomiaHttpResponse.FAILED("反馈内容不能为空");
         if (StringUtils.isBlank(contact)) return MomiaHttpResponse.FAILED("联系方式不能为空");
-
-        if (content.length() > 480) return MomiaHttpResponse.FAILED("反馈内容字数超出限制");
 
         if (!feedbackServiceApi.add(content, contact)) return MomiaHttpResponse.FAILED("提交反馈意见失败");
         return MomiaHttpResponse.SUCCESS;

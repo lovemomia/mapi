@@ -1,4 +1,4 @@
-package cn.momia.mapi.api.v1.config;
+package cn.momia.mapi.api.config;
 
 import cn.momia.common.core.http.MomiaHttpResponse;
 import cn.momia.common.webapp.config.Configuration;

@@ -1,10 +1,11 @@
-package cn.momia.mapi.api;
+package cn.momia.mapi.api.index;
 
 import cn.momia.api.operate.ConfigServiceApi;
 import cn.momia.api.operate.dto.Banner;
 import cn.momia.api.operate.dto.Event;
 import cn.momia.api.operate.dto.Icon;
 import cn.momia.common.webapp.config.Configuration;
+import cn.momia.mapi.api.AbstractApi;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;

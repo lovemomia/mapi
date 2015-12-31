@@ -1,4 +1,4 @@
-package cn.momia.mapi.api.v1.base;
+package cn.momia.mapi.api.poi;
 
 import cn.momia.api.poi.PoiServiceApi;
 import cn.momia.common.core.http.MomiaHttpResponse;
