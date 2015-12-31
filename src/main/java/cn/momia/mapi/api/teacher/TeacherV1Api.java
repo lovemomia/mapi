@@ -2,7 +2,7 @@ package cn.momia.mapi.api.teacher;
 
 import cn.momia.api.course.CourseServiceApi;
 import cn.momia.api.course.dto.Course;
-import cn.momia.api.course.dto.CourseMaterial;
+import cn.momia.api.course.dto.material.CourseMaterial;
 import cn.momia.api.course.dto.CourseSku;
 import cn.momia.api.course.dto.TeacherCourse;
 import cn.momia.api.course.dto.Student;

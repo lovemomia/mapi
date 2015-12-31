@@ -5,7 +5,7 @@ import cn.momia.api.course.CourseServiceApi;
 import cn.momia.api.course.OrderServiceApi;
 import cn.momia.api.course.SubjectServiceApi;
 import cn.momia.api.course.dto.BookedCourse;
-import cn.momia.api.course.dto.Favorite;
+import cn.momia.api.course.dto.favorite.Favorite;
 import cn.momia.api.course.dto.SubjectPackage;
 import cn.momia.api.course.dto.SubjectOrder;
 import cn.momia.api.course.dto.TimelineUnit;
