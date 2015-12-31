@@ -2,9 +2,9 @@ package cn.momia.mapi.api;
 
 import cn.momia.api.course.dto.course.Course;
 import cn.momia.api.course.dto.subject.Subject;
-import cn.momia.api.course.dto.teacher.Teacher;
 import cn.momia.api.course.dto.comment.UserCourseComment;
 import cn.momia.api.user.dto.Child;
+import cn.momia.api.user.dto.Teacher;
 import cn.momia.api.user.dto.User;
 import cn.momia.common.core.platform.Platform;
 import cn.momia.common.webapp.config.Configuration;
@@ -173,7 +173,7 @@ public abstract class AbstractApi extends BaseController {
 
     protected List<Teacher> completeTeachersImgs(List<Teacher> teachers) {
         for (Teacher teacher : teachers) {
-            teacher.setAvatar(completeSmallImg(teacher.getAvatar()));
+            teacher.setPic(completeSmallImg(teacher.getPic()));
         }
 
         return teachers;

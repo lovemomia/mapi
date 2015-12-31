@@ -6,11 +6,12 @@ import cn.momia.api.course.dto.course.Course;
 import cn.momia.api.course.dto.course.CourseSku;
 import cn.momia.api.course.dto.course.DatedCourseSkus;
 import cn.momia.api.course.dto.comment.UserCourseComment;
-import cn.momia.api.course.dto.teacher.Teacher;
 import cn.momia.api.im.ImServiceApi;
 import cn.momia.api.poi.PoiServiceApi;
 import cn.momia.api.poi.dto.Institution;
+import cn.momia.api.user.TeacherServiceApi;
 import cn.momia.api.user.UserServiceApi;
+import cn.momia.api.user.dto.Teacher;
 import cn.momia.api.user.dto.User;
 import cn.momia.common.core.dto.PagedList;
 import cn.momia.common.core.http.MomiaHttpResponse;
@@ -36,6 +37,7 @@ public class CourseV1Api extends AbstractApi {
     @Autowired private PoiServiceApi poiServiceApi;
     @Autowired private ImServiceApi imServiceApi;
     @Autowired private UserServiceApi userServiceApi;
+    @Autowired private TeacherServiceApi teacherServiceApi;
 
     @RequestMapping(method = RequestMethod.GET)
     public MomiaHttpResponse get(@RequestParam(required = false, defaultValue = "") String utoken,
@@ -50,7 +52,8 @@ public class CourseV1Api extends AbstractApi {
             courseJson.put("favored", courseServiceApi.isFavored(user.getId(), id));
         }
 
-        List<Teacher> teachers = completeTeachersImgs(courseServiceApi.teacher(id, 0, Configuration.getInt("PageSize.CourseTeacher")).getList());
+        PagedList<Integer> pagedTeacherIds = courseServiceApi.teacherIds(id, 0, Configuration.getInt("PageSize.CourseTeacher"));
+        List<Teacher> teachers = completeTeachersImgs(teacherServiceApi.list(pagedTeacherIds.getList()));
         if (!teachers.isEmpty()) courseJson.put("teachers", teachers);
 
         return MomiaHttpResponse.SUCCESS(courseJson);
@@ -76,10 +79,15 @@ public class CourseV1Api extends AbstractApi {
     public MomiaHttpResponse teacher(@RequestParam long id, @RequestParam int start) {
         if (id <= 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        PagedList<Teacher> teachers = courseServiceApi.teacher(id, start, Configuration.getInt("PageSize.Teacher"));
-        completeTeachersImgs(teachers.getList());
+        PagedList<Integer> pagedTeacherIds = courseServiceApi.teacherIds(id, start, Configuration.getInt("PageSize.Teacher"));
+        List<Teacher> teachers = completeTeachersImgs(teacherServiceApi.list(pagedTeacherIds.getList()));
 
-        return MomiaHttpResponse.SUCCESS(teachers);
+        PagedList<Teacher> pagedTeachers = new PagedList<Teacher>();
+        pagedTeachers.setTotalCount(pagedTeacherIds.getTotalCount());
+        pagedTeachers.setNextIndex(pagedTeacherIds.getNextIndex());
+        pagedTeachers.setList(teachers);
+
+        return MomiaHttpResponse.SUCCESS(pagedTeachers);
     }
 
     @RequestMapping(value = "/institution", method = RequestMethod.GET)
