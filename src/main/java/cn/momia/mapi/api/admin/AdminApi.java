@@ -1,6 +1,7 @@
 package cn.momia.mapi.api.admin;
 
 import cn.momia.api.course.CourseServiceApi;
+import cn.momia.api.course.OrderServiceApi;
 import cn.momia.api.im.ImServiceApi;
 import cn.momia.common.core.http.MomiaHttpResponse;
 import cn.momia.mapi.api.AbstractApi;
@@ -24,6 +25,7 @@ import java.util.Set;
 public class AdminApi extends AbstractApi {
     @Autowired private ImServiceApi imServiceApi;
     @Autowired private CourseServiceApi courseServiceApi;
+    @Autowired private OrderServiceApi orderServiceApi;
 
     @RequestMapping(value = "/im/group", method = RequestMethod.POST)
     public MomiaHttpResponse createGroup(@RequestParam(value = "coid") long courseId,
@@ -75,5 +77,11 @@ public class AdminApi extends AbstractApi {
         }
 
         return MomiaHttpResponse.SUCCESS(successful);
+    }
+
+    @RequestMapping(value = "/package/time/extend", method = RequestMethod.POST)
+    public MomiaHttpResponse extendPackageTime(@RequestParam(value = "pid") long packageId, @RequestParam int time) {
+        if (packageId <= 0 || time <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        return MomiaHttpResponse.SUCCESS(orderServiceApi.extendPackageTime(packageId, time));
     }
 }
