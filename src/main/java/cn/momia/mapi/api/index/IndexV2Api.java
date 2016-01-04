@@ -24,9 +24,9 @@ public class IndexV2Api extends AbstractIndexApi {
     @Autowired private CourseServiceApi courseServiceApi;
 
     @RequestMapping(method = RequestMethod.GET)
-    public MomiaHttpResponse index(@RequestParam(value = "city") int cityId,
-                                   @RequestParam int start,
-                                   HttpServletRequest request) {
+    public MomiaHttpResponse index(HttpServletRequest request,
+                                   @RequestParam(value = "city") int cityId,
+                                   @RequestParam int start) {
         if (cityId < 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
         JSONObject indexJson = new JSONObject();
