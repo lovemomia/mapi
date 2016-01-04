@@ -231,6 +231,25 @@ public class CourseV1Api extends AbstractApi {
         return MomiaHttpResponse.SUCCESS;
     }
 
+    @RequestMapping(value = "/cancel/batch", method = RequestMethod.POST)
+    public MomiaHttpResponse batchCancel(@RequestParam String uids,
+                                         @RequestParam(value = "coid") long courseId,
+                                         @RequestParam(value = "sid") long skuId) {
+        Set<Long> userIds = new HashSet<Long>();
+        for (String userId : Splitter.on(",").omitEmptyStrings().trimResults().split(uids)) {
+            userIds.add(Long.valueOf(userId));
+        }
+
+        boolean successful = courseServiceApi.batchCancel(userIds, courseId, skuId);
+        if (successful) {
+            for (long userId : userIds) {
+                imServiceApi.leaveGroup(userId, courseId, skuId);
+            }
+        }
+
+        return MomiaHttpResponse.SUCCESS(successful);
+    }
+
     @RequestMapping(value = "/comment", method = RequestMethod.POST)
     public MomiaHttpResponse comment(String utoken, String comment) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
