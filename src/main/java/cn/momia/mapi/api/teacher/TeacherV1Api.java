@@ -350,10 +350,15 @@ public class TeacherV1Api extends AbstractApi {
         List<ChildTag> tags = childServiceApi.listAllTags();
         ChildRecord record = childServiceApi.getRecord(utoken, childId, courseId, courseSkuId);
 
+        List<Integer> selectedTags = record.getTags();
+        for (ChildTag tag : tags) {
+            if (selectedTags.contains(tag.getId())) tag.setSelected(true);
+        }
+
         JSONObject recordJson = new JSONObject();
         recordJson.put("child", buildStudent(child));
         recordJson.put("tags", tags);
-        recordJson.put("record", record);
+        recordJson.put("content", record.getContent());
 
         return MomiaHttpResponse.SUCCESS(recordJson);
     }
