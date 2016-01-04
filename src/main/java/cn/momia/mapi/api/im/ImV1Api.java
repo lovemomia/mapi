@@ -11,6 +11,7 @@ import cn.momia.api.user.dto.User;
 import cn.momia.common.core.http.MomiaHttpResponse;
 import cn.momia.mapi.api.AbstractApi;
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.base.Splitter;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,6 +83,22 @@ public class ImV1Api extends AbstractApi {
         imUserInfoJson.put("role", user.getRole());
 
         return imUserInfoJson;
+    }
+
+    @RequestMapping(value = "/group", method = RequestMethod.POST)
+    public MomiaHttpResponse createGroup(@RequestParam(value = "coid") long courseId,
+                                         @RequestParam(value = "sid") long courseSkuId,
+                                         @RequestParam(value = "tids") String teachers,
+                                         @RequestParam(value = "name") String groupName) {
+        if (courseId <= 0 || courseSkuId <= 0 || StringUtils.isBlank(teachers) || StringUtils.isBlank(groupName)) return MomiaHttpResponse.BAD_REQUEST;
+
+        Set<Long> teacherUserIds = new HashSet<Long>();
+        for (String teacher : Splitter.on(",").trimResults().omitEmptyStrings().split(teachers)) {
+            teacherUserIds.add(Long.valueOf(teacher));
+        }
+        if (teacherUserIds.isEmpty()) return MomiaHttpResponse.FAILED("创建群组失败，至少要有一个群成员");
+
+        return MomiaHttpResponse.SUCCESS(imServiceApi.createGroup(courseId, courseSkuId, teacherUserIds, groupName));
     }
 
     @RequestMapping(value = "/group", method = RequestMethod.GET)
