@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -30,13 +31,26 @@ public class ValidationFilter implements Filter {
             return;
         }
 
-        if (needParamsValidation(httpRequest)) {
+        if (isNormalAppRequest(httpRequest)) {
             if (isParamMissing(httpRequest)) {
                 forwardErrorPage(request, response, 400);
                 return;
             }
 
-            if (isInvalidSign(httpRequest)) {
+            if (isInvalidSign(httpRequest, Configuration.getString("Validation.Key"))) {
+                forwardErrorPage(request, response, 403);
+                return;
+            }
+        }
+
+        if (isAdminOperation(httpRequest)) {
+            long expired = Long.valueOf(httpRequest.getParameter("expired"));
+            if (expired <= new Date().getTime()) {
+                forwardErrorPage(request, response, 403);
+                return;
+            }
+
+            if (isInvalidSign(httpRequest, Configuration.getString("Validation.AdminKey"))) {
                 forwardErrorPage(request, response, 403);
                 return;
             }
@@ -50,9 +64,13 @@ public class ValidationFilter implements Filter {
         return StringUtils.isBlank(userAgent);
     }
 
-    private boolean needParamsValidation(HttpServletRequest request) {
-        String uri = request.getRequestURI();
-        return !(uri.startsWith("/payment/callback/") || uri.startsWith("/m/"));
+    private void forwardErrorPage(ServletRequest request, ServletResponse response, int errorCode) throws ServletException, IOException {
+        request.getRequestDispatcher("/error/" + errorCode).forward(request, response);
+    }
+
+    private boolean isNormalAppRequest(HttpServletRequest httpRequest) {
+        String uri = httpRequest.getRequestURI();
+        return !(uri.startsWith("/payment/callback/") || uri.startsWith("/m/") || uri.startsWith("/admin/"));
     }
 
     private boolean isParamMissing(HttpServletRequest httpRequest) {
@@ -73,7 +91,7 @@ public class ValidationFilter implements Filter {
                 StringUtils.isBlank(sign));
     }
 
-    private boolean isInvalidSign(HttpServletRequest httpRequest) {
+    private boolean isInvalidSign(HttpServletRequest httpRequest, String validationKey) {
         List<String> kvs = new ArrayList<String>();
         Map<String, String[]> httpParams = httpRequest.getParameterMap();
         for (Map.Entry<String, String[]> entry : httpParams.entrySet()) {
@@ -84,15 +102,16 @@ public class ValidationFilter implements Filter {
             kvs.add(key + "=" + value);
         }
         Collections.sort(kvs);
-        kvs.add("key=" + Configuration.getString("Validation.Key"));
+        kvs.add("key=" + validationKey);
 
         String sign = httpRequest.getParameter("sign");
 
         return !sign.equals(DigestUtils.md5Hex(StringUtils.join(kvs, "")));
     }
 
-    private void forwardErrorPage(ServletRequest request, ServletResponse response, int errorCode) throws ServletException, IOException {
-        request.getRequestDispatcher("/error/" + errorCode).forward(request, response);
+    private boolean isAdminOperation(HttpServletRequest httpRequest) {
+        String uri = httpRequest.getRequestURI();
+        return uri.startsWith("/admin/");
     }
 
     @Override
