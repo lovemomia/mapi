@@ -19,6 +19,7 @@ import cn.momia.common.webapp.config.Configuration;
 import cn.momia.mapi.api.AbstractApi;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.base.Splitter;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,7 +29,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @RestController
 @RequestMapping(value = "/v1/course")
@@ -192,6 +196,23 @@ public class CourseV1Api extends AbstractApi {
         }
 
         return MomiaHttpResponse.SUCCESS;
+    }
+
+    @RequestMapping(value = "/booking/batch", method = RequestMethod.POST)
+    public MomiaHttpResponse batchBooking(@RequestParam String uids,
+                                          @RequestParam(value = "coid") long courseId,
+                                          @RequestParam(value = "sid") long skuId) {
+        Set<Long> userIds = new HashSet<Long>();
+        for (String userId : Splitter.on(",").omitEmptyStrings().trimResults().split(uids)) {
+            userIds.add(Long.valueOf(userId));
+        }
+
+        List<Long> failedUserIds = courseServiceApi.batchBooking(userIds, courseId, skuId);
+        for (long userId : userIds) {
+            if (!failedUserIds.contains(userId)) imServiceApi.joinGroup(userId, courseId, skuId);
+        }
+
+        return MomiaHttpResponse.SUCCESS(failedUserIds);
     }
 
     @RequestMapping(value = "/cancel", method = RequestMethod.POST)
