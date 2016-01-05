@@ -158,7 +158,7 @@ public class TeacherV1Api extends AbstractApi {
         JSONObject resultJson = new JSONObject();
 
         User user = userServiceApi.get(utoken);
-        TeacherCourse teacherCourse = courseServiceApi.getOngoingTeacherCourse(user.getId());
+        TeacherCourse teacherCourse = courseServiceApi.ongoingTeacherCourse(user.getId());
         if (teacherCourse.exists()) {
             teacherCourse.setCover(completeMiddleImg(teacherCourse.getCover()));
             resultJson.put("course", teacherCourse);

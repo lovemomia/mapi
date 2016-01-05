@@ -178,13 +178,14 @@ public class CourseV1Api extends AbstractApi {
 
     @RequestMapping(value = "/booking", method = RequestMethod.POST)
     public MomiaHttpResponse booking(@RequestParam String utoken,
+                                     @RequestParam(value = "cid", required = false, defaultValue = "0") long childId,
                                      @RequestParam(value = "pid") long packageId,
                                      @RequestParam(value = "sid") long skuId) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (packageId <= 0 || skuId <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
         User user = userServiceApi.get(utoken);
-        BookedCourse bookedCourse = courseServiceApi.booking(utoken, packageId, skuId);
+        BookedCourse bookedCourse = courseServiceApi.booking(utoken, childId, packageId, skuId);
         if (bookedCourse.getParentId() > 0 && bookedCourse.getParentCourseSkuId() > 0) {
             imServiceApi.joinGroup(user.getId(), bookedCourse.getParentId(), bookedCourse.getParentCourseSkuId());
         } else {
