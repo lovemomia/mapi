@@ -5,6 +5,7 @@ import cn.momia.api.user.SmsServiceApi;
 import cn.momia.api.course.CouponServiceApi;
 import cn.momia.api.im.ImServiceApi;
 import cn.momia.api.user.AuthServiceApi;
+import cn.momia.api.user.UserServiceApi;
 import cn.momia.api.user.dto.Child;
 import cn.momia.api.user.dto.User;
 import cn.momia.common.core.http.MomiaHttpResponse;
@@ -20,7 +21,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @RestController
 @RequestMapping("/v1/auth")
@@ -32,6 +35,7 @@ public class AuthV1Api extends AbstractApi {
     @Autowired private CouponServiceApi couponServiceApi;
     @Autowired private ImServiceApi imServiceApi;
     @Autowired private ChildServiceApi childServiceApi;
+    @Autowired private UserServiceApi userServiceApi;
 
     @RequestMapping(value = "/send", method = RequestMethod.POST)
     public MomiaHttpResponse send(@RequestParam String mobile)  {
@@ -53,18 +57,10 @@ public class AuthV1Api extends AbstractApi {
 
         User user = completeUserImgs(authServiceApi.register(nickName, mobile, password, code));
         distributeInviteCoupon(user.getId(), mobile);
-        generateImToken(user.getId(), user.getNickName(), user.getAvatar());
+        generateImToken(user, user.getNickName(), user.getAvatar());
         addDefaultChild(user);
 
         return MomiaHttpResponse.SUCCESS(user);
-    }
-
-    private void generateImToken(long userId, String nickName, String avatar) {
-        try {
-            imServiceApi.generateImToken(userId, nickName, avatar);
-        } catch (Exception e) {
-            LOGGER.error("fail to generate im token for user: {}", userId, e);
-        }
     }
 
     private void distributeInviteCoupon(long userId, String mobile) {
@@ -72,6 +68,15 @@ public class AuthV1Api extends AbstractApi {
             couponServiceApi.distributeInviteCoupon(userId, mobile);
         } catch (Exception e) {
             LOGGER.error("分发邀请红包失败", e);
+        }
+    }
+
+    private void generateImToken(User user, String nickName, String avatar) {
+        try {
+            String imToken = imServiceApi.generateImToken(user.getId(), nickName, avatar);
+            if (!StringUtils.isBlank(imToken)) userServiceApi.updateImToken(user.getToken(), imToken);
+        } catch (Exception e) {
+            LOGGER.error("fail to generate im token for user: {}", user.getId(), e);
         }
     }
 
@@ -83,7 +88,10 @@ public class AuthV1Api extends AbstractApi {
             child.setSex("男");
             child.setBirthday(new Date(new Date().getTime() - 5 * 365 * 24 * 60 * 60 * 1000));
 
-            childServiceApi.add(user.getToken(), JSON.toJSONString(child));
+            List<Child> children = new ArrayList<Child>();
+            children.add(child);
+
+            childServiceApi.add(user.getToken(), JSON.toJSONString(children));
         } catch (Exception e) {
             LOGGER.error("fail to add default child for user: {}", user.getId(), e);
         }
