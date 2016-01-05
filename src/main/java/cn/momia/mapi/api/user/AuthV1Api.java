@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Date;
+
 @RestController
 @RequestMapping("/v1/auth")
 public class AuthV1Api extends AbstractApi {
@@ -60,7 +62,10 @@ public class AuthV1Api extends AbstractApi {
 
     private String buildDefaultChild(User user) {
         Child child = new Child();
+        child.setUserId(user.getId());
         child.setName(user.getNickName() + "的宝宝");
+        child.setSex("男");
+        child.setBirthday(new Date(new Date().getTime() - 5 * 365 * 24 * 60 * 60 * 1000));
 
         return JSON.toJSONString(child);
     }
