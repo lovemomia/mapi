@@ -86,7 +86,7 @@ public class AuthV1Api extends AbstractApi {
             child.setUserId(user.getId());
             child.setName(user.getNickName() + "的宝宝");
             child.setSex("男");
-            child.setBirthday(new Date(new Date().getTime() - 5 * 365 * 24 * 60 * 60 * 1000));
+            child.setBirthday(new Date(new Date().getTime() - 5 * 365 * 24 * 60 * 60 * 1000L));
 
             List<Child> children = new ArrayList<Child>();
             children.add(child);
