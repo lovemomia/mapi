@@ -1,13 +1,16 @@
 package cn.momia.mapi.api.user;
 
+import cn.momia.api.user.ChildServiceApi;
 import cn.momia.api.user.SmsServiceApi;
 import cn.momia.api.course.CouponServiceApi;
 import cn.momia.api.im.ImServiceApi;
 import cn.momia.api.user.AuthServiceApi;
+import cn.momia.api.user.dto.Child;
 import cn.momia.api.user.dto.User;
 import cn.momia.common.core.http.MomiaHttpResponse;
 import cn.momia.common.core.util.MobileUtil;
 import cn.momia.mapi.api.AbstractApi;
+import com.alibaba.fastjson.JSON;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +29,7 @@ public class AuthV1Api extends AbstractApi {
     @Autowired private AuthServiceApi authServiceApi;
     @Autowired private CouponServiceApi couponServiceApi;
     @Autowired private ImServiceApi imServiceApi;
+    @Autowired private ChildServiceApi childServiceApi;
 
     @RequestMapping(value = "/send", method = RequestMethod.POST)
     public MomiaHttpResponse send(@RequestParam String mobile)  {
@@ -49,7 +53,16 @@ public class AuthV1Api extends AbstractApi {
         distributeInviteCoupon(user.getId(), mobile);
         generateImToken(user.getId(), user.getNickName(), user.getAvatar());
 
+        childServiceApi.add(user.getToken(), buildDefaultChild(user));
+
         return MomiaHttpResponse.SUCCESS(user);
+    }
+
+    private String buildDefaultChild(User user) {
+        Child child = new Child();
+        child.setName(user.getNickName() + "的宝宝");
+
+        return JSON.toJSONString(child);
     }
 
     private void generateImToken(long userId, String nickName, String avatar) {
