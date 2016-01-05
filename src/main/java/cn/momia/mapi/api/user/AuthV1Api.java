@@ -54,20 +54,9 @@ public class AuthV1Api extends AbstractApi {
         User user = completeUserImgs(authServiceApi.register(nickName, mobile, password, code));
         distributeInviteCoupon(user.getId(), mobile);
         generateImToken(user.getId(), user.getNickName(), user.getAvatar());
-
-        childServiceApi.add(user.getToken(), buildDefaultChild(user));
+        addDefaultChild(user);
 
         return MomiaHttpResponse.SUCCESS(user);
-    }
-
-    private String buildDefaultChild(User user) {
-        Child child = new Child();
-        child.setUserId(user.getId());
-        child.setName(user.getNickName() + "的宝宝");
-        child.setSex("男");
-        child.setBirthday(new Date(new Date().getTime() - 5 * 365 * 24 * 60 * 60 * 1000));
-
-        return JSON.toJSONString(child);
     }
 
     private void generateImToken(long userId, String nickName, String avatar) {
@@ -83,6 +72,20 @@ public class AuthV1Api extends AbstractApi {
             couponServiceApi.distributeInviteCoupon(userId, mobile);
         } catch (Exception e) {
             LOGGER.error("分发邀请红包失败", e);
+        }
+    }
+
+    private void addDefaultChild(User user) {
+        try {
+            Child child = new Child();
+            child.setUserId(user.getId());
+            child.setName(user.getNickName() + "的宝宝");
+            child.setSex("男");
+            child.setBirthday(new Date(new Date().getTime() - 5 * 365 * 24 * 60 * 60 * 1000));
+
+            childServiceApi.add(user.getToken(), JSON.toJSONString(child));
+        } catch (Exception e) {
+            LOGGER.error("fail to add default child for user: {}", user.getId(), e);
         }
     }
 
