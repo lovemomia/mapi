@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -69,16 +70,21 @@ public class AdminApi extends AbstractApi {
             userIds.add(Long.valueOf(userId));
         }
 
-        boolean successful = courseServiceApi.batchCancel(userIds, courseId, skuId);
-        if (successful) {
-            for (long userId : userIds) {
+        List<Long> successfulUserIds = courseServiceApi.batchCancel(userIds, courseId, skuId);
+        if (!successfulUserIds.isEmpty()) {
+            for (long userId : successfulUserIds) {
                 imServiceApi.leaveGroup(userId, courseId, skuId);
             }
 
-            orderServiceApi.batchExtendPackageTimes(userIds, courseId, skuId, 1);
+            orderServiceApi.batchExtendPackageTimes(successfulUserIds, courseId, skuId, 1);
         }
 
-        return MomiaHttpResponse.SUCCESS(successful);
+        List<Long> failedUserIds = new ArrayList<Long>();
+        for (long userId : userIds) {
+            if (!successfulUserIds.contains(userId)) failedUserIds.add(userId);
+        }
+
+        return MomiaHttpResponse.SUCCESS(failedUserIds);
     }
 
     @RequestMapping(value = "/package/time/extend", method = RequestMethod.POST)
