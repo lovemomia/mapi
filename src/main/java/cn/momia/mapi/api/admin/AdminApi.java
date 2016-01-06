@@ -74,6 +74,8 @@ public class AdminApi extends AbstractApi {
             for (long userId : userIds) {
                 imServiceApi.leaveGroup(userId, courseId, skuId);
             }
+
+            orderServiceApi.batchExtendPackageTimes(userIds, courseId, skuId, 1);
         }
 
         return MomiaHttpResponse.SUCCESS(successful);
