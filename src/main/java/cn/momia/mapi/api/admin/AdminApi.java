@@ -13,9 +13,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -62,7 +62,7 @@ public class AdminApi extends AbstractApi {
     }
 
     @RequestMapping(value = "/course/cancel/batch", method = RequestMethod.POST)
-    public MomiaHttpResponse batchCancel(@RequestParam String uids,
+    public MomiaHttpResponse batchCancel(@RequestParam(required = false, defaultValue = "") String uids,
                                          @RequestParam(value = "coid") long courseId,
                                          @RequestParam(value = "sid") long skuId) {
         Set<Long> userIds = new HashSet<Long>();
@@ -70,21 +70,15 @@ public class AdminApi extends AbstractApi {
             userIds.add(Long.valueOf(userId));
         }
 
-        List<Long> successfulUserIds = courseServiceApi.batchCancel(userIds, courseId, skuId);
-        if (!successfulUserIds.isEmpty()) {
-            for (long userId : successfulUserIds) {
-                imServiceApi.leaveGroup(userId, courseId, skuId);
+        Map<Long, Long> successfulPackageUsers = courseServiceApi.batchCancel(userIds, courseId, skuId);
+        if (!successfulPackageUsers.isEmpty()) {
+            for (Map.Entry<Long, Long> entry : successfulPackageUsers.entrySet()) {
+                orderServiceApi.extendPackageTime(entry.getKey(), 1);
+                imServiceApi.leaveGroup(entry.getValue(), courseId, skuId);
             }
-
-            orderServiceApi.batchExtendPackageTimes(successfulUserIds, courseId, skuId, 1);
         }
 
-        List<Long> failedUserIds = new ArrayList<Long>();
-        for (long userId : userIds) {
-            if (!successfulUserIds.contains(userId)) failedUserIds.add(userId);
-        }
-
-        return MomiaHttpResponse.SUCCESS(failedUserIds);
+        return MomiaHttpResponse.SUCCESS;
     }
 
     @RequestMapping(value = "/package/time/extend", method = RequestMethod.POST)
