@@ -17,7 +17,7 @@ public class MApiController extends BaseController {
         return forward(request, request.getRequestURI().substring(2));
     }
 
-    public String forward(HttpServletRequest request, String uri) {
+    private String forward(HttpServletRequest request, String uri) {
         if (PATTERN.matcher(uri).find()) return "forward:" + uri;
         return "forward:/v1" + uri;
     }

@@ -1,6 +1,6 @@
-package cn.momia.mapi.api.v1.config;
+package cn.momia.mapi.api.config;
 
-import cn.momia.common.api.http.MomiaHttpResponse;
+import cn.momia.common.core.http.MomiaHttpResponse;
 import cn.momia.common.webapp.config.Configuration;
 import cn.momia.mapi.api.AbstractApi;
 import org.springframework.web.bind.annotation.RequestMapping;

@@ -1,26 +1,26 @@
-package cn.momia.mapi.api.v1.user;
+package cn.momia.mapi.api.user;
 
 import cn.momia.api.course.CouponServiceApi;
 import cn.momia.api.course.CourseServiceApi;
 import cn.momia.api.course.OrderServiceApi;
 import cn.momia.api.course.SubjectServiceApi;
-import cn.momia.api.course.dto.BookedCourse;
-import cn.momia.api.course.dto.Favorite;
-import cn.momia.api.course.dto.SubjectPackage;
-import cn.momia.api.course.dto.SubjectOrder;
-import cn.momia.api.course.dto.TimelineUnit;
-import cn.momia.api.course.dto.UserCoupon;
-import cn.momia.api.course.dto.UserCourseComment;
+import cn.momia.api.course.dto.course.BookedCourse;
+import cn.momia.api.course.dto.favorite.Favorite;
+import cn.momia.api.course.dto.subject.SubjectPackage;
+import cn.momia.api.course.dto.subject.SubjectOrder;
+import cn.momia.api.course.dto.comment.TimelineUnit;
+import cn.momia.api.course.dto.coupon.UserCoupon;
+import cn.momia.api.course.dto.comment.UserCourseComment;
 import cn.momia.api.feed.FeedServiceApi;
-import cn.momia.api.feed.dto.UserFeed;
+import cn.momia.api.feed.dto.Feed;
 import cn.momia.api.im.ImServiceApi;
 import cn.momia.api.user.dto.User;
-import cn.momia.common.api.dto.PagedList;
-import cn.momia.common.api.http.MomiaHttpResponse;
+import cn.momia.common.core.dto.PagedList;
+import cn.momia.common.core.http.MomiaHttpResponse;
 import cn.momia.api.user.UserServiceApi;
-import cn.momia.common.util.SexUtil;
+import cn.momia.common.core.util.SexUtil;
 import cn.momia.common.webapp.config.Configuration;
-import cn.momia.mapi.api.AbstractApi;
+import cn.momia.mapi.api.FeedRelatedApi;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +35,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/v1/user")
-public class UserV1Api extends AbstractApi {
+public class UserV1Api extends FeedRelatedApi {
     @Autowired private CourseServiceApi courseServiceApi;
     @Autowired private SubjectServiceApi subjectServiceApi;
     @Autowired private CouponServiceApi couponServiceApi;
@@ -57,7 +57,7 @@ public class UserV1Api extends AbstractApi {
         if (nickName.contains("官方")) return MomiaHttpResponse.FAILED("用户昵称不能包含“官方”");
 
         User user = completeUserImgs(userServiceApi.updateNickName(utoken, nickName));
-        imServiceApi.updateImNickName(user.getToken(), user.getNickName());
+        imServiceApi.updateImNickName(user.getId(), user.getNickName());
 
         return MomiaHttpResponse.SUCCESS(user);
     }
@@ -68,7 +68,7 @@ public class UserV1Api extends AbstractApi {
         if (StringUtils.isBlank(avatar)) return MomiaHttpResponse.FAILED("用户头像不能为空");
 
         User user = completeUserImgs(userServiceApi.updateAvatar(utoken, avatar));
-        imServiceApi.updateImAvatar(user.getToken(), user.getAvatar());
+        imServiceApi.updateImAvatar(user.getId(), user.getAvatar());
 
         return MomiaHttpResponse.SUCCESS(user);
     }
@@ -223,14 +223,13 @@ public class UserV1Api extends AbstractApi {
         if (start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
         User user = userServiceApi.get(utoken);
-        PagedList<UserFeed> pagedFeeds = feedServiceApi.listFeedsOfUser(user.getId(), start, Configuration.getInt("PageSize.Feed"));
-        completeFeedsImgs(pagedFeeds.getList());
+        PagedList<Feed> pagedFeeds = feedServiceApi.listFeedsOfUser(user.getId(), start, Configuration.getInt("PageSize.Feed"));
 
-        return MomiaHttpResponse.SUCCESS(pagedFeeds);
+        return MomiaHttpResponse.SUCCESS(buildPagedUserFeeds(user.getId(), pagedFeeds));
     }
 
     @RequestMapping(value = "/info", method = RequestMethod.GET)
-    public MomiaHttpResponse getInfo(@RequestParam(value = "uid") long userId, @RequestParam int start) {
+    public MomiaHttpResponse getInfo(@RequestParam(required = false, defaultValue = "") String utoken, @RequestParam(value = "uid") long userId, @RequestParam int start) {
         JSONObject infoJson = new JSONObject();
 
         if (start == 0) {
@@ -239,9 +238,10 @@ public class UserV1Api extends AbstractApi {
             infoJson.put("user", completeUserImgs(user));
         }
 
-        PagedList<UserFeed> pagedFeeds = feedServiceApi.listFeedsOfUser(userId, start, Configuration.getInt("PageSize.Feed"));
-        completeFeedsImgs(pagedFeeds.getList());
-        infoJson.put("feeds", pagedFeeds);
+        long selfId = StringUtils.isBlank(utoken) ? 0 : userServiceApi.get(utoken).getId();
+        PagedList<Feed> pagedFeeds = feedServiceApi.listFeedsOfUser(userId, start, Configuration.getInt("PageSize.Feed"));
+
+        infoJson.put("feeds", buildPagedUserFeeds(selfId, pagedFeeds));
 
         return MomiaHttpResponse.SUCCESS(infoJson);
     }

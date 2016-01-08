@@ -1,11 +1,10 @@
-package cn.momia.mapi.api.v2.index;
+package cn.momia.mapi.api.index;
 
 import cn.momia.api.course.CourseServiceApi;
-import cn.momia.api.course.dto.Course;
-import cn.momia.common.api.dto.PagedList;
-import cn.momia.common.api.http.MomiaHttpResponse;
+import cn.momia.api.course.dto.course.Course;
+import cn.momia.common.core.dto.PagedList;
+import cn.momia.common.core.http.MomiaHttpResponse;
 import cn.momia.common.webapp.config.Configuration;
-import cn.momia.mapi.api.AbstractIndexApi;
 import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,19 +24,19 @@ public class IndexV2Api extends AbstractIndexApi {
     @Autowired private CourseServiceApi courseServiceApi;
 
     @RequestMapping(method = RequestMethod.GET)
-    public MomiaHttpResponse index(@RequestParam(value = "city") int cityId,
-                                   @RequestParam int start,
-                                   HttpServletRequest request) {
+    public MomiaHttpResponse index(HttpServletRequest request,
+                                   @RequestParam(value = "city") int cityId,
+                                   @RequestParam int start) {
         if (cityId < 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
         JSONObject indexJson = new JSONObject();
         if (start == 0) {
-            int clientType = getClientType(request);
+            int platform = getPlatform(request);
             String version = getVersion(request);
 
-            indexJson.put("banners", getBanners(cityId, clientType, version));
-            indexJson.put("icons", getIcons(cityId, clientType, version));
-            indexJson.put("events", getEvents(cityId, clientType, version));
+            indexJson.put("banners", getBanners(cityId, platform, version));
+            indexJson.put("icons", getIcons(cityId, platform, version));
+            indexJson.put("events", getEvents(cityId, platform, version));
         }
         indexJson.put("courses", getRecommendCourses(cityId, start));
 

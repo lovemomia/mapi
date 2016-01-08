@@ -6,7 +6,7 @@
 
     <groupId>cn.momia</groupId>
     <artifactId>duola-mapi</artifactId>
-    <version>1.1.0</version>
+    <version>1.2.0</version>
     <packaging>jar</packaging>
 
     <name>Momia MAPI</name>
@@ -16,33 +16,33 @@
         <!-- Momia API -->
         <dependency>
             <groupId>cn.momia</groupId>
-            <artifactId>duola-api-base</artifactId>
-            <version>1.1.0</version>
-        </dependency>
-        <dependency>
-            <groupId>cn.momia</groupId>
             <artifactId>duola-api-course</artifactId>
-            <version>1.1.0</version>
-        </dependency>
-        <dependency>
-            <groupId>cn.momia</groupId>
-            <artifactId>duola-api-event</artifactId>
-            <version>1.1.0</version>
+            <version>1.2.0</version>
         </dependency>
         <dependency>
             <groupId>cn.momia</groupId>
             <artifactId>duola-api-feed</artifactId>
-            <version>1.1.0</version>
+            <version>1.2.0</version>
         </dependency>
         <dependency>
             <groupId>cn.momia</groupId>
             <artifactId>duola-api-im</artifactId>
-            <version>1.1.0</version>
+            <version>1.2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>cn.momia</groupId>
+            <artifactId>duola-api-operate</artifactId>
+            <version>1.2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>cn.momia</groupId>
+            <artifactId>duola-api-poi</artifactId>
+            <version>1.2.0</version>
         </dependency>
         <dependency>
             <groupId>cn.momia</groupId>
             <artifactId>duola-api-user</artifactId>
-            <version>1.1.0</version>
+            <version>1.2.0</version>
         </dependency>
 
         <dependency>
@@ -55,7 +55,7 @@
         <dependency>
             <groupId>cn.momia</groupId>
             <artifactId>duola-common-webapp</artifactId>
-            <version>1.1.0</version>
+            <version>1.2.0</version>
         </dependency>
 
         <!-- Test -->

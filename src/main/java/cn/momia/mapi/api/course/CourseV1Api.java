@@ -1,18 +1,20 @@
-package cn.momia.mapi.api.v1.course;
+package cn.momia.mapi.api.course;
 
 import cn.momia.api.course.CourseServiceApi;
-import cn.momia.api.course.dto.BookedCourse;
-import cn.momia.api.course.dto.Course;
-import cn.momia.api.course.dto.CourseSku;
-import cn.momia.api.course.dto.DatedCourseSkus;
-import cn.momia.api.course.dto.UserCourseComment;
-import cn.momia.api.course.dto.Institution;
-import cn.momia.api.course.dto.Teacher;
+import cn.momia.api.course.dto.course.BookedCourse;
+import cn.momia.api.course.dto.course.Course;
+import cn.momia.api.course.dto.course.CourseSku;
+import cn.momia.api.course.dto.course.DatedCourseSkus;
+import cn.momia.api.course.dto.comment.UserCourseComment;
 import cn.momia.api.im.ImServiceApi;
+import cn.momia.api.poi.PoiServiceApi;
+import cn.momia.api.poi.dto.Institution;
+import cn.momia.api.user.TeacherServiceApi;
 import cn.momia.api.user.UserServiceApi;
+import cn.momia.api.user.dto.Teacher;
 import cn.momia.api.user.dto.User;
-import cn.momia.common.api.dto.PagedList;
-import cn.momia.common.api.http.MomiaHttpResponse;
+import cn.momia.common.core.dto.PagedList;
+import cn.momia.common.core.http.MomiaHttpResponse;
 import cn.momia.common.webapp.config.Configuration;
 import cn.momia.mapi.api.AbstractApi;
 import com.alibaba.fastjson.JSON;
@@ -32,8 +34,10 @@ import java.util.List;
 @RequestMapping(value = "/v1/course")
 public class CourseV1Api extends AbstractApi {
     @Autowired private CourseServiceApi courseServiceApi;
+    @Autowired private PoiServiceApi poiServiceApi;
     @Autowired private ImServiceApi imServiceApi;
     @Autowired private UserServiceApi userServiceApi;
+    @Autowired private TeacherServiceApi teacherServiceApi;
 
     @RequestMapping(method = RequestMethod.GET)
     public MomiaHttpResponse get(@RequestParam(required = false, defaultValue = "") String utoken,
@@ -48,7 +52,8 @@ public class CourseV1Api extends AbstractApi {
             courseJson.put("favored", courseServiceApi.isFavored(user.getId(), id));
         }
 
-        List<Teacher> teachers = completeTeachersImgs(courseServiceApi.teacher(id, 0, Configuration.getInt("PageSize.CourseTeacher")).getList());
+        PagedList<Integer> pagedTeacherIds = courseServiceApi.teacherIds(id, 0, Configuration.getInt("PageSize.CourseTeacher"));
+        List<Teacher> teachers = completeTeachersImgs(teacherServiceApi.list(pagedTeacherIds.getList()));
         if (!teachers.isEmpty()) courseJson.put("teachers", teachers);
 
         return MomiaHttpResponse.SUCCESS(courseJson);
@@ -74,17 +79,25 @@ public class CourseV1Api extends AbstractApi {
     public MomiaHttpResponse teacher(@RequestParam long id, @RequestParam int start) {
         if (id <= 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        PagedList<Teacher> teachers = courseServiceApi.teacher(id, start, Configuration.getInt("PageSize.Teacher"));
-        completeTeachersImgs(teachers.getList());
+        PagedList<Integer> pagedTeacherIds = courseServiceApi.teacherIds(id, start, Configuration.getInt("PageSize.Teacher"));
+        List<Teacher> teachers = completeTeachersImgs(teacherServiceApi.list(pagedTeacherIds.getList()));
 
-        return MomiaHttpResponse.SUCCESS(teachers);
+        PagedList<Teacher> pagedTeachers = new PagedList<Teacher>();
+        pagedTeachers.setTotalCount(pagedTeacherIds.getTotalCount());
+        pagedTeachers.setNextIndex(pagedTeacherIds.getNextIndex());
+        pagedTeachers.setList(teachers);
+
+        return MomiaHttpResponse.SUCCESS(pagedTeachers);
     }
 
     @RequestMapping(value = "/institution", method = RequestMethod.GET)
     public MomiaHttpResponse institution(@RequestParam long id) {
         if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        Institution institution = courseServiceApi.institution(id);
+        int institutionId = courseServiceApi.getInstitutionId(id);
+        Institution institution = poiServiceApi.getInstitution(institutionId);
+        if (!institution.exists()) return MomiaHttpResponse.FAILED("机构信息不存在");
+
         institution.setCover(completeLargeImg(institution.getCover()));
 
         return MomiaHttpResponse.SUCCESS(institution);
@@ -165,16 +178,18 @@ public class CourseV1Api extends AbstractApi {
 
     @RequestMapping(value = "/booking", method = RequestMethod.POST)
     public MomiaHttpResponse booking(@RequestParam String utoken,
+                                     @RequestParam(value = "cid", required = false, defaultValue = "0") long childId,
                                      @RequestParam(value = "pid") long packageId,
                                      @RequestParam(value = "sid") long skuId) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (packageId <= 0 || skuId <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        BookedCourse bookedCourse = courseServiceApi.booking(utoken, packageId, skuId);
+        User user = userServiceApi.get(utoken);
+        BookedCourse bookedCourse = courseServiceApi.booking(utoken, childId, packageId, skuId);
         if (bookedCourse.getParentId() > 0 && bookedCourse.getParentCourseSkuId() > 0) {
-            imServiceApi.joinGroup(utoken, bookedCourse.getParentId(), bookedCourse.getParentCourseSkuId());
+            imServiceApi.joinGroup(user.getId(), bookedCourse.getParentId(), bookedCourse.getParentCourseSkuId());
         } else {
-            imServiceApi.joinGroup(utoken, bookedCourse.getId(), bookedCourse.getCourseSkuId());
+            imServiceApi.joinGroup(user.getId(), bookedCourse.getId(), bookedCourse.getCourseSkuId());
         }
 
         return MomiaHttpResponse.SUCCESS;
@@ -185,11 +200,12 @@ public class CourseV1Api extends AbstractApi {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (bookingId <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
+        User user = userServiceApi.get(utoken);
         BookedCourse bookedCourse = courseServiceApi.cancel(utoken, bookingId);
         if (bookedCourse.getParentId() > 0 && bookedCourse.getParentCourseSkuId() > 0) {
-            imServiceApi.leaveGroup(utoken, bookedCourse.getParentId(), bookedCourse.getParentCourseSkuId());
+            imServiceApi.leaveGroup(user.getId(), bookedCourse.getParentId(), bookedCourse.getParentCourseSkuId());
         } else {
-            imServiceApi.leaveGroup(utoken, bookedCourse.getId(), bookedCourse.getCourseSkuId());
+            imServiceApi.leaveGroup(user.getId(), bookedCourse.getId(), bookedCourse.getCourseSkuId());
         }
 
         return MomiaHttpResponse.SUCCESS;

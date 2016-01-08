@@ -1,13 +1,12 @@
 package cn.momia.mapi.api;
 
-import cn.momia.api.course.dto.Course;
-import cn.momia.api.course.dto.Subject;
-import cn.momia.api.course.dto.Teacher;
-import cn.momia.api.course.dto.UserCourseComment;
-import cn.momia.api.feed.dto.UserFeed;
+import cn.momia.api.course.dto.course.Course;
+import cn.momia.api.course.dto.subject.Subject;
+import cn.momia.api.course.dto.comment.UserCourseComment;
 import cn.momia.api.user.dto.Child;
+import cn.momia.api.user.dto.Teacher;
 import cn.momia.api.user.dto.User;
-import cn.momia.common.client.ClientType;
+import cn.momia.common.core.platform.Platform;
 import cn.momia.common.webapp.config.Configuration;
 import cn.momia.common.webapp.ctrl.BaseController;
 import cn.momia.image.api.ImageFile;
@@ -21,8 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class AbstractApi extends BaseController {
-    protected int getClientType(HttpServletRequest request) {
-        return StringUtils.isBlank(request.getParameter("terminal")) ? ClientType.WAP : ClientType.APP;
+    protected int getPlatform(HttpServletRequest request) {
+        return StringUtils.isBlank(request.getParameter("terminal")) ? Platform.WAP : Platform.APP;
     }
 
     protected String getVersion(HttpServletRequest request) {
@@ -30,8 +29,8 @@ public abstract class AbstractApi extends BaseController {
         return StringUtils.isBlank(version) ? "" : version;
     }
 
-    protected String buildAction(String uri, int clientType) {
-        if (ClientType.isApp(clientType)) {
+    protected String buildAction(String uri, int platform) {
+        if (Platform.isApp(platform)) {
             if (uri.startsWith("http")) return Configuration.getString("AppConf.Name") + "://web?url=" + URLEncoder.encode(uri);
             return Configuration.getString("AppConf.Name") + "://" + uri;
         }
@@ -174,27 +173,10 @@ public abstract class AbstractApi extends BaseController {
 
     protected List<Teacher> completeTeachersImgs(List<Teacher> teachers) {
         for (Teacher teacher : teachers) {
-            teacher.setAvatar(completeSmallImg(teacher.getAvatar()));
+            teacher.setPic(completeSmallImg(teacher.getPic()));
         }
 
         return teachers;
-    }
-
-    protected List<UserFeed> completeFeedsImgs(List<UserFeed> feeds) {
-        for (UserFeed feed : feeds) {
-            completeFeedImgs(feed);
-        }
-
-        return feeds;
-    }
-
-    protected UserFeed completeFeedImgs(UserFeed feed) {
-        List<String> imgs = feed.getImgs();
-        feed.setImgs(completeMiddleImgs(imgs));
-        feed.setLargeImgs(completeLargeImgs(imgs));
-        feed.setAvatar(completeSmallImg(feed.getAvatar()));
-
-        return feed;
     }
 
     protected List<User> completeUsersImgs(List<User> users) {
@@ -215,13 +197,13 @@ public abstract class AbstractApi extends BaseController {
 
     protected List<Child> completeChildrenImgs(List<Child> children) {
         for (Child child : children) {
-            completeChildImg(child);
+            completeChildImgs(child);
         }
 
         return children;
     }
 
-    protected Child completeChildImg(Child child) {
+    protected Child completeChildImgs(Child child) {
         child.setAvatar(completeSmallImg(child.getAvatar()));
         return child;
     }

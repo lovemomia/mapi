@@ -6,6 +6,7 @@
 
     <Validation>
         <Key>578890d82212ae548d883bc7a201cdf4</Key>
+        <AdminKey>578890d82212ae548d883bc7a201cdf4</AdminKey>
     </Validation>
 
     <Image>
@@ -15,14 +16,15 @@
     <Service>
         <Base>http://localhost:7070</Base>
         <Course>http://localhost:7070</Course>
-        <Event>http://localhost:7070</Event>
         <Feed>http://localhost:7070</Feed>
         <IM>http://localhost:7070</IM>
+        <Operate>http://localhost:7070</Operate>
+        <Poi>http://localhost:7070</Poi>
         <User>http://localhost:7070</User>
     </Service>
 
     <AppConf>
-        <Name>duola</Name>
+        <Name>duoladebug</Name>
         <WapDomain>http://m.momia.cn</WapDomain>
         <ShareCoupon>true</ShareCoupon>
     </AppConf>
@@ -56,5 +58,7 @@
         <FeedDetailComment>20</FeedDetailComment>
         <FeedTag>10</FeedTag>
         <Timeline>20</Timeline>
+        <Material>20</Material>
+        <ChildComment>20</ChildComment>
     </PageSize>
 </Configuration>

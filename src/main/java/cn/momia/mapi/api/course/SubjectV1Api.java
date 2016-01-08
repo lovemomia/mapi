@@ -1,22 +1,19 @@
-package cn.momia.mapi.api.v1.course;
+package cn.momia.mapi.api.course;
 
-import cn.momia.api.base.MetaUtil;
-import cn.momia.api.base.dto.AgeRange;
-import cn.momia.api.base.dto.SortType;
 import cn.momia.api.course.CouponServiceApi;
 import cn.momia.api.course.CourseServiceApi;
 import cn.momia.api.course.OrderServiceApi;
 import cn.momia.api.course.SubjectServiceApi;
-import cn.momia.api.course.dto.Course;
-import cn.momia.api.course.dto.Subject;
-import cn.momia.api.course.dto.SubjectSku;
-import cn.momia.api.course.dto.UserCourseComment;
-import cn.momia.api.course.dto.SubjectOrder;
+import cn.momia.api.course.dto.course.Course;
+import cn.momia.api.course.dto.subject.Subject;
+import cn.momia.api.course.dto.subject.SubjectSku;
+import cn.momia.api.course.dto.comment.UserCourseComment;
+import cn.momia.api.course.dto.subject.SubjectOrder;
 import cn.momia.api.user.UserServiceApi;
 import cn.momia.api.user.dto.Contact;
 import cn.momia.api.user.dto.User;
-import cn.momia.common.api.dto.PagedList;
-import cn.momia.common.api.http.MomiaHttpResponse;
+import cn.momia.common.core.dto.PagedList;
+import cn.momia.common.core.http.MomiaHttpResponse;
 import cn.momia.common.webapp.config.Configuration;
 import cn.momia.mapi.api.AbstractApi;
 import com.alibaba.fastjson.JSON;
@@ -70,20 +67,40 @@ public class SubjectV1Api extends AbstractApi {
                                          @RequestParam int start) {
         if (id <= 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        AgeRange ageRange = MetaUtil.getAgeRange(age);
-        SortType sortType = MetaUtil.getSortType(sort);
-
-        PagedList<Course> courses = courseServiceApi.query(id, packageId, ageRange.getMin(), ageRange.getMax(), sortType.getId(), start, Configuration.getInt("PageSize.Course"));
+        // FIXME Magic Number
+        PagedList<Course> courses = courseServiceApi.query(id, packageId, 1, 100, 0, start, Configuration.getInt("PageSize.Course"));
         completeMiddleCoursesImgs(courses.getList());
 
         JSONObject responseJson = new JSONObject();
-        responseJson.put("ages", MetaUtil.listAgeRanges());
-        responseJson.put("sorts", MetaUtil.listSortTypes());
-        responseJson.put("currentAge", ageRange.getId());
-        responseJson.put("currentSort", sortType.getId());
+        responseJson.put("ages", buildAgeRanges());
+        responseJson.put("sorts", buildSortTypes());
+        responseJson.put("currentAge", 0);
+        responseJson.put("currentSort", 0);
         responseJson.put("courses", courses);
 
         return MomiaHttpResponse.SUCCESS(responseJson);
+    }
+
+    private JSONArray buildAgeRanges() {
+        JSONArray ageRanges = new JSONArray();
+        JSONObject ageRange = new JSONObject();
+        ageRange.put("id", 0);
+        ageRange.put("min", 1);
+        ageRange.put("max", 100);
+        ageRange.put("text", "全部");
+        ageRanges.add(ageRange);
+
+        return ageRanges;
+    }
+
+    private JSONArray buildSortTypes() {
+        JSONArray sortTypes = new JSONArray();
+        JSONObject sortType = new JSONObject();
+        sortType.put("id", 0);
+        sortType.put("text", "默认");
+        sortTypes.add(sortType);
+
+        return sortTypes;
     }
 
     @RequestMapping(value = "/comment/list", method = RequestMethod.GET)

@@ -1,14 +1,15 @@
-package cn.momia.mapi.api.v2.course;
+package cn.momia.mapi.api.course;
 
 import cn.momia.api.course.CourseServiceApi;
-import cn.momia.api.course.dto.Course;
-import cn.momia.api.course.dto.UserCourseComment;
-import cn.momia.api.course.dto.CourseDetail;
-import cn.momia.api.course.dto.Teacher;
+import cn.momia.api.course.dto.course.Course;
+import cn.momia.api.course.dto.comment.UserCourseComment;
+import cn.momia.api.course.dto.course.CourseDetail;
+import cn.momia.api.user.TeacherServiceApi;
 import cn.momia.api.user.UserServiceApi;
+import cn.momia.api.user.dto.Teacher;
 import cn.momia.api.user.dto.User;
-import cn.momia.common.api.dto.PagedList;
-import cn.momia.common.api.http.MomiaHttpResponse;
+import cn.momia.common.core.dto.PagedList;
+import cn.momia.common.core.http.MomiaHttpResponse;
 import cn.momia.common.webapp.config.Configuration;
 import cn.momia.mapi.api.AbstractApi;
 import com.alibaba.fastjson.JSON;
@@ -32,6 +33,7 @@ public class CourseV2Api extends AbstractApi {
 
     @Autowired private CourseServiceApi courseServiceApi;
     @Autowired private UserServiceApi userServiceApi;
+    @Autowired private TeacherServiceApi teacherServiceApi;
 
     @RequestMapping(method = RequestMethod.GET)
     public MomiaHttpResponse get(@RequestParam(required = false, defaultValue = "") String utoken,
@@ -46,7 +48,8 @@ public class CourseV2Api extends AbstractApi {
             courseJson.put("favored", courseServiceApi.isFavored(user.getId(), id));
         }
 
-        List<Teacher> teachers = completeTeachersImgs(courseServiceApi.teacher(id, 0, Configuration.getInt("PageSize.CourseTeacher")).getList());
+        PagedList<Integer> pagedTeacherIds = courseServiceApi.teacherIds(id, 0, Configuration.getInt("PageSize.CourseTeacher"));
+        List<Teacher> teachers = completeTeachersImgs(teacherServiceApi.list(pagedTeacherIds.getList()));
         if (!teachers.isEmpty()) courseJson.put("teachers", teachers);
 
         PagedList<UserCourseComment> pagedComments = courseServiceApi.queryCommentsByCourse(id, 0, 1);

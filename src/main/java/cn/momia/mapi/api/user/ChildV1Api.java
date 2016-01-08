@@ -1,8 +1,8 @@
-package cn.momia.mapi.api.v1.user;
+package cn.momia.mapi.api.user;
 
 import cn.momia.api.user.ChildServiceApi;
-import cn.momia.common.api.http.MomiaHttpResponse;
-import cn.momia.common.util.SexUtil;
+import cn.momia.common.core.http.MomiaHttpResponse;
+import cn.momia.common.core.util.SexUtil;
 import cn.momia.mapi.api.AbstractApi;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +32,7 @@ public class ChildV1Api extends AbstractApi {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (childId <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
-        return MomiaHttpResponse.SUCCESS(completeChildImg(childServiceApi.get(utoken, childId)));
+        return MomiaHttpResponse.SUCCESS(completeChildImgs(childServiceApi.get(utoken, childId)));
     }
 
     @RequestMapping(value = "/list", method = RequestMethod.GET)
