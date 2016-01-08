@@ -54,6 +54,7 @@ public class TeacherV1Api extends AbstractApi {
         JSONObject statusJson = (JSONObject) JSON.toJSON(teacher);
         statusJson.put("status", status.getStatus());
         statusJson.put("msg", status.getMsg());
+        if (teacher.getBirthday() != null) statusJson.put("birthday", TimeUtil.SHORT_DATE_FORMAT.format(teacher.getBirthday()));
 
         return MomiaHttpResponse.SUCCESS(statusJson);
     }
