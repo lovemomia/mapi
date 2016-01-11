@@ -151,6 +151,15 @@ public class UserV1Api extends FeedRelatedApi {
         return MomiaHttpResponse.SUCCESS(courses);
     }
 
+
+    @RequestMapping(value = "/booked/sku", method = RequestMethod.GET)
+    public MomiaHttpResponse getSku(@RequestParam String utoken, @RequestParam(value = "bid") long bookingId) {
+        if (bookingId <= 0) return MomiaHttpResponse.BAD_REQUEST;
+
+        User user = userServiceApi.get(utoken);
+        return MomiaHttpResponse.SUCCESS(courseServiceApi.getBookedSku(user.getId(), bookingId));
+    }
+
     @RequestMapping(value = "/bookable", method = RequestMethod.GET)
     public MomiaHttpResponse listBookableOrders(@RequestParam String utoken,
                                                 @RequestParam(value = "oid", required = false, defaultValue = "0") long orderId,
