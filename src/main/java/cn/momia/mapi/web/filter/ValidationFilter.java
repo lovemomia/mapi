@@ -44,7 +44,13 @@ public class ValidationFilter implements Filter {
         }
 
         if (isAdminOperation(httpRequest)) {
-            long expired = Long.valueOf(httpRequest.getParameter("expired"));
+            String expiredStr = httpRequest.getParameter("expired");
+            if (StringUtils.isBlank(expiredStr)) {
+                forwardErrorPage(request, response, 400);
+                return;
+            }
+
+            long expired = Long.valueOf(expiredStr);
             if (expired <= new Date().getTime()) {
                 forwardErrorPage(request, response, 403);
                 return;
@@ -105,6 +111,7 @@ public class ValidationFilter implements Filter {
         kvs.add("key=" + validationKey);
 
         String sign = httpRequest.getParameter("sign");
+        if (StringUtils.isBlank(sign)) return true;
 
         return !sign.equals(DigestUtils.md5Hex(StringUtils.join(kvs, "")));
     }

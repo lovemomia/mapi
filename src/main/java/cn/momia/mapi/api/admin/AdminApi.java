@@ -86,4 +86,12 @@ public class AdminApi extends AbstractApi {
         if (packageId <= 0 || time <= 0) return MomiaHttpResponse.BAD_REQUEST;
         return MomiaHttpResponse.SUCCESS(orderServiceApi.extendPackageTime(packageId, time));
     }
+
+    @RequestMapping(value = "/push", method = RequestMethod.POST)
+    public MomiaHttpResponse push(@RequestParam(value = "uid") long userId,
+                                  @RequestParam String content,
+                                  @RequestParam(required = false, defaultValue = "") String extra) {
+        if (userId <= 0 || StringUtils.isBlank(content)) return MomiaHttpResponse.BAD_REQUEST;
+        return MomiaHttpResponse.SUCCESS(imServiceApi.push(userId, content, extra));
+    }
 }
