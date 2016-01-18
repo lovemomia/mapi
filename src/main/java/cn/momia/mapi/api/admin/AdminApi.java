@@ -3,7 +3,9 @@ package cn.momia.mapi.api.admin;
 import cn.momia.api.course.CourseServiceApi;
 import cn.momia.api.course.OrderServiceApi;
 import cn.momia.api.im.ImServiceApi;
+import cn.momia.api.user.SmsServiceApi;
 import cn.momia.common.core.http.MomiaHttpResponse;
+import cn.momia.common.core.util.MobileUtil;
 import cn.momia.mapi.api.AbstractApi;
 import com.google.common.base.Splitter;
 import org.apache.commons.lang3.StringUtils;
@@ -29,6 +31,7 @@ public class AdminApi extends AbstractApi {
     @Autowired private ImServiceApi imServiceApi;
     @Autowired private CourseServiceApi courseServiceApi;
     @Autowired private OrderServiceApi orderServiceApi;
+    @Autowired private SmsServiceApi smsServiceApi;
 
     @RequestMapping(value = "/im/group", method = RequestMethod.POST)
     public MomiaHttpResponse createGroup(@RequestParam(value = "coid") long courseId,
@@ -98,5 +101,11 @@ public class AdminApi extends AbstractApi {
                                   @RequestParam(required = false, defaultValue = "") String extra) {
         if (userId <= 0 || StringUtils.isBlank(content)) return MomiaHttpResponse.BAD_REQUEST;
         return MomiaHttpResponse.SUCCESS(imServiceApi.push(userId, content, extra));
+    }
+
+    @RequestMapping(value = "/sms/notify", method = RequestMethod.POST)
+    public MomiaHttpResponse smsNotify(@RequestParam String mobile, @RequestParam String message) {
+        if (MobileUtil.isInvalid(mobile) || StringUtils.isBlank(message)) return MomiaHttpResponse.BAD_REQUEST;
+        return MomiaHttpResponse.SUCCESS(smsServiceApi.notify(mobile, message));
     }
 }
