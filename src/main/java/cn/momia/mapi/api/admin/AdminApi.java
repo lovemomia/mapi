@@ -24,6 +24,8 @@ import java.util.Set;
 @RestController
 @RequestMapping("/admin")
 public class AdminApi extends AbstractApi {
+    private static final long SYSTEM_PUSH_USERID = 10000;
+
     @Autowired private ImServiceApi imServiceApi;
     @Autowired private CourseServiceApi courseServiceApi;
     @Autowired private OrderServiceApi orderServiceApi;
@@ -31,15 +33,18 @@ public class AdminApi extends AbstractApi {
     @RequestMapping(value = "/im/group", method = RequestMethod.POST)
     public MomiaHttpResponse createGroup(@RequestParam(value = "coid") long courseId,
                                          @RequestParam(value = "sid") long courseSkuId,
-                                         @RequestParam(value = "tids") String teachers,
+                                         @RequestParam(value = "tids", required = false, defaultValue = "") String teachers,
                                          @RequestParam(value = "name") String groupName) {
-        if (courseId <= 0 || courseSkuId <= 0 || StringUtils.isBlank(teachers) || StringUtils.isBlank(groupName)) return MomiaHttpResponse.BAD_REQUEST;
+        if (courseId <= 0 || courseSkuId <= 0 || StringUtils.isBlank(groupName)) return MomiaHttpResponse.BAD_REQUEST;
 
         Set<Long> teacherUserIds = new HashSet<Long>();
         for (String teacher : Splitter.on(",").trimResults().omitEmptyStrings().split(teachers)) {
             teacherUserIds.add(Long.valueOf(teacher));
         }
-        if (teacherUserIds.isEmpty()) return MomiaHttpResponse.FAILED("创建群组失败，至少要有一个群成员");
+
+        if (teacherUserIds.isEmpty()) {
+            teacherUserIds.add(SYSTEM_PUSH_USERID);
+        }
 
         return MomiaHttpResponse.SUCCESS(imServiceApi.createGroup(courseId, courseSkuId, teacherUserIds, groupName));
     }
