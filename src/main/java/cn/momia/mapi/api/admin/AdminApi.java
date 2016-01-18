@@ -119,6 +119,20 @@ public class AdminApi extends AbstractApi {
         return MomiaHttpResponse.SUCCESS(imServiceApi.push(userId, content, extra));
     }
 
+    @RequestMapping(value = "/push/batch", method = RequestMethod.POST)
+    public MomiaHttpResponse pushBatch(@RequestParam(value = "uids") String uids,
+                                       @RequestParam String content,
+                                       @RequestParam(required = false, defaultValue = "") String extra) {
+        if (StringUtils.isBlank(uids) || StringUtils.isBlank(content)) return MomiaHttpResponse.BAD_REQUEST;
+
+        Set<Long> userIds = new HashSet<Long>();
+        for (String userId : Splitter.on(",").omitEmptyStrings().trimResults().split(uids)) {
+            userIds.add(Long.valueOf(userId));
+        }
+
+        return MomiaHttpResponse.SUCCESS(imServiceApi.pushBatch(userIds, content, extra));
+    }
+
     @RequestMapping(value = "/sms/notify", method = RequestMethod.POST)
     public MomiaHttpResponse smsNotify(@RequestParam String mobile, @RequestParam String message) {
         if (MobileUtil.isInvalid(mobile) || StringUtils.isBlank(message)) return MomiaHttpResponse.BAD_REQUEST;
