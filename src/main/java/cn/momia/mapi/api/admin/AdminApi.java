@@ -52,6 +52,22 @@ public class AdminApi extends AbstractApi {
         return MomiaHttpResponse.SUCCESS(imServiceApi.createGroup(courseId, courseSkuId, teacherUserIds, groupName));
     }
 
+    @RequestMapping(value = "/im/group/join", method = RequestMethod.POST)
+    public MomiaHttpResponse joinGroup(@RequestParam(value = "uid") long userId,
+                                       @RequestParam(value = "coid") long courseId,
+                                       @RequestParam(value = "sid") long courseSkuId) {
+        if (userId <= 0 || courseId <= 0 || courseSkuId <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        return MomiaHttpResponse.SUCCESS(imServiceApi.joinGroup(userId, courseId, courseSkuId));
+    }
+
+    @RequestMapping(value = "/im/group/leave", method = RequestMethod.POST)
+    public MomiaHttpResponse leaveGroup(@RequestParam(value = "uid") long userId,
+                                        @RequestParam(value = "coid") long courseId,
+                                        @RequestParam(value = "sid") long courseSkuId) {
+        if (userId <= 0 || courseId <= 0 || courseSkuId <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        return MomiaHttpResponse.SUCCESS(imServiceApi.leaveGroup(userId, courseId, courseSkuId));
+    }
+
     @RequestMapping(value = "/course/booking/batch", method = RequestMethod.POST)
     public MomiaHttpResponse batchBooking(@RequestParam String uids,
                                           @RequestParam(value = "coid") long courseId,
