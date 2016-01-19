@@ -3,7 +3,9 @@ package cn.momia.mapi.api.admin;
 import cn.momia.api.course.CourseServiceApi;
 import cn.momia.api.course.OrderServiceApi;
 import cn.momia.api.im.ImServiceApi;
+import cn.momia.api.user.SmsServiceApi;
 import cn.momia.common.core.http.MomiaHttpResponse;
+import cn.momia.common.core.util.MobileUtil;
 import cn.momia.mapi.api.AbstractApi;
 import com.google.common.base.Splitter;
 import org.apache.commons.lang3.StringUtils;
@@ -24,24 +26,46 @@ import java.util.Set;
 @RestController
 @RequestMapping("/admin")
 public class AdminApi extends AbstractApi {
+    private static final long SYSTEM_PUSH_USERID = 10000;
+
     @Autowired private ImServiceApi imServiceApi;
     @Autowired private CourseServiceApi courseServiceApi;
     @Autowired private OrderServiceApi orderServiceApi;
+    @Autowired private SmsServiceApi smsServiceApi;
 
     @RequestMapping(value = "/im/group", method = RequestMethod.POST)
     public MomiaHttpResponse createGroup(@RequestParam(value = "coid") long courseId,
                                          @RequestParam(value = "sid") long courseSkuId,
-                                         @RequestParam(value = "tids") String teachers,
+                                         @RequestParam(value = "tids", required = false, defaultValue = "") String teachers,
                                          @RequestParam(value = "name") String groupName) {
-        if (courseId <= 0 || courseSkuId <= 0 || StringUtils.isBlank(teachers) || StringUtils.isBlank(groupName)) return MomiaHttpResponse.BAD_REQUEST;
+        if (courseId <= 0 || courseSkuId <= 0 || StringUtils.isBlank(groupName)) return MomiaHttpResponse.BAD_REQUEST;
 
         Set<Long> teacherUserIds = new HashSet<Long>();
         for (String teacher : Splitter.on(",").trimResults().omitEmptyStrings().split(teachers)) {
             teacherUserIds.add(Long.valueOf(teacher));
         }
-        if (teacherUserIds.isEmpty()) return MomiaHttpResponse.FAILED("创建群组失败，至少要有一个群成员");
+
+        if (teacherUserIds.isEmpty()) {
+            teacherUserIds.add(SYSTEM_PUSH_USERID);
+        }
 
         return MomiaHttpResponse.SUCCESS(imServiceApi.createGroup(courseId, courseSkuId, teacherUserIds, groupName));
+    }
+
+    @RequestMapping(value = "/im/group/join", method = RequestMethod.POST)
+    public MomiaHttpResponse joinGroup(@RequestParam(value = "uid") long userId,
+                                       @RequestParam(value = "coid") long courseId,
+                                       @RequestParam(value = "sid") long courseSkuId) {
+        if (userId <= 0 || courseId <= 0 || courseSkuId <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        return MomiaHttpResponse.SUCCESS(imServiceApi.joinGroup(userId, courseId, courseSkuId));
+    }
+
+    @RequestMapping(value = "/im/group/leave", method = RequestMethod.POST)
+    public MomiaHttpResponse leaveGroup(@RequestParam(value = "uid") long userId,
+                                        @RequestParam(value = "coid") long courseId,
+                                        @RequestParam(value = "sid") long courseSkuId) {
+        if (userId <= 0 || courseId <= 0 || courseSkuId <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        return MomiaHttpResponse.SUCCESS(imServiceApi.leaveGroup(userId, courseId, courseSkuId));
     }
 
     @RequestMapping(value = "/course/booking/batch", method = RequestMethod.POST)
@@ -85,5 +109,33 @@ public class AdminApi extends AbstractApi {
     public MomiaHttpResponse extendPackageTime(@RequestParam(value = "pid") long packageId, @RequestParam int time) {
         if (packageId <= 0 || time <= 0) return MomiaHttpResponse.BAD_REQUEST;
         return MomiaHttpResponse.SUCCESS(orderServiceApi.extendPackageTime(packageId, time));
+    }
+
+    @RequestMapping(value = "/push", method = RequestMethod.POST)
+    public MomiaHttpResponse push(@RequestParam(value = "uid") long userId,
+                                  @RequestParam String content,
+                                  @RequestParam(required = false, defaultValue = "") String extra) {
+        if (userId <= 0 || StringUtils.isBlank(content)) return MomiaHttpResponse.BAD_REQUEST;
+        return MomiaHttpResponse.SUCCESS(imServiceApi.push(userId, content, extra));
+    }
+
+    @RequestMapping(value = "/push/batch", method = RequestMethod.POST)
+    public MomiaHttpResponse pushBatch(@RequestParam(value = "uids") String uids,
+                                       @RequestParam String content,
+                                       @RequestParam(required = false, defaultValue = "") String extra) {
+        if (StringUtils.isBlank(uids) || StringUtils.isBlank(content)) return MomiaHttpResponse.BAD_REQUEST;
+
+        Set<Long> userIds = new HashSet<Long>();
+        for (String userId : Splitter.on(",").omitEmptyStrings().trimResults().split(uids)) {
+            userIds.add(Long.valueOf(userId));
+        }
+
+        return MomiaHttpResponse.SUCCESS(imServiceApi.pushBatch(userIds, content, extra));
+    }
+
+    @RequestMapping(value = "/sms/notify", method = RequestMethod.POST)
+    public MomiaHttpResponse smsNotify(@RequestParam String mobile, @RequestParam String message) {
+        if (MobileUtil.isInvalid(mobile) || StringUtils.isBlank(message)) return MomiaHttpResponse.BAD_REQUEST;
+        return MomiaHttpResponse.SUCCESS(smsServiceApi.notify(mobile, message));
     }
 }

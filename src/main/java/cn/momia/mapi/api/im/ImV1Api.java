@@ -6,7 +6,9 @@ import cn.momia.api.im.ImServiceApi;
 import cn.momia.api.im.dto.Group;
 import cn.momia.api.im.dto.GroupMember;
 import cn.momia.api.im.dto.UserGroup;
+import cn.momia.api.user.TeacherServiceApi;
 import cn.momia.api.user.UserServiceApi;
+import cn.momia.api.user.dto.Teacher;
 import cn.momia.api.user.dto.User;
 import cn.momia.common.core.http.MomiaHttpResponse;
 import cn.momia.mapi.api.AbstractApi;
@@ -32,6 +34,7 @@ public class ImV1Api extends AbstractApi {
     @Autowired private CourseServiceApi courseServiceApi;
     @Autowired private ImServiceApi imServiceApi;
     @Autowired private UserServiceApi userServiceApi;
+    @Autowired private TeacherServiceApi teacherServiceApi;
 
     @RequestMapping(value = "/token", method = RequestMethod.POST)
     public MomiaHttpResponse generateImToken(@RequestParam String utoken) {
@@ -111,8 +114,16 @@ public class ImV1Api extends AbstractApi {
         List<GroupMember> groupMembers = imServiceApi.listGroupMembers(user.getId(), groupId);
 
         Set<Long> userIds = new HashSet<Long>();
+        Set<Long> teacherUserIds = new HashSet<Long>();
         for (GroupMember groupMember : groupMembers) {
-            userIds.add(groupMember.getUserId());
+            if (groupMember.isTeacher()) teacherUserIds.add(groupMember.getUserId());
+            else userIds.add(groupMember.getUserId());
+        }
+
+        List<Teacher> teachers = teacherServiceApi.listByUserIds(teacherUserIds);
+        Map<Long, Teacher> teachersMap = new HashMap<Long, Teacher>();
+        for (Teacher teacher : teachers) {
+            teachersMap.put(teacher.getUserId(), teacher);
         }
 
         List<User> users = userServiceApi.list(userIds, User.Type.BASE);
@@ -121,22 +132,39 @@ public class ImV1Api extends AbstractApi {
             usersMap.put(memberUser.getId(), memberUser);
         }
 
-        List<JSONObject> teachers = new ArrayList<JSONObject>();
-        List<JSONObject> customers = new ArrayList<JSONObject>();
+        List<JSONObject> teachersList = new ArrayList<JSONObject>();
+        List<JSONObject> customersList = new ArrayList<JSONObject>();
         for (GroupMember groupMember : groupMembers) {
-            User memberUser = usersMap.get(groupMember.getUserId());
-            if (memberUser == null) continue;
+            if (groupMember.isTeacher()) {
+                Teacher teacher = teachersMap.get(groupMember.getUserId());
+                if (teacher == null) continue;
 
-            JSONObject imUserJson = createImUserInfo(memberUser);
-            if (groupMember.isTeacher()) teachers.add(imUserJson);
-            else customers.add(imUserJson);
+                JSONObject imTeacherJson = createImTeacherInfo(teacher);
+                teachersList.add(imTeacherJson);
+            } else {
+                User memberUser = usersMap.get(groupMember.getUserId());
+                if (memberUser == null) continue;
+
+                JSONObject imUserJson = createImUserInfo(memberUser);
+                customersList.add(imUserJson);
+            }
         }
 
         JSONObject responseJson = new JSONObject();
-        responseJson.put("teachers", teachers);
-        responseJson.put("customers", customers);
+        responseJson.put("teachers", teachersList);
+        responseJson.put("customers", customersList);
 
         return MomiaHttpResponse.SUCCESS(responseJson);
+    }
+
+    private JSONObject createImTeacherInfo(Teacher teacher) {
+        JSONObject imTeacherInfoJson = new JSONObject();
+        imTeacherInfoJson.put("id", teacher.getUserId());
+        imTeacherInfoJson.put("nickName", teacher.getName());
+        imTeacherInfoJson.put("avatar", completeSmallImg(teacher.getAvatar()));
+        imTeacherInfoJson.put("role", User.Role.TEACHER);
+
+        return imTeacherInfoJson;
     }
 
     @RequestMapping(value = "/user/group", method = RequestMethod.GET)
