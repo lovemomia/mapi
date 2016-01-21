@@ -4,6 +4,8 @@ import cn.momia.api.course.CourseServiceApi;
 import cn.momia.api.course.OrderServiceApi;
 import cn.momia.api.im.ImServiceApi;
 import cn.momia.api.user.SmsServiceApi;
+import cn.momia.api.user.UserServiceApi;
+import cn.momia.api.user.dto.User;
 import cn.momia.common.core.http.MomiaHttpResponse;
 import cn.momia.common.core.util.MobileUtil;
 import cn.momia.mapi.api.AbstractApi;
@@ -32,6 +34,7 @@ public class AdminApi extends AbstractApi {
     @Autowired private CourseServiceApi courseServiceApi;
     @Autowired private OrderServiceApi orderServiceApi;
     @Autowired private SmsServiceApi smsServiceApi;
+    @Autowired private UserServiceApi userServiceApi;
 
     @RequestMapping(value = "/im/group", method = RequestMethod.POST)
     public MomiaHttpResponse createGroup(@RequestParam(value = "coid") long courseId,
@@ -57,7 +60,9 @@ public class AdminApi extends AbstractApi {
                                        @RequestParam(value = "coid") long courseId,
                                        @RequestParam(value = "sid") long courseSkuId) {
         if (userId <= 0 || courseId <= 0 || courseSkuId <= 0) return MomiaHttpResponse.BAD_REQUEST;
-        return MomiaHttpResponse.SUCCESS(imServiceApi.joinGroup(userId, courseId, courseSkuId));
+
+        User user = userServiceApi.get(userId);
+        return MomiaHttpResponse.SUCCESS(imServiceApi.joinGroup(userId, courseId, courseSkuId, user.isTeacher()));
     }
 
     @RequestMapping(value = "/im/group/leave", method = RequestMethod.POST)
@@ -79,7 +84,7 @@ public class AdminApi extends AbstractApi {
 
         List<Long> failedUserIds = courseServiceApi.batchBooking(userIds, courseId, skuId);
         for (long userId : userIds) {
-            if (!failedUserIds.contains(userId)) imServiceApi.joinGroup(userId, courseId, skuId);
+            if (!failedUserIds.contains(userId)) imServiceApi.joinGroup(userId, courseId, skuId, false);
         }
 
         return MomiaHttpResponse.SUCCESS(failedUserIds);
