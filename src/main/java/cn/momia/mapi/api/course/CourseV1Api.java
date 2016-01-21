@@ -187,9 +187,9 @@ public class CourseV1Api extends AbstractApi {
         User user = userServiceApi.get(utoken);
         BookedCourse bookedCourse = courseServiceApi.booking(utoken, childId, packageId, skuId);
         if (bookedCourse.getParentId() > 0 && bookedCourse.getParentCourseSkuId() > 0) {
-            imServiceApi.joinGroup(user.getId(), bookedCourse.getParentId(), bookedCourse.getParentCourseSkuId());
+            imServiceApi.joinGroup(user.getId(), bookedCourse.getParentId(), bookedCourse.getParentCourseSkuId(), false);
         } else {
-            imServiceApi.joinGroup(user.getId(), bookedCourse.getId(), bookedCourse.getCourseSkuId());
+            imServiceApi.joinGroup(user.getId(), bookedCourse.getId(), bookedCourse.getCourseSkuId(), false);
         }
 
         return MomiaHttpResponse.SUCCESS;
