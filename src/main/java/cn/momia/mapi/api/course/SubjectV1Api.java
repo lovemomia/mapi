@@ -59,6 +59,18 @@ public class SubjectV1Api extends AbstractApi {
         return MomiaHttpResponse.SUCCESS(responseJson);
     }
 
+    @RequestMapping(value = "/list", method = RequestMethod.GET)
+    public MomiaHttpResponse list(@RequestParam(value = "city") int cityId) {
+        if (cityId <= 0) return MomiaHttpResponse.BAD_REQUEST;
+
+        List<Subject> subjects = subjectServiceApi.list(cityId);
+        for (Subject subject : subjects) {
+            completeLargeImg(subject);
+        }
+
+        return MomiaHttpResponse.SUCCESS(subjects);
+    }
+
     @RequestMapping(value = "/course", method = RequestMethod.GET)
     public MomiaHttpResponse listCourses(@RequestParam long id,
                                          @RequestParam(value = "pid", required = false, defaultValue = "0") long packageId,
