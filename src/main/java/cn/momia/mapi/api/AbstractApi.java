@@ -108,6 +108,12 @@ public abstract class AbstractApi extends BaseController {
     protected Subject completeLargeImg(Subject subject) {
         subject.setCover(completeLargeImg(subject.getCover()));
         subject.setImgs(completeLargeImgs(subject.getImgs()));
+        if (subject.getCourses() != null) {
+            for (Course course : subject.getCourses()) {
+                course.setCover(completeMiddleImg(course.getCover()));
+                course.setVCover(completeImg(course.getVCover()));
+            }
+        }
 
         return subject;
     }

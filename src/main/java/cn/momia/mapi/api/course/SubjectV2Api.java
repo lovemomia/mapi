@@ -60,6 +60,7 @@ public class SubjectV2Api extends FeedRelatedApi {
         if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
 
         Subject subject = subjectServiceApi.get(id);
+        subject.setCourses(null); // 后面通过course的接口单独取
         completeLargeImg(subject);
 
         PagedList<Course> courses = courseServiceApi.query(id, 0, Configuration.getInt("PageSize.Course"));
