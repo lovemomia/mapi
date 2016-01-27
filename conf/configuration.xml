@@ -60,5 +60,6 @@
         <Timeline>20</Timeline>
         <Material>20</Material>
         <ChildComment>20</ChildComment>
+        <DiscussReply>20</DiscussReply>
     </PageSize>
 </Configuration>
