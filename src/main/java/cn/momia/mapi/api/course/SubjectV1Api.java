@@ -229,6 +229,17 @@ public class SubjectV1Api extends AbstractApi {
         return MomiaHttpResponse.SUCCESS(orderServiceApi.sendGift(utoken, orderId));
     }
 
+    @RequestMapping(value = "/order/gift/receive", method = RequestMethod.POST)
+    public MomiaHttpResponse receiveGift(@RequestParam String utoken,
+                                         @RequestParam(value = "oid") long orderId,
+                                         @RequestParam long expired,
+                                         @RequestParam String giftsign) {
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (orderId <= 0 || expired <= 0 || StringUtils.isBlank(giftsign)) return MomiaHttpResponse.BAD_REQUEST;
+
+        return MomiaHttpResponse.SUCCESS(orderServiceApi.receiveGift(utoken, orderId, expired, giftsign));
+    }
+
     @RequestMapping(value = "/favor", method = RequestMethod.POST)
     public MomiaHttpResponse favor(@RequestParam String utoken, @RequestParam long id) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
