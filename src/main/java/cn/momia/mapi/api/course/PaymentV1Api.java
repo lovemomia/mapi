@@ -2,7 +2,7 @@ package cn.momia.mapi.api.course;
 
 import cn.momia.api.course.PaymentServiceApi;
 import cn.momia.common.core.http.MomiaHttpResponse;
-import cn.momia.common.core.util.XmlUtil;
+import cn.momia.common.core.util.MomiaUtil;
 import cn.momia.mapi.api.AbstractApi;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -64,7 +64,7 @@ public class PaymentV1Api extends AbstractApi {
     @RequestMapping(value = "/callback/weixin", method = RequestMethod.POST, produces = "application/xml")
     public String callbackWeixin(HttpServletRequest request) {
         try {
-            Map<String, String> params = XmlUtil.xmlToMap(IOUtils.toString(request.getInputStream()));
+            Map<String, String> params = MomiaUtil.xmlToMap(IOUtils.toString(request.getInputStream()));
             if (paymentServiceApi.callbackWeixin(params)) return WechatpayResponse.SUCCESS;
         } catch (Exception e) {
             LOGGER.error("wechat pay callback error", e);
