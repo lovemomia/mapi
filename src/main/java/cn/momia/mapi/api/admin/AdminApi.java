@@ -7,7 +7,7 @@ import cn.momia.api.user.SmsServiceApi;
 import cn.momia.api.user.UserServiceApi;
 import cn.momia.api.user.dto.User;
 import cn.momia.common.core.http.MomiaHttpResponse;
-import cn.momia.common.core.util.MobileUtil;
+import cn.momia.common.core.util.MomiaUtil;
 import cn.momia.mapi.api.AbstractApi;
 import com.google.common.base.Splitter;
 import org.apache.commons.lang3.StringUtils;
@@ -140,7 +140,7 @@ public class AdminApi extends AbstractApi {
 
     @RequestMapping(value = "/sms/notify", method = RequestMethod.POST)
     public MomiaHttpResponse smsNotify(@RequestParam String mobile, @RequestParam String message) {
-        if (MobileUtil.isInvalid(mobile) || StringUtils.isBlank(message)) return MomiaHttpResponse.BAD_REQUEST;
+        if (MomiaUtil.isInvalid(mobile) || StringUtils.isBlank(message)) return MomiaHttpResponse.BAD_REQUEST;
         return MomiaHttpResponse.SUCCESS(smsServiceApi.notify(mobile, message));
     }
 }
