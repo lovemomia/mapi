@@ -18,7 +18,7 @@ import cn.momia.api.user.dto.User;
 import cn.momia.common.core.dto.PagedList;
 import cn.momia.common.core.http.MomiaHttpResponse;
 import cn.momia.api.user.UserServiceApi;
-import cn.momia.common.core.util.SexUtil;
+import cn.momia.common.core.util.MomiaUtil;
 import cn.momia.common.webapp.config.Configuration;
 import cn.momia.mapi.api.FeedRelatedApi;
 import com.alibaba.fastjson.JSONObject;
@@ -92,7 +92,7 @@ public class UserV1Api extends FeedRelatedApi {
     @RequestMapping(value = "/sex", method = RequestMethod.POST)
     public MomiaHttpResponse updateSex(@RequestParam String utoken, @RequestParam String sex) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (StringUtils.isBlank(sex) || SexUtil.isInvalid(sex)) return MomiaHttpResponse.FAILED("无效的用户性别");
+        if (StringUtils.isBlank(sex) || MomiaUtil.isInvalidSex(sex)) return MomiaHttpResponse.FAILED("无效的用户性别");
 
         return MomiaHttpResponse.SUCCESS(completeUserImgs(userServiceApi.updateSex(utoken, sex)));
     }

@@ -2,7 +2,7 @@ package cn.momia.mapi.api.user;
 
 import cn.momia.api.user.ChildServiceApi;
 import cn.momia.common.core.http.MomiaHttpResponse;
-import cn.momia.common.core.util.SexUtil;
+import cn.momia.common.core.util.MomiaUtil;
 import cn.momia.mapi.api.AbstractApi;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,7 +69,7 @@ public class ChildV1Api extends AbstractApi {
                                             @RequestParam String sex) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (childId <= 0) return MomiaHttpResponse.BAD_REQUEST;
-        if (SexUtil.isInvalid(sex)) return MomiaHttpResponse.FAILED("无效的孩子性别");
+        if (MomiaUtil.isInvalidSex(sex)) return MomiaHttpResponse.FAILED("无效的孩子性别");
 
         return MomiaHttpResponse.SUCCESS(completeUserImgs(childServiceApi.updateSex(utoken, childId, sex)));
     }
