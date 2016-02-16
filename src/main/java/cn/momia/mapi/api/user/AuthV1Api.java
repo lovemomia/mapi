@@ -39,7 +39,7 @@ public class AuthV1Api extends AbstractApi {
 
     @RequestMapping(value = "/send", method = RequestMethod.POST)
     public MomiaHttpResponse send(@RequestParam String mobile)  {
-        if (MomiaUtil.isInvalid(mobile)) return MomiaHttpResponse.FAILED("无效的手机号码");
+        if (MomiaUtil.isInvalidMobile(mobile)) return MomiaHttpResponse.FAILED("无效的手机号码");
         if (!smsServiceApi.send(mobile)) return MomiaHttpResponse.FAILED("发送短信验证码失败");
 
         return MomiaHttpResponse.SUCCESS;
@@ -51,7 +51,7 @@ public class AuthV1Api extends AbstractApi {
                                       @RequestParam String password,
                                       @RequestParam String code) {
         if (StringUtils.isBlank(nickName)) return MomiaHttpResponse.FAILED("昵称不能为空");
-        if (MomiaUtil.isInvalid(mobile)) return MomiaHttpResponse.FAILED("无效的手机号码");
+        if (MomiaUtil.isInvalidMobile(mobile)) return MomiaHttpResponse.FAILED("无效的手机号码");
         if (StringUtils.isBlank(password)) return MomiaHttpResponse.FAILED("密码不能为空");
         if (StringUtils.isBlank(code)) return MomiaHttpResponse.FAILED("验证码不能为空");
 
@@ -99,7 +99,7 @@ public class AuthV1Api extends AbstractApi {
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public MomiaHttpResponse login(@RequestParam String mobile, @RequestParam String password) {
-        if (MomiaUtil.isInvalid(mobile)) return MomiaHttpResponse.FAILED("无效的手机号码");
+        if (MomiaUtil.isInvalidMobile(mobile)) return MomiaHttpResponse.FAILED("无效的手机号码");
         if (StringUtils.isBlank(password)) return MomiaHttpResponse.FAILED("密码不能为空");
 
         return MomiaHttpResponse.SUCCESS(completeUserImgs(authServiceApi.login(mobile, password)));
@@ -107,7 +107,7 @@ public class AuthV1Api extends AbstractApi {
 
     @RequestMapping(value = "/password", method = RequestMethod.POST)
     public MomiaHttpResponse updatePassword(@RequestParam String mobile, @RequestParam String password, @RequestParam String code) {
-        if (MomiaUtil.isInvalid(mobile)) return MomiaHttpResponse.FAILED("无效的手机号码");
+        if (MomiaUtil.isInvalidMobile(mobile)) return MomiaHttpResponse.FAILED("无效的手机号码");
         if (StringUtils.isBlank(password)) return MomiaHttpResponse.FAILED("密码不能为空");
         if (StringUtils.isBlank(code)) return MomiaHttpResponse.FAILED("验证码不能为空");
 

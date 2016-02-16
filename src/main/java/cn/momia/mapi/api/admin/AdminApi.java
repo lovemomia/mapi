@@ -140,7 +140,7 @@ public class AdminApi extends AbstractApi {
 
     @RequestMapping(value = "/sms/notify", method = RequestMethod.POST)
     public MomiaHttpResponse smsNotify(@RequestParam String mobile, @RequestParam String message) {
-        if (MomiaUtil.isInvalid(mobile) || StringUtils.isBlank(message)) return MomiaHttpResponse.BAD_REQUEST;
+        if (MomiaUtil.isInvalidMobile(mobile) || StringUtils.isBlank(message)) return MomiaHttpResponse.BAD_REQUEST;
         return MomiaHttpResponse.SUCCESS(smsServiceApi.notify(mobile, message));
     }
 }
