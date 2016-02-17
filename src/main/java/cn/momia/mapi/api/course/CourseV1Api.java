@@ -96,8 +96,6 @@ public class CourseV1Api extends AbstractApi {
 
         int institutionId = courseServiceApi.getInstitutionId(id);
         Institution institution = poiServiceApi.getInstitution(institutionId);
-        if (!institution.exists()) return MomiaHttpResponse.FAILED("机构信息不存在");
-
         institution.setCover(completeLargeImg(institution.getCover()));
 
         return MomiaHttpResponse.SUCCESS(institution);
