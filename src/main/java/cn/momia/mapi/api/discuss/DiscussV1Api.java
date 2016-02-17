@@ -41,17 +41,21 @@ public class DiscussV1Api extends AbstractApi {
 
         if (start == 0) responseJson.put("topic", completeDiscussTopic(discussServiceApi.getTopic(id)));
 
-        long userId = StringUtils.isBlank(utoken) ? 0 : userServiceApi.get(utoken).getId();
-        PagedList<DiscussReply> pagedReplies = discussServiceApi.listReplies(userId, id, start, Configuration.getInt("PageSize.DiscussReply"));
+        PagedList<DiscussReply> pagedReplies = discussServiceApi.listReplies(id, start, Configuration.getInt("PageSize.DiscussReply"));
 
+        Set<Long> replyIds = new HashSet<Long>();
         Set<Long> userIds = new HashSet<Long>();
         for (DiscussReply reply : pagedReplies.getList()) {
+            replyIds.add(reply.getId());
             userIds.add(reply.getUserId());
         }
 
+        long userId = StringUtils.isBlank(utoken) ? 0 : userServiceApi.get(utoken).getId();
+        List<Long> staredReplyIds = userId > 0 ? discussServiceApi.filterNotStaredReplyIds(userId, replyIds) : new ArrayList<Long>();
+
         List<User> users = userServiceApi.list(userIds, User.Type.FULL);
 
-        responseJson.put("replies", buildPagedUserReplies(pagedReplies, users));
+        responseJson.put("replies", buildPagedUserReplies(pagedReplies, staredReplyIds, users));
 
         return MomiaHttpResponse.SUCCESS(responseJson);
     }
@@ -61,7 +65,7 @@ public class DiscussV1Api extends AbstractApi {
         return topic;
     }
 
-    private PagedList<JSONObject> buildPagedUserReplies(PagedList<DiscussReply> pagedReplies, List<User> users) {
+    private PagedList<JSONObject> buildPagedUserReplies(PagedList<DiscussReply> pagedReplies, List<Long> staredReplyIds, List<User> users) {
         PagedList<JSONObject> pagedUserReplies = new PagedList<JSONObject>();
         pagedUserReplies.setTotalCount(pagedReplies.getTotalCount());
         pagedUserReplies.setNextIndex(pagedReplies.getNextIndex());
@@ -87,7 +91,7 @@ public class DiscussV1Api extends AbstractApi {
             userReply.put("content", reply.getContent());
             userReply.put("addTime", TimeUtil.formatAddTime(reply.getAddTime()));
             userReply.put("staredCount", reply.getStaredCount());
-            userReply.put("stared", reply.isStared());
+            userReply.put("stared", staredReplyIds.contains(reply.getId()));
 
             userReplies.add(userReply);
         }
