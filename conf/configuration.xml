@@ -4,6 +4,14 @@
         <Level>INFO</Level>
     </Logger>
 
+    <Database>
+        <SogoKids>
+            <JdbcUrl><![CDATA[jdbc:mysql://120.55.102.12:3306/sogokids?characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull]]></JdbcUrl>
+            <Username>sogokids</Username>
+            <Password>SogoKids</Password>
+        </SogoKids>
+    </Database>
+
     <Validation>
         <Key>578890d82212ae548d883bc7a201cdf4</Key>
         <AdminKey>578890d82212ae548d883bc7a201cdf4</AdminKey>
