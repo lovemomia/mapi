@@ -3,8 +3,8 @@ package cn.momia.mapi.api.discuss;
 import cn.momia.api.discuss.DiscussServiceApi;
 import cn.momia.api.discuss.dto.DiscussReply;
 import cn.momia.api.discuss.dto.DiscussTopic;
+import cn.momia.api.user.ChildServiceApi;
 import cn.momia.api.user.UserServiceApi;
-import cn.momia.api.user.dto.Child;
 import cn.momia.api.user.dto.User;
 import cn.momia.common.core.dto.PagedList;
 import cn.momia.common.core.http.MomiaHttpResponse;
@@ -31,6 +31,7 @@ import java.util.Set;
 public class DiscussV1Api extends AbstractApi {
     @Autowired private DiscussServiceApi discussServiceApi;
     @Autowired private UserServiceApi userServiceApi;
+    @Autowired private ChildServiceApi childServiceApi;
 
     @RequestMapping(value = "/topic", method = RequestMethod.GET)
     public MomiaHttpResponse getTopic(@RequestParam(required = false, defaultValue = "") String utoken, @RequestParam int id, @RequestParam int start) {
@@ -84,8 +85,8 @@ public class DiscussV1Api extends AbstractApi {
             userReply.put("id", reply.getId());
             userReply.put("avatar", completeSmallImg(user.getAvatar()));
             userReply.put("nickName", user.getNickName());
-            List<JSONObject> childrenDetail = formatChildrenDetail(user.getChildren());
-            List<String> children = formatChildren(childrenDetail);
+            List<JSONObject> childrenDetail = childServiceApi.formatChildrenDetail(user.getChildren());
+            List<String> children = childServiceApi.formatChildren(childrenDetail);
             userReply.put("childrenDetail", childrenDetail);
             userReply.put("children", children);
             userReply.put("content", reply.getContent());
@@ -100,38 +101,13 @@ public class DiscussV1Api extends AbstractApi {
         return pagedUserReplies;
     }
 
-    private List<JSONObject> formatChildrenDetail(List<Child> children) {
-        List<JSONObject> childrenDetail = new ArrayList<JSONObject>();
-        for (int i = 0; i < Math.min(2, children.size()); i++) {
-            Child child = children.get(i);
-            JSONObject childJson = new JSONObject();
-            childJson.put("sex", child.getSex());
-            childJson.put("name", child.getName());
-            childJson.put("age", TimeUtil.formatAge(child.getBirthday()));
-
-            childrenDetail.add(childJson);
-        }
-
-        return childrenDetail;
-    }
-
-    private List<String> formatChildren(List<JSONObject> childrenDetail) {
-        List<String> formatedChildren = new ArrayList<String>();
-        for (JSONObject child : childrenDetail) {
-            formatedChildren.add(child.getString("sex") + "孩" + child.getString("age"));
-        }
-
-        return formatedChildren;
-    }
-
     @RequestMapping(value = "/reply", method = RequestMethod.POST)
     public MomiaHttpResponse reply(@RequestParam String utoken, @RequestParam(value = "topicid") int topicId, @RequestParam String content) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (topicId <= 0) return MomiaHttpResponse.FAILED("无效的TopicID");
         if (StringUtils.isBlank(content)) return MomiaHttpResponse.FAILED("内容不能为空");
 
-        User user = userServiceApi.get(utoken);
-        return MomiaHttpResponse.SUCCESS(discussServiceApi.reply(user.getId(), topicId, content));
+        return MomiaHttpResponse.SUCCESS(discussServiceApi.reply(userServiceApi.get(utoken).getId(), topicId, content));
     }
 
     @RequestMapping(value = "/reply/star", method = RequestMethod.POST)
@@ -139,8 +115,7 @@ public class DiscussV1Api extends AbstractApi {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (replyId <= 0) return MomiaHttpResponse.FAILED("无效的ReplyID");
 
-        User user = userServiceApi.get(utoken);
-        return MomiaHttpResponse.SUCCESS(discussServiceApi.star(user.getId(), replyId));
+        return MomiaHttpResponse.SUCCESS(discussServiceApi.star(userServiceApi.get(utoken).getId(), replyId));
     }
 
     @RequestMapping(value = "/reply/unstar", method = RequestMethod.POST)
@@ -148,7 +123,6 @@ public class DiscussV1Api extends AbstractApi {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (replyId <= 0) return MomiaHttpResponse.FAILED("无效的ReplyID");
 
-        User user = userServiceApi.get(utoken);
-        return MomiaHttpResponse.SUCCESS(discussServiceApi.unstar(user.getId(), replyId));
+        return MomiaHttpResponse.SUCCESS(discussServiceApi.unstar(userServiceApi.get(utoken).getId(), replyId));
     }
 }
