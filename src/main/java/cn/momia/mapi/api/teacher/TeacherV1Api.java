@@ -279,7 +279,7 @@ public class TeacherV1Api extends AbstractApi {
         student.put("userId", child.getUserId());
         student.put("avatar", completeSmallImg(child.getAvatar()));
         student.put("name", child.getName());
-        student.put("birthday", child.getBirthday());
+        student.put("age", TimeUtil.formatAge(child.getBirthday()));
         student.put("sex", child.getSex());
 
         return student;
