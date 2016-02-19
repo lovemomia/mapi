@@ -1,7 +1,5 @@
 package cn.momia.mapi.api.index;
 
-import cn.momia.api.operate.ConfigServiceApi;
-import cn.momia.api.operate.dto.Config;
 import cn.momia.common.webapp.config.Configuration;
 import cn.momia.mapi.api.AbstractApi;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,10 +8,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AbstractIndexApi extends AbstractApi {
-    @Autowired private ConfigServiceApi configServiceApi;
+    @Autowired private ConfigService configService;
 
     protected List<Config.Banner> getBanners(int cityId, int platform, String clientVersion) {
-        List<Config.Banner> banners = configServiceApi.listBanners(cityId);
+        List<Config.Banner> banners = configService.listBanners(cityId);
         List<Config.Banner> filteredBanners = new ArrayList<Config.Banner>();
         for (Config.Banner banner : banners) {
             if (banner.isInvalid(platform, clientVersion)) continue;
@@ -27,7 +25,7 @@ public class AbstractIndexApi extends AbstractApi {
     }
 
     protected List<Config.Icon> getIcons(int cityId, int platform, String clientVersion) {
-        List<Config.Icon> icons = configServiceApi.listIcons(cityId);
+        List<Config.Icon> icons = configService.listIcons(cityId);
         List<Config.Icon> filteredIcons = new ArrayList<Config.Icon>();
         for (Config.Icon icon : icons) {
             if (icon.isInvalid(platform, clientVersion)) continue;
@@ -41,7 +39,7 @@ public class AbstractIndexApi extends AbstractApi {
     }
 
     protected List<Config.Event> getEvents(int cityId, int platform, String clientVersion) {
-        List<Config.Event> events = configServiceApi.listEvents(cityId);
+        List<Config.Event> events = configService.listEvents(cityId);
         List<Config.Event> filteredEvents = new ArrayList<Config.Event>();
         for (Config.Event event : events) {
             if (event.isInvalid(platform, clientVersion)) continue;
