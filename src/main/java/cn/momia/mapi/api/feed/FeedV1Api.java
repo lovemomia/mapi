@@ -43,7 +43,7 @@ public class FeedV1Api extends FeedRelatedApi {
     @RequestMapping(value = "/follow", method = RequestMethod.POST)
     public MomiaHttpResponse follow(@RequestParam String utoken, @RequestParam(value = "fuid") long followedId) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (followedId <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (followedId <= 0) return MomiaHttpResponse.FAILED("无效的关注的用户ID");
 
         User followedUser = userServiceApi.get(followedId);
         if (!followedUser.exists()) return MomiaHttpResponse.FAILED("关注的用户不存在");
