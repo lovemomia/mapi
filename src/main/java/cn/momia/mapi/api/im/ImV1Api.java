@@ -5,6 +5,7 @@ import cn.momia.api.course.dto.course.CourseSku;
 import cn.momia.api.im.ImServiceApi;
 import cn.momia.api.im.dto.Group;
 import cn.momia.api.im.dto.GroupMember;
+import cn.momia.api.im.dto.UserGroup;
 import cn.momia.api.user.TeacherServiceApi;
 import cn.momia.api.user.UserServiceApi;
 import cn.momia.api.user.dto.Teacher;
@@ -12,6 +13,7 @@ import cn.momia.api.user.dto.User;
 import cn.momia.common.core.http.MomiaHttpResponse;
 import cn.momia.common.core.util.TimeUtil;
 import cn.momia.mapi.api.AbstractApi;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
@@ -22,7 +24,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -173,30 +174,23 @@ public class ImV1Api extends AbstractApi {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
 
         User user = userServiceApi.get(utoken);
-        List<Group> groups = imServiceApi.listUserGroups(user.getId());
+        List<UserGroup> userGroups = imServiceApi.listUserGroups(user.getId());
 
-        Set<Long> groupIds = new HashSet<Long>();
         Set<Long> courseIds = new HashSet<Long>();
-        for (Group group : groups) {
-            groupIds.add(group.getGroupId());
+        for (UserGroup group : userGroups) {
             courseIds.add(group.getCourseId());
         }
-        Map<Long, Date> joinTimes = imServiceApi.queryJoinTimes(user.getId(), groupIds);
         Map<Long, String> tipsOfCourses = courseServiceApi.queryTips(courseIds);
 
-        List<JSONObject> userGroups = new ArrayList<JSONObject>();
-        for (Group group : groups) {
-            JSONObject userGroup = new JSONObject();
-            userGroup.put("userId", user.getId());
-            userGroup.put("groupId", group.getGroupId());
-            userGroup.put("groupName", group.getGroupName());
-            userGroup.put("courseId", group.getCourseId());
-            userGroup.put("addTime", TimeUtil.STANDARD_DATE_FORMAT.format(joinTimes.get(String.valueOf(group.getGroupId()))));
-            userGroup.put("tips", tipsOfCourses.get(String.valueOf(group.getCourseId())));
+        List<JSONObject> results = new ArrayList<JSONObject>();
+        for (UserGroup userGroup : userGroups) {
+            JSONObject userGroupJson = (JSONObject) JSON.toJSON(userGroup);
+            userGroupJson.put("addTime", TimeUtil.STANDARD_DATE_FORMAT.format(userGroup.getAddTime()));
+            userGroupJson.put("tips", tipsOfCourses.get(String.valueOf(userGroup.getCourseId())));
 
-            userGroups.add(userGroup);
+            results.add(userGroupJson);
         }
 
-        return MomiaHttpResponse.SUCCESS(groups);
+        return MomiaHttpResponse.SUCCESS(results);
     }
 }
