@@ -22,7 +22,7 @@ public class ChildV1Api extends AbstractApi {
     @RequestMapping(method = RequestMethod.POST)
     public MomiaHttpResponse addChild(@RequestParam String utoken, @RequestParam String children) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (StringUtils.isBlank(children)) return MomiaHttpResponse.BAD_REQUEST;
+        if (StringUtils.isBlank(children)) return MomiaHttpResponse.FAILED("孩子信息不能为空");
 
         return MomiaHttpResponse.SUCCESS(completeUserImgs(childServiceApi.add(utoken, children)));
     }
@@ -30,7 +30,7 @@ public class ChildV1Api extends AbstractApi {
     @RequestMapping(method = RequestMethod.GET)
     public MomiaHttpResponse getChild(@RequestParam String utoken, @RequestParam(value = "cid") long childId) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (childId <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (childId <= 0) return MomiaHttpResponse.FAILED("无效的ChildID");
 
         return MomiaHttpResponse.SUCCESS(completeChildImgs(childServiceApi.get(utoken, childId)));
     }
@@ -46,7 +46,7 @@ public class ChildV1Api extends AbstractApi {
                                                @RequestParam(value = "cid") long childId,
                                                @RequestParam String avatar) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (childId <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (childId <= 0) return MomiaHttpResponse.FAILED("无效的ChildID");
         if (StringUtils.isBlank(avatar)) return MomiaHttpResponse.FAILED("孩子头像不能为空");
 
         return MomiaHttpResponse.SUCCESS(completeUserImgs(childServiceApi.updateAvatar(utoken, childId, avatar)));
@@ -57,7 +57,7 @@ public class ChildV1Api extends AbstractApi {
                                              @RequestParam(value = "cid") long childId,
                                              @RequestParam String name) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (childId <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (childId <= 0) return MomiaHttpResponse.FAILED("无效的ChildID");
         if (StringUtils.isBlank(name)) return MomiaHttpResponse.FAILED("孩子姓名不能为空");
 
         return MomiaHttpResponse.SUCCESS(completeUserImgs(childServiceApi.updateName(utoken, childId, name)));
@@ -68,7 +68,7 @@ public class ChildV1Api extends AbstractApi {
                                             @RequestParam(value = "cid") long childId,
                                             @RequestParam String sex) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (childId <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (childId <= 0) return MomiaHttpResponse.FAILED("无效的ChildID");
         if (MomiaUtil.isInvalidSex(sex)) return MomiaHttpResponse.FAILED("无效的孩子性别");
 
         return MomiaHttpResponse.SUCCESS(completeUserImgs(childServiceApi.updateSex(utoken, childId, sex)));
@@ -79,7 +79,7 @@ public class ChildV1Api extends AbstractApi {
                                                  @RequestParam(value = "cid") long childId,
                                                  @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date birthday) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (childId <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (childId <= 0) return MomiaHttpResponse.FAILED("无效的ChildID");
         if (birthday == null) return MomiaHttpResponse.FAILED("无效的孩子生日");
 
         return MomiaHttpResponse.SUCCESS(completeUserImgs(childServiceApi.updateBirthday(utoken, childId, birthday)));
@@ -88,7 +88,7 @@ public class ChildV1Api extends AbstractApi {
     @RequestMapping(value = "/delete", method = RequestMethod.POST)
     public MomiaHttpResponse deleteChild(@RequestParam String utoken, @RequestParam(value = "cid") long childId) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (childId <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (childId <= 0) return MomiaHttpResponse.FAILED("无效的ChildID");
 
         return MomiaHttpResponse.SUCCESS(completeUserImgs(childServiceApi.delete(utoken, childId)));
     }

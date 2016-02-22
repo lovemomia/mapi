@@ -34,8 +34,8 @@ public class AuthV1Api extends AbstractApi {
     @Autowired private AuthServiceApi authServiceApi;
     @Autowired private CouponServiceApi couponServiceApi;
     @Autowired private ImServiceApi imServiceApi;
-    @Autowired private ChildServiceApi childServiceApi;
     @Autowired private UserServiceApi userServiceApi;
+    @Autowired private ChildServiceApi childServiceApi;
 
     @RequestMapping(value = "/send", method = RequestMethod.POST)
     public MomiaHttpResponse send(@RequestParam String mobile)  {
@@ -51,6 +51,7 @@ public class AuthV1Api extends AbstractApi {
                                       @RequestParam String password,
                                       @RequestParam String code) {
         if (StringUtils.isBlank(nickName)) return MomiaHttpResponse.FAILED("昵称不能为空");
+        if (nickName.contains("官方")) return MomiaHttpResponse.FAILED("用户昵称不能包含“官方”");
         if (MomiaUtil.isInvalidMobile(mobile)) return MomiaHttpResponse.FAILED("无效的手机号码");
         if (StringUtils.isBlank(password)) return MomiaHttpResponse.FAILED("密码不能为空");
         if (StringUtils.isBlank(code)) return MomiaHttpResponse.FAILED("验证码不能为空");
