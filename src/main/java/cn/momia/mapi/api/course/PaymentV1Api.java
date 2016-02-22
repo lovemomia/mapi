@@ -30,7 +30,8 @@ public class PaymentV1Api extends AbstractApi {
                                           @RequestParam(defaultValue = "app") String type,
                                           @RequestParam(value = "coupon", required = false, defaultValue = "0") long userCouponId) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (orderId <= 0 || StringUtils.isBlank(type)) return MomiaHttpResponse.BAD_REQUEST;
+        if (orderId <= 0) return MomiaHttpResponse.FAILED("无效的订单ID");
+        if (StringUtils.isBlank(type)) return MomiaHttpResponse.FAILED("无效的类型");
 
         return MomiaHttpResponse.SUCCESS(paymentServiceApi.prepayAlipay(utoken, orderId, type, userCouponId));
     }
@@ -42,7 +43,8 @@ public class PaymentV1Api extends AbstractApi {
                                           @RequestParam(required = false) String code,
                                           @RequestParam(value = "coupon", required = false, defaultValue = "0") long userCouponId) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (orderId <= 0 || StringUtils.isBlank(type)) return MomiaHttpResponse.BAD_REQUEST;
+        if (orderId <= 0) return MomiaHttpResponse.FAILED("无效的订单ID");
+        if (StringUtils.isBlank(type)) return MomiaHttpResponse.FAILED("无效的类型");
 
         return MomiaHttpResponse.SUCCESS(paymentServiceApi.prepayWeixin(utoken, orderId, type, code, userCouponId));
     }
@@ -96,7 +98,7 @@ public class PaymentV1Api extends AbstractApi {
     @RequestMapping(value = "/check", method = RequestMethod.POST)
     public MomiaHttpResponse check(@RequestParam String utoken, @RequestParam(value = "oid") long orderId) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (orderId <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (orderId <= 0) return MomiaHttpResponse.FAILED("无效的订单ID");
 
         return MomiaHttpResponse.SUCCESS(paymentServiceApi.checkPayment(utoken, orderId));
     }

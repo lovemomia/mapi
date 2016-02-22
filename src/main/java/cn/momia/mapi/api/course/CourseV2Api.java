@@ -35,7 +35,7 @@ public class CourseV2Api extends AbstractApi {
     public MomiaHttpResponse get(@RequestParam(required = false, defaultValue = "") String utoken,
                                  @RequestParam long id,
                                  @RequestParam(required = false, defaultValue = "") String pos) {
-        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (id <= 0) return MomiaHttpResponse.FAILED("无效的课程ID");
 
         Course course = completeLargeImg(courseServiceApi.get(id, pos));
         JSONObject courseJson = (JSONObject) JSON.toJSON(course);

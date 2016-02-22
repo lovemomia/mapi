@@ -40,7 +40,7 @@ public class SubjectV1Api extends AbstractApi {
 
     @RequestMapping(method = RequestMethod.GET)
     public MomiaHttpResponse get(@RequestParam long id) {
-        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (id <= 0) return MomiaHttpResponse.FAILED("无效的课程体系ID");
 
         Subject subject = subjectServiceApi.get(id);
         completeLargeImg(subject);
@@ -61,7 +61,7 @@ public class SubjectV1Api extends AbstractApi {
 
     @RequestMapping(value = "/list", method = RequestMethod.GET)
     public MomiaHttpResponse list(@RequestParam(value = "city") int cityId) {
-        if (cityId <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (cityId < 0) return MomiaHttpResponse.FAILED("无效的城市ID");
 
         List<Subject> subjects = subjectServiceApi.list(cityId);
         for (Subject subject : subjects) {
@@ -77,7 +77,8 @@ public class SubjectV1Api extends AbstractApi {
                                          @RequestParam(required = false, defaultValue = "0") int age,
                                          @RequestParam(required = false, defaultValue = "0") int sort,
                                          @RequestParam int start) {
-        if (id <= 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (id <= 0) return MomiaHttpResponse.FAILED("无效的课程体系ID");
+        if (start < 0) return MomiaHttpResponse.FAILED("无效的分页参数，start必须为非负整数");
 
         // FIXME Magic Number
         PagedList<Course> courses = courseServiceApi.query(id, packageId, 1, 100, 0, start, Configuration.getInt("PageSize.Course"));
@@ -117,7 +118,8 @@ public class SubjectV1Api extends AbstractApi {
 
     @RequestMapping(value = "/comment/list", method = RequestMethod.GET)
     public MomiaHttpResponse listComments(@RequestParam long id, @RequestParam int start) {
-        if (id <= 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (id <= 0) return MomiaHttpResponse.FAILED("无效的课程体系ID");
+        if (start < 0) return MomiaHttpResponse.FAILED("无效的分页参数，start必须为非负整数");
 
         PagedList<UserCourseComment> pageComments = subjectServiceApi.queryCommentsBySubject(id, start, Configuration.getInt("PageSize.CourseComment"));
         completeCourseCommentsImgs(pageComments.getList());
@@ -128,7 +130,7 @@ public class SubjectV1Api extends AbstractApi {
     @RequestMapping(value = "/sku", method = RequestMethod.GET)
     public MomiaHttpResponse sku(@RequestParam String utoken, @RequestParam long id) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (id <= 0) return MomiaHttpResponse.FAILED("无效的课程体系ID");
 
         Subject subject = subjectServiceApi.get(id);
 
@@ -154,7 +156,7 @@ public class SubjectV1Api extends AbstractApi {
     @RequestMapping(value = "/order", method = RequestMethod.POST)
     public MomiaHttpResponse order(@RequestParam String utoken, @RequestParam String order) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (StringUtils.isBlank(order)) return MomiaHttpResponse.BAD_REQUEST;
+        if (StringUtils.isBlank(order)) return MomiaHttpResponse.FAILED("无效的订单信息");
 
         JSONObject orderJson = JSON.parseObject(order);
 
@@ -185,7 +187,7 @@ public class SubjectV1Api extends AbstractApi {
     @RequestMapping(value = "/order/delete", method = RequestMethod.POST)
     public MomiaHttpResponse deleteOrder(@RequestParam String utoken, @RequestParam(value = "oid") long orderId) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (orderId <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (orderId <= 0) return MomiaHttpResponse.FAILED("无效的订单ID");
 
         if (!orderServiceApi.deleteOrder(utoken, orderId)) return MomiaHttpResponse.FAILED("删除订单失败");
         return MomiaHttpResponse.SUCCESS;
@@ -194,7 +196,7 @@ public class SubjectV1Api extends AbstractApi {
     @RequestMapping(value = "/order/refund", method = RequestMethod.POST)
     public MomiaHttpResponse refund(@RequestParam String utoken, @RequestParam(value = "oid") long orderId) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (orderId <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (orderId <= 0) return MomiaHttpResponse.FAILED("无效的订单ID");
 
         if (!orderServiceApi.refundOrder(utoken, orderId)) return MomiaHttpResponse.FAILED("申请退款失败");
         return MomiaHttpResponse.SUCCESS;
@@ -205,7 +207,8 @@ public class SubjectV1Api extends AbstractApi {
                                     @RequestParam(value = "oid") long orderId,
                                     @RequestParam(value = "coupon") long userCouponId) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (orderId <= 0 || userCouponId <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (orderId <= 0) return MomiaHttpResponse.FAILED("无效的订单ID");
+        if (userCouponId <= 0) return MomiaHttpResponse.FAILED("无效的优惠ID");
 
         return MomiaHttpResponse.SUCCESS(couponServiceApi.coupon(utoken, orderId, userCouponId));
     }
@@ -213,7 +216,7 @@ public class SubjectV1Api extends AbstractApi {
     @RequestMapping(value = "/order/detail", method = RequestMethod.GET)
     public MomiaHttpResponse orderDetail(@RequestParam String utoken, @RequestParam(value = "oid") long orderId) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (orderId <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (orderId <= 0) return MomiaHttpResponse.FAILED("无效的订单ID");
 
         SubjectOrder order = orderServiceApi.get(utoken, orderId);
         order.setCover(completeMiddleImg(order.getCover()));
@@ -224,7 +227,7 @@ public class SubjectV1Api extends AbstractApi {
     @RequestMapping(value = "/order/gift/send", method = RequestMethod.POST)
     public MomiaHttpResponse sendGift(@RequestParam String utoken, @RequestParam(value = "oid") long orderId) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (orderId <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (orderId <= 0) return MomiaHttpResponse.FAILED("无效的订单ID");
 
         return MomiaHttpResponse.SUCCESS(orderServiceApi.sendGift(utoken, orderId));
     }
@@ -232,7 +235,7 @@ public class SubjectV1Api extends AbstractApi {
     @RequestMapping(value = "/order/gift/status", method = RequestMethod.GET)
     public MomiaHttpResponse giftStatus(@RequestParam String utoken, @RequestParam(value = "oid") long orderId) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (orderId <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (orderId <= 0) return MomiaHttpResponse.FAILED("无效的订单ID");
 
         return MomiaHttpResponse.SUCCESS(orderServiceApi.giftStatus(utoken, orderId));
     }
@@ -243,7 +246,9 @@ public class SubjectV1Api extends AbstractApi {
                                          @RequestParam long expired,
                                          @RequestParam String giftsign) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (orderId <= 0 || expired <= 0 || StringUtils.isBlank(giftsign)) return MomiaHttpResponse.BAD_REQUEST;
+        if (orderId <= 0) return MomiaHttpResponse.FAILED("无效的订单ID");
+        if (expired <= 0) return MomiaHttpResponse.FAILED("无效的过期时间");
+        if (StringUtils.isBlank(giftsign)) return MomiaHttpResponse.FAILED("无效的签名");
 
         return MomiaHttpResponse.SUCCESS(orderServiceApi.receiveGift(utoken, orderId, expired, giftsign));
     }

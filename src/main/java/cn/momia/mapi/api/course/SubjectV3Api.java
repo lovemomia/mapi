@@ -22,7 +22,7 @@ public class SubjectV3Api extends AbstractApi {
 
     @RequestMapping(method = RequestMethod.GET)
     public MomiaHttpResponse get(@RequestParam long id) {
-        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (id <= 0) return MomiaHttpResponse.FAILED("无效的课程体系ID");
 
         Subject subject = subjectServiceApi.get(id);
         completeLargeImg(subject);

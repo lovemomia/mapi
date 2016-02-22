@@ -39,7 +39,8 @@ public class SubjectV2Api extends FeedRelatedApi {
 
     @RequestMapping(value = "/trial", method = RequestMethod.GET)
     public MomiaHttpResponse trial(@RequestParam(value = "city") int cityId, @RequestParam int start) {
-        if (cityId < 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (cityId < 0) return MomiaHttpResponse.FAILED("无效的城市ID");
+        if (start < 0) return MomiaHttpResponse.FAILED("无效的分页参数，start必须为非负整数");
         return MomiaHttpResponse.SUCCESS(getTrialSubjects(cityId, start));
     }
 
@@ -57,7 +58,7 @@ public class SubjectV2Api extends FeedRelatedApi {
 
     @RequestMapping(method = RequestMethod.GET)
     public MomiaHttpResponse get(@RequestParam(required = false, defaultValue = "") String utoken, @RequestParam long id) {
-        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (id <= 0) return MomiaHttpResponse.FAILED("无效的课程体系ID");
 
         Subject subject = subjectServiceApi.get(id);
         subject.setCourses(null); // 后面通过course的接口单独取
@@ -84,7 +85,7 @@ public class SubjectV2Api extends FeedRelatedApi {
     @RequestMapping(value = "/sku", method = RequestMethod.GET)
     public MomiaHttpResponse sku(@RequestParam String utoken, @RequestParam long id, @RequestParam(required = false, value = "coid", defaultValue = "0") long courseId) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (id <= 0) return MomiaHttpResponse.FAILED("无效的课程体系ID");
 
         List<SubjectSku> skus = subjectServiceApi.querySkus(id);
         Contact contact = userServiceApi.getContact(utoken);

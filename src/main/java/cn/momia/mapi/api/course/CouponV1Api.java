@@ -40,7 +40,7 @@ public class CouponV1Api extends AbstractApi {
     @RequestMapping(value = "/invite", method = RequestMethod.POST)
     public MomiaHttpResponse inviteCoupon(@RequestParam String mobile, @RequestParam(value = "invite") String inviteCode) {
         if (MomiaUtil.isInvalidMobile(mobile)) return MomiaHttpResponse.FAILED("无效的手机号码");
-        if (StringUtils.isBlank(inviteCode)) return MomiaHttpResponse.BAD_REQUEST;
+        if (StringUtils.isBlank(inviteCode)) return MomiaHttpResponse.FAILED("无效的邀请码");
         if (userServiceApi.getByMobile(mobile).exists()) return MomiaHttpResponse.FAILED("该手机号已经注册过，只有新用户才能领取");
 
         couponServiceApi.invite(mobile, inviteCode);
