@@ -61,7 +61,7 @@ public class AuthV1Api extends AbstractApi {
         generateImToken(user, user.getNickName(), user.getAvatar());
         addDefaultChild(user);
 
-        return MomiaHttpResponse.SUCCESS(user);
+        return MomiaHttpResponse.SUCCESS(completeUserImgs(userServiceApi.get(user.getToken())));
     }
 
     private void distributeInviteCoupon(long userId, String mobile) {
