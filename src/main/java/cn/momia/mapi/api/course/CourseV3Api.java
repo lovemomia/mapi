@@ -7,9 +7,7 @@ import cn.momia.api.course.dto.course.Course;
 import cn.momia.api.course.dto.course.CourseDetail;
 import cn.momia.api.course.dto.subject.SubjectSku;
 import cn.momia.api.user.TeacherServiceApi;
-import cn.momia.api.user.UserServiceApi;
 import cn.momia.api.user.dto.Teacher;
-import cn.momia.api.user.dto.User;
 import cn.momia.common.core.dto.PagedList;
 import cn.momia.common.core.http.MomiaHttpResponse;
 import cn.momia.common.webapp.config.Configuration;
@@ -17,7 +15,6 @@ import cn.momia.mapi.api.AbstractApi;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +32,6 @@ public class CourseV3Api extends AbstractApi {
 
     @Autowired private CourseServiceApi courseServiceApi;
     @Autowired private SubjectServiceApi subjectServiceApi;
-    @Autowired private UserServiceApi userServiceApi;
     @Autowired private TeacherServiceApi teacherServiceApi;
 
     @RequestMapping(method = RequestMethod.GET)
@@ -46,10 +42,6 @@ public class CourseV3Api extends AbstractApi {
 
         Course course = completeLargeImg(courseServiceApi.get(id, pos));
         JSONObject courseJson = (JSONObject) JSON.toJSON(course);
-        if (!StringUtils.isBlank(utoken)) {
-            User user = userServiceApi.get(utoken);
-            courseJson.put("favored", courseServiceApi.isFavored(user.getId(), id));
-        }
 
         PagedList<Integer> pagedTeacherIds = courseServiceApi.teacherIds(id, 0, Configuration.getInt("PageSize.Teacher"));
         List<Teacher> teachers = completeTeachersImgs(teacherServiceApi.list(pagedTeacherIds.getList()));

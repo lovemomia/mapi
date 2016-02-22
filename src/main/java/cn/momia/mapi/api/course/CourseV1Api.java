@@ -47,10 +47,6 @@ public class CourseV1Api extends AbstractApi {
 
         Course course = completeLargeImg(courseServiceApi.get(id, pos));
         JSONObject courseJson = (JSONObject) JSON.toJSON(course);
-        if (!StringUtils.isBlank(utoken)) {
-            User user = userServiceApi.get(utoken);
-            courseJson.put("favored", courseServiceApi.isFavored(user.getId(), id));
-        }
 
         PagedList<Integer> pagedTeacherIds = courseServiceApi.teacherIds(id, 0, Configuration.getInt("PageSize.CourseTeacher"));
         List<Teacher> teachers = completeTeachersImgs(teacherServiceApi.list(pagedTeacherIds.getList()));
@@ -228,25 +224,5 @@ public class CourseV1Api extends AbstractApi {
         completeCourseCommentsImgs(pagedComments.getList());
 
         return MomiaHttpResponse.SUCCESS(pagedComments);
-    }
-
-    @RequestMapping(value = "/favor", method = RequestMethod.POST)
-    public MomiaHttpResponse favor(@RequestParam String utoken, @RequestParam long id) {
-        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
-
-        User user = userServiceApi.get(utoken);
-        if (!courseServiceApi.favor(user.getId(), id)) return MomiaHttpResponse.FAILED("添加收藏失败");
-        return MomiaHttpResponse.SUCCESS;
-    }
-
-    @RequestMapping(value = "/unfavor", method = RequestMethod.POST)
-    public MomiaHttpResponse unfavor(@RequestParam String utoken, @RequestParam long id) {
-        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
-
-        User user = userServiceApi.get(utoken);
-        if (!courseServiceApi.unfavor(user.getId(), id)) return MomiaHttpResponse.FAILED("取消收藏失败");
-        return MomiaHttpResponse.SUCCESS;
     }
 }

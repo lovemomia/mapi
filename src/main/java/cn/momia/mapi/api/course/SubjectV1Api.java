@@ -247,24 +247,4 @@ public class SubjectV1Api extends AbstractApi {
 
         return MomiaHttpResponse.SUCCESS(orderServiceApi.receiveGift(utoken, orderId, expired, giftsign));
     }
-
-    @RequestMapping(value = "/favor", method = RequestMethod.POST)
-    public MomiaHttpResponse favor(@RequestParam String utoken, @RequestParam long id) {
-        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
-
-        User user = userServiceApi.get(utoken);
-        if (!subjectServiceApi.favor(user.getId(), id)) return MomiaHttpResponse.FAILED("添加收藏失败");
-        return MomiaHttpResponse.SUCCESS;
-    }
-
-    @RequestMapping(value = "/unfavor", method = RequestMethod.POST)
-    public MomiaHttpResponse unfavor(@RequestParam String utoken, @RequestParam long id) {
-        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
-
-        User user = userServiceApi.get(utoken);
-        if (!subjectServiceApi.unfavor(user.getId(), id)) return MomiaHttpResponse.FAILED("取消收藏失败");
-        return MomiaHttpResponse.SUCCESS;
-    }
 }
