@@ -41,7 +41,7 @@ public class FeedRelatedApi extends AbstractApi {
             for (Feed feed : feeds) {
                 feedIds.add(feed.getId());
             }
-            staredFeedIds.addAll(feedServiceApi.queryStaredFeedIds(userId, feedIds));
+            staredFeedIds.addAll(feedServiceApi.filterNotStaredFeedIds(userId, feedIds));
         }
 
         Set<Long> userIds = new HashSet<Long>();

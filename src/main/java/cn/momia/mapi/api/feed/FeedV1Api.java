@@ -49,22 +49,18 @@ public class FeedV1Api extends FeedRelatedApi {
         if (!followedUser.exists()) return MomiaHttpResponse.FAILED("关注的用户不存在");
 
         User user = userServiceApi.get(utoken);
-        feedServiceApi.follow(user.getId(), followedId);
+        if (!feedServiceApi.follow(user.getId(), followedId)) return MomiaHttpResponse.FAILED("关注失败");
 
         return MomiaHttpResponse.SUCCESS;
     }
 
     @RequestMapping(method = RequestMethod.GET)
     public MomiaHttpResponse list(@RequestParam(required = false, defaultValue = "") String utoken, @RequestParam int start) {
-        if (start < 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (start < 0) return MomiaHttpResponse.FAILED("无效的分页参数，start必须为非负整数");
 
-        long userId = 0;
-        if (!StringUtils.isBlank(utoken)) {
-            User user = userServiceApi.get(utoken);
-            userId = user.getId();
-        }
-
+        long userId = StringUtils.isBlank(utoken) ? 0 : userServiceApi.get(utoken).getId();
         PagedList<Feed> pagedFeeds = feedServiceApi.list(userId, start, Configuration.getInt("PageSize.Feed"));
+
         return MomiaHttpResponse.SUCCESS(buildPagedUserFeeds(userId, pagedFeeds));
     }
 
@@ -72,7 +68,8 @@ public class FeedV1Api extends FeedRelatedApi {
     public MomiaHttpResponse subject(@RequestParam(defaultValue = "") String utoken,
                                      @RequestParam(value = "suid") long subjectId,
                                      @RequestParam final int start) {
-        if (subjectId <= 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (subjectId <= 0) return MomiaHttpResponse.FAILED("无效的课程体系ID");
+        if (start < 0) return MomiaHttpResponse.FAILED("无效的分页参数，start必须为非负整数");
 
         long userId = StringUtils.isBlank(utoken) ? 0 : userServiceApi.get(utoken).getId();
         PagedList<Feed> pagedFeeds = feedServiceApi.queryBySubject(subjectId, start, Configuration.getInt("PageSize.Feed"));
@@ -84,7 +81,8 @@ public class FeedV1Api extends FeedRelatedApi {
     public MomiaHttpResponse course(@RequestParam(defaultValue = "") String utoken,
                                     @RequestParam(value = "coid") long courseId,
                                     @RequestParam final int start) {
-        if (courseId <= 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (courseId <= 0) return MomiaHttpResponse.FAILED("无效的课程ID");
+        if (start < 0) return MomiaHttpResponse.FAILED("无效的分页参数，start必须为非负整数");
 
         JSONObject courseFeedsJson = new JSONObject();
 
@@ -104,16 +102,13 @@ public class FeedV1Api extends FeedRelatedApi {
     @RequestMapping(value = "/course/list", method = RequestMethod.GET)
     public MomiaHttpResponse listCourses(@RequestParam String utoken, @RequestParam int start) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (start < 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (start < 0) return MomiaHttpResponse.FAILED("无效的分页参数，start必须为非负整数");
 
-        PagedList<? extends Course> pagedCourses;
         User user = userServiceApi.get(utoken);
-        if (!feedServiceApi.isOfficialUser(user.getId())) {
-            pagedCourses = courseServiceApi.listFinished(user.getId(), start, Configuration.getInt("PageSize.Course"));
-        } else {
-            pagedCourses = courseServiceApi.listFinished(0, start, Configuration.getInt("PageSize.Course"));
-        }
-        
+        PagedList<? extends Course> pagedCourses = feedServiceApi.isOfficialUser(user.getId()) ?
+                courseServiceApi.listFinished(0, start, Configuration.getInt("PageSize.Course")) :
+                courseServiceApi.listFinished(user.getId(), start, Configuration.getInt("PageSize.Course"));
+
         completeMiddleCoursesImgs(pagedCourses.getList());
 
         return MomiaHttpResponse.SUCCESS(pagedCourses);
@@ -133,7 +128,7 @@ public class FeedV1Api extends FeedRelatedApi {
     @RequestMapping(value = "/add", method = RequestMethod.POST)
     public MomiaHttpResponse add(@RequestParam String utoken, @RequestParam String feed) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (StringUtils.isBlank(feed)) return MomiaHttpResponse.BAD_REQUEST;
+        if (StringUtils.isBlank(feed)) return MomiaHttpResponse.FAILED("无效的Feed内容");
 
         User user = userServiceApi.get(utoken);
         JSONObject feedJson = JSON.parseObject(feed);
@@ -153,16 +148,14 @@ public class FeedV1Api extends FeedRelatedApi {
 
     @RequestMapping(value = "/detail", method = RequestMethod.GET)
     public MomiaHttpResponse detail(@RequestParam(defaultValue = "") String utoken, @RequestParam long id) {
-        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (id <= 0) return MomiaHttpResponse.FAILED("无效的FeedID");
 
-        long userId = StringUtils.isBlank(utoken) ? 0 : userServiceApi.get(utoken).getId();
         Feed feed = feedServiceApi.get(id);
-
         PagedList<Long> pagedStaredUserIds = feedServiceApi.listStaredUserIds(id, 0, Configuration.getInt("PageSize.FeedDetailStar"));
         PagedList<FeedComment> pagedFeedComments = feedServiceApi.listComments(id, 0, Configuration.getInt("PageSize.FeedDetailComment"));
 
         JSONObject feedDetailJson = new JSONObject();
-        feedDetailJson.put("feed", buildUserFeed(userId, feed));
+        feedDetailJson.put("feed", buildUserFeed(StringUtils.isBlank(utoken) ? 0 : userServiceApi.get(utoken).getId(), feed));
         feedDetailJson.put("staredUsers", buildStaredUsers(pagedStaredUserIds));
         feedDetailJson.put("comments", buildUserFeedComments(pagedFeedComments));
 
@@ -233,7 +226,7 @@ public class FeedV1Api extends FeedRelatedApi {
     @RequestMapping(value = "/delete", method = RequestMethod.POST)
     public MomiaHttpResponse delete(@RequestParam String utoken, @RequestParam long id) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (id <= 0) return MomiaHttpResponse.FAILED("无效的FeedID");
 
         User user = userServiceApi.get(utoken);
         if (!feedServiceApi.delete(user.getId(), id)) return MomiaHttpResponse.FAILED("删除Feed失败");
@@ -243,7 +236,8 @@ public class FeedV1Api extends FeedRelatedApi {
 
     @RequestMapping(value = "/comment", method = RequestMethod.GET)
     public MomiaHttpResponse listComments(@RequestParam long id, @RequestParam int start) {
-        if (id <= 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (id <= 0) return MomiaHttpResponse.FAILED("无效的FeedID");
+        if (start < 0) return MomiaHttpResponse.FAILED("无效的分页参数，start必须为非负整数");
 
         PagedList<FeedComment> pagedComments = feedServiceApi.listComments(id, start, Configuration.getInt("PageSize.FeedComment"));
         return MomiaHttpResponse.SUCCESS(buildUserFeedComments(pagedComments));
@@ -252,7 +246,8 @@ public class FeedV1Api extends FeedRelatedApi {
     @RequestMapping(value = "/comment/add", method = RequestMethod.POST)
     public MomiaHttpResponse addComment(@RequestParam String utoken, @RequestParam long id, @RequestParam String content) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (id <= 0 || StringUtils.isBlank(content)) return MomiaHttpResponse.BAD_REQUEST;
+        if (id <= 0) return MomiaHttpResponse.FAILED("无效的FeedID");
+        if (StringUtils.isBlank(content)) return MomiaHttpResponse.FAILED("评论内容不能为空");
 
         User user = userServiceApi.get(utoken);
         feedServiceApi.addComment(user.getId(), id, content);
@@ -263,7 +258,8 @@ public class FeedV1Api extends FeedRelatedApi {
     @RequestMapping(value = "/comment/delete", method = RequestMethod.POST)
     public MomiaHttpResponse deleteComment(@RequestParam String utoken, @RequestParam long id, @RequestParam(value = "cmid") long commentId) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (id <= 0 || commentId <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (id <= 0) return MomiaHttpResponse.FAILED("无效的FeedID");
+        if (commentId <= 0) return MomiaHttpResponse.FAILED("无效的评论ID");
 
         User user = userServiceApi.get(utoken);
         feedServiceApi.deleteComment(user.getId(), id, commentId);
@@ -274,7 +270,7 @@ public class FeedV1Api extends FeedRelatedApi {
     @RequestMapping(value = "/star", method = RequestMethod.POST)
     public MomiaHttpResponse star(@RequestParam String utoken, @RequestParam long id) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (id <= 0) return MomiaHttpResponse.FAILED("无效的FeedID");
 
         User user = userServiceApi.get(utoken);
         feedServiceApi.star(user.getId(), id);
@@ -285,7 +281,7 @@ public class FeedV1Api extends FeedRelatedApi {
     @RequestMapping(value = "/unstar", method = RequestMethod.POST)
     public MomiaHttpResponse unstar(@RequestParam String utoken, @RequestParam long id) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (id <= 0) return MomiaHttpResponse.FAILED("无效的FeedID");
 
         User user = userServiceApi.get(utoken);
         feedServiceApi.unstar(user.getId(), id);
