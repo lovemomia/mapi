@@ -24,7 +24,7 @@ import java.util.List;
 @RestController
 @RequestMapping(value = "/v3/index")
 public class IndexV3Api extends AbstractIndexApi {
-    private static final Logger LOGGER = LoggerFactory.getLogger(IndexV2Api.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(IndexV3Api.class);
 
     @Autowired private CourseServiceApi courseServiceApi;
     @Autowired private SubjectServiceApi subjectServiceApi;

@@ -117,6 +117,22 @@ public class AdminApi extends AbstractApi {
         return MomiaHttpResponse.SUCCESS;
     }
 
+    @RequestMapping(value = "/course/sku/cancel", method = RequestMethod.POST)
+    public MomiaHttpResponse skuCancel(@RequestParam(value = "coid") long courseId, @RequestParam(value = "sid") long courseSkuId) {
+        if (courseId <= 0) return MomiaHttpResponse.FAILED("无效的课程ID");
+        if (courseSkuId <= 0) return MomiaHttpResponse.FAILED("无效的场次ID");
+
+        Map<Long, Long> successfulPackageUsers = courseServiceApi.skuCancel(courseId, courseSkuId);
+        if (!successfulPackageUsers.isEmpty()) {
+            for (Map.Entry<Long, Long> entry : successfulPackageUsers.entrySet()) {
+                orderServiceApi.extendPackageTime(entry.getKey(), 1);
+                imServiceApi.leaveGroup(entry.getValue(), courseId, courseSkuId);
+            }
+        }
+
+        return MomiaHttpResponse.SUCCESS;
+    }
+
     @RequestMapping(value = "/package/time/extend", method = RequestMethod.POST)
     public MomiaHttpResponse extendPackageTime(@RequestParam(value = "pid") long packageId, @RequestParam int time) {
         if (packageId <= 0) return MomiaHttpResponse.FAILED("无效的课程包ID");
