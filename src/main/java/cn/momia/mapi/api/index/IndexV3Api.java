@@ -22,12 +22,21 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 
 @RestController
 @RequestMapping(value = "/v3/index")
 public class IndexV3Api extends AbstractIndexApi {
     private static final Logger LOGGER = LoggerFactory.getLogger(IndexV3Api.class);
+
+    private static final int HOT_COURSE = 1;
+    private static final int NEW_COURSE = 2;
+
+    private static Date lastChangeTime = new Date();
+    private static int subjectCourseType = HOT_COURSE;
 
     @Autowired private CourseServiceApi courseServiceApi;
     @Autowired private SubjectServiceApi subjectServiceApi;
@@ -50,13 +59,19 @@ public class IndexV3Api extends AbstractIndexApi {
             indexJson.put("banners", getBanners(cityId, platform, version));
             if (!StringUtils.isBlank(utoken)) {
                 User user = userServiceApi.get(utoken);
-                if (!user.isPayed()) indexJson.put("trials", getTrials(cityId));
+                if (!user.isPayed()) indexJson.put("events", getEvents(cityId, platform, version));
             } else {
-                indexJson.put("trials", getTrials(cityId));
+                indexJson.put("events", getEvents(cityId, platform, version));
             }
 
             List<Subject> subjects = getSubjects(cityId);
-            // TODO courses
+            Date now = new Date();
+            if (now.getTime() - lastChangeTime.getTime() >= 3 * 24 * 60 * 60 * 1000) { // 3天一轮换
+                if (subjectCourseType == HOT_COURSE) subjectCourseType = NEW_COURSE;
+                else subjectCourseType = HOT_COURSE;
+            }
+            if (subjectCourseType == HOT_COURSE) sortCoursesByJoined(subjects);
+            else sortCoursesByAddTime(subjects);
             indexJson.put("subjects", subjects);
 
             List<DiscussTopic> topics = discussServiceApi.listTopics(cityId, 0, 3).getList();
@@ -71,13 +86,6 @@ public class IndexV3Api extends AbstractIndexApi {
         return MomiaHttpResponse.SUCCESS(indexJson);
     }
 
-    private PagedList<Course> getTrials(int cityId) {
-        PagedList<Course> courses = courseServiceApi.listTrial(cityId, 0, Configuration.getInt("PageSize.Trial"));
-        completeLargeCoursesImgs(courses.getList());
-
-        return courses;
-    }
-
     private List<Subject> getSubjects(int cityId) {
         List<Subject> subjects = subjectServiceApi.list(cityId);
         for (Subject subject : subjects) {
@@ -85,6 +93,36 @@ public class IndexV3Api extends AbstractIndexApi {
         }
 
         return subjects;
+    }
+
+    private void sortCoursesByJoined(List<Subject> subjects) {
+        for (Subject subject : subjects) {
+            List<Course> courses = subject.getCourses();
+            if (!courses.isEmpty()) {
+                Collections.sort(courses, new Comparator<Course>() {
+                    @Override
+                    public int compare(Course c1, Course c2) {
+                        return c2.getJoined() - c1.getJoined();
+                    }
+                });
+                subject.setCourses(courses.subList(0, Math.min(courses.size(), 3)));
+            }
+        }
+    }
+
+    private void sortCoursesByAddTime(List<Subject> subjects) {
+        for (Subject subject : subjects) {
+            List<Course> courses = subject.getCourses();
+            if (!courses.isEmpty()) {
+                Collections.sort(courses, new Comparator<Course>() {
+                    @Override
+                    public int compare(Course c1, Course c2) {
+                        return (int) (c2.getAddTime().getTime() - c1.getAddTime().getTime());
+                    }
+                });
+                subject.setCourses(courses.subList(0, Math.min(courses.size(), 3)));
+            }
+        }
     }
 
     private PagedList<Course> getRecommendCourses(int cityId, int start) {
