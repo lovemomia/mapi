@@ -57,7 +57,7 @@ public class CourseV3Api extends AbstractApi {
             if (subjectSku.getCourseId() > 0) continue;
             if (cheapestSubjectSku == null || subjectSku.getPrice().compareTo(cheapestSubjectSku.getPrice()) < 0) cheapestSubjectSku = subjectSku;
         }
-        if (cheapestSubjectSku != null) courseJson.put("subjectSku", cheapestSubjectSku);
+        if (cheapestSubjectSku != null) courseJson.put("cheapestSku", cheapestSubjectSku);
 
         try {
             CourseDetail detail = courseServiceApi.detail(id);
