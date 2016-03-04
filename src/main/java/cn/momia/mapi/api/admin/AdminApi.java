@@ -10,6 +10,7 @@ import cn.momia.common.core.http.MomiaHttpResponse;
 import cn.momia.common.core.util.MomiaUtil;
 import cn.momia.mapi.api.AbstractApi;
 import com.google.common.base.Splitter;
+import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -130,7 +131,7 @@ public class AdminApi extends AbstractApi {
             }
         }
 
-        return MomiaHttpResponse.SUCCESS(successfulPackageUsers.keySet());
+        return MomiaHttpResponse.SUCCESS(Sets.newHashSet(successfulPackageUsers.values()));
     }
 
     @RequestMapping(value = "/package/time/extend", method = RequestMethod.POST)
