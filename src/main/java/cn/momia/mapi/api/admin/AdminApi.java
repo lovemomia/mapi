@@ -130,7 +130,7 @@ public class AdminApi extends AbstractApi {
             }
         }
 
-        return MomiaHttpResponse.SUCCESS;
+        return MomiaHttpResponse.SUCCESS(successfulPackageUsers.keySet());
     }
 
     @RequestMapping(value = "/package/time/extend", method = RequestMethod.POST)
