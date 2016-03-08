@@ -65,7 +65,7 @@ public class SubjectV2Api extends FeedRelatedApi {
         completeLargeImg(subject);
 
         PagedList<Course> courses = courseServiceApi.query(id, 0, Configuration.getInt("PageSize.Course"));
-        completeMiddleCoursesImgs(courses.getList());
+        completeLargeCoursesImgs(courses.getList());
 
         long userId = StringUtils.isBlank(utoken) ? 0 : userServiceApi.get(utoken).getId();
         PagedList<Feed> feeds = feedServiceApi.queryBySubject(id, 0, Configuration.getInt("PageSize.Feed"));
