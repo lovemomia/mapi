@@ -70,9 +70,11 @@ public class IndexV3Api extends AbstractIndexApi {
                 if (subjectCourseType == HOT_COURSE) subjectCourseType = NEW_COURSE;
                 else subjectCourseType = HOT_COURSE;
             }
-            if (subjectCourseType == HOT_COURSE) sortCoursesByJoined(subjects);
+            int currentSubjectCourseType = subjectCourseType;
+            if (currentSubjectCourseType == HOT_COURSE) sortCoursesByJoined(subjects);
             else sortCoursesByAddTime(subjects);
             indexJson.put("subjects", subjects);
+            indexJson.put("subjectCourseType", currentSubjectCourseType);
 
             List<DiscussTopic> topics = discussServiceApi.listTopics(cityId, 0, 3).getList();
             for (DiscussTopic topic : topics) {
