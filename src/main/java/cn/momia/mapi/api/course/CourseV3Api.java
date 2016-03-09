@@ -59,7 +59,6 @@ public class CourseV3Api extends AbstractApi {
             if (cheapestSubjectSku == null || subjectSku.getPrice().compareTo(cheapestSubjectSku.getPrice()) < 0) cheapestSubjectSku = subjectSku;
         }
         if (cheapestSubjectSku != null) {
-            courseJson.put("cheapestSku", cheapestSubjectSku);
             courseJson.put("cheapestSkuPrice", cheapestSubjectSku.getPrice());
             courseJson.put("cheapestSkuTimeUnit", TimeUtil.toUnitString(cheapestSubjectSku.getTimeUnit()));
             courseJson.put("cheapestSkuDesc", "任选" + cheapestSubjectSku.getCourseCount() + "次");
