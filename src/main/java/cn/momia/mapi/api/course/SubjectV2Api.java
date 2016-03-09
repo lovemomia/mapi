@@ -12,6 +12,7 @@ import cn.momia.api.user.UserServiceApi;
 import cn.momia.api.user.dto.Contact;
 import cn.momia.common.core.dto.PagedList;
 import cn.momia.common.core.http.MomiaHttpResponse;
+import cn.momia.common.core.util.MomiaUtil;
 import cn.momia.common.core.util.TimeUtil;
 import cn.momia.common.webapp.config.Configuration;
 import cn.momia.mapi.api.FeedRelatedApi;
@@ -84,7 +85,7 @@ public class SubjectV2Api extends FeedRelatedApi {
         if (cheapestSku == null) return MomiaHttpResponse.FAILED("无效的课程体系");
         responseJson.put("cheapestSkuPrice", cheapestSku.getPrice());
         responseJson.put("cheapestSkuTimeUnit", TimeUtil.toUnitString(cheapestSku.getTimeUnit()));
-        responseJson.put("cheapestSkuDesc", "任选" + cheapestSku.getCourseCount() + "次");
+        responseJson.put("cheapestSkuDesc", "任选" + MomiaUtil.CHINESE_NUMBER_CHARACTER[cheapestSku.getCourseCount()] + "次");
 
         return MomiaHttpResponse.SUCCESS(responseJson);
     }

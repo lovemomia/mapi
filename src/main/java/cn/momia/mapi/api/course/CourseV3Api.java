@@ -10,6 +10,7 @@ import cn.momia.api.user.TeacherServiceApi;
 import cn.momia.api.user.dto.Teacher;
 import cn.momia.common.core.dto.PagedList;
 import cn.momia.common.core.http.MomiaHttpResponse;
+import cn.momia.common.core.util.MomiaUtil;
 import cn.momia.common.core.util.TimeUtil;
 import cn.momia.common.webapp.config.Configuration;
 import cn.momia.mapi.api.AbstractApi;
@@ -61,7 +62,7 @@ public class CourseV3Api extends AbstractApi {
         if (cheapestSubjectSku != null) {
             courseJson.put("cheapestSkuPrice", cheapestSubjectSku.getPrice());
             courseJson.put("cheapestSkuTimeUnit", TimeUtil.toUnitString(cheapestSubjectSku.getTimeUnit()));
-            courseJson.put("cheapestSkuDesc", "任选" + cheapestSubjectSku.getCourseCount() + "次");
+            courseJson.put("cheapestSkuDesc", "任选" + MomiaUtil.CHINESE_NUMBER_CHARACTER[cheapestSubjectSku.getCourseCount()] + "次");
         }
 
         try {
