@@ -57,10 +57,16 @@ public class IndexV3Api extends AbstractIndexApi {
             String version = getVersion(request);
 
             indexJson.put("banners", getBanners(cityId, platform, version));
+
+            indexJson.put("newUser", false);
             if (!StringUtils.isBlank(utoken)) {
                 User user = userServiceApi.get(utoken);
-                if (!user.isPayed()) indexJson.put("events", getEvents(cityId, platform, version));
+                if (!user.isPayed()) {
+                    indexJson.put("newUser", true);
+                    indexJson.put("events", getEvents(cityId, platform, version));
+                }
             } else {
+                indexJson.put("newUser", true);
                 indexJson.put("events", getEvents(cityId, platform, version));
             }
 
