@@ -11,6 +11,8 @@ import cn.momia.api.user.dto.User;
 import cn.momia.common.core.dto.PagedList;
 import cn.momia.common.core.http.MomiaHttpResponse;
 import cn.momia.common.webapp.config.Configuration;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -63,10 +65,12 @@ public class IndexV3Api extends AbstractIndexApi {
                 User user = userServiceApi.get(utoken);
                 if (!user.isPayed()) {
                     indexJson.put("newUser", true);
+                    indexJson.put("eventsTitle", "新用户专享");
                     indexJson.put("events", getEvents(cityId, platform, version));
                 }
             } else {
                 indexJson.put("newUser", true);
+                indexJson.put("eventsTitle", "新用户专享");
                 indexJson.put("events", getEvents(cityId, platform, version));
             }
 
@@ -79,10 +83,17 @@ public class IndexV3Api extends AbstractIndexApi {
             int currentSubjectCourseType = subjectCourseType;
             if (currentSubjectCourseType == HOT_COURSE) sortCoursesByJoined(subjects);
             else sortCoursesByAddTime(subjects);
+            JSONArray subjectsJson = (JSONArray) JSON.toJSON(subjects);
+            for (int i = 0; i < subjectsJson.size(); i++) {
+                JSONObject subjectJson = subjectsJson.getJSONObject(i);
+                if (currentSubjectCourseType == HOT_COURSE) subjectJson.put("coursesTitle", "本周热门课程");
+                else subjectJson.put("coursesTitle", "本周新开课程");
+            }
             indexJson.put("subjects", subjects);
             indexJson.put("subjectCourseType", currentSubjectCourseType);
 
             List<DiscussTopic> topics = discussServiceApi.listTopics(cityId, 0, 3).getList();
+            if (!topics.isEmpty()) topics = topics.subList(0, 1);
             for (DiscussTopic topic : topics) {
                 topic.setCover(completeLargeImg(topic.getCover()));
             }
