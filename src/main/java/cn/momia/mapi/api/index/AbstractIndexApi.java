@@ -51,6 +51,9 @@ public class AbstractIndexApi extends AbstractApi {
         int maxCount = Configuration.getInt("PageSize.Event");
         if (filteredEvents.size() > maxCount) filteredEvents = filteredEvents.subList(0, maxCount);
 
-        return filteredEvents.size() % 2 != 0 ? filteredEvents.subList(0, filteredEvents.size() - 1) : filteredEvents;
+        filteredEvents = filteredEvents.size() % 2 != 0 ? filteredEvents.subList(0, filteredEvents.size() - 1) : filteredEvents;
+        if (filteredEvents.size() > 2) filteredEvents = filteredEvents.subList(0, 2);
+
+        return filteredEvents;
     }
 }
