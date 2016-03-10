@@ -38,11 +38,11 @@ public class AbstractIndexApi extends AbstractApi {
         return filteredIcons.size() > maxCount ? filteredIcons.subList(0, maxCount) : filteredIcons;
     }
 
-    protected List<Config.Event> getEvents(int cityId, int platform, String clientVersion) {
+    protected List<Config.Event> getEvents(int cityId, int platform, String clientVersion, int type) {
         List<Config.Event> events = configService.listEvents(cityId);
         List<Config.Event> filteredEvents = new ArrayList<Config.Event>();
         for (Config.Event event : events) {
-            if (event.isInvalid(platform, clientVersion)) continue;
+            if (event.isInvalid(platform, clientVersion) || (type > 0 && event.getType() != type)) continue;
             event.setImg(completeImg(event.getImg()));
             event.setAction(buildAction(event.getAction(), platform));
             filteredEvents.add(event);

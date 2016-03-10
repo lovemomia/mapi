@@ -66,12 +66,12 @@ public class IndexV3Api extends AbstractIndexApi {
                 if (!user.isPayed()) {
                     indexJson.put("newUser", true);
                     indexJson.put("eventsTitle", "新用户专享");
-                    indexJson.put("events", getEvents(cityId, platform, version));
+                    indexJson.put("events", getEvents(cityId, platform, version, 2));
                 }
             } else {
                 indexJson.put("newUser", true);
                 indexJson.put("eventsTitle", "新用户专享");
-                indexJson.put("events", getEvents(cityId, platform, version));
+                indexJson.put("events", getEvents(cityId, platform, version, 2));
             }
 
             List<Subject> subjects = getSubjects(cityId);

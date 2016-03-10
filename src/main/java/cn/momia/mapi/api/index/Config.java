@@ -75,9 +75,18 @@ public class Config {
     }
 
     public static class Event extends Config {
+        private int type;
         private String title;
         private String img;
         private String desc;
+
+        public int getType() {
+            return type;
+        }
+
+        public void setType(int type) {
+            this.type = type;
+        }
 
         public String getTitle() {
             return title;
