@@ -89,7 +89,7 @@ public class IndexV3Api extends AbstractIndexApi {
                 if (currentSubjectCourseType == HOT_COURSE) subjectJson.put("coursesTitle", "本周热门课程");
                 else subjectJson.put("coursesTitle", "本周新开课程");
             }
-            indexJson.put("subjects", subjects);
+            indexJson.put("subjects", subjectsJson);
             indexJson.put("subjectCourseType", currentSubjectCourseType);
 
             List<DiscussTopic> topics = discussServiceApi.listTopics(cityId, 0, 3).getList();
