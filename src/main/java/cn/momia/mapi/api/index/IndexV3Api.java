@@ -38,7 +38,7 @@ public class IndexV3Api extends AbstractIndexApi {
     private static final int NEW_COURSE = 2;
 
     private static Date lastChangeTime = new Date();
-    private static int subjectCourseType = HOT_COURSE;
+    private static int subjectCourseType = Math.random() > 0.5 ? HOT_COURSE : NEW_COURSE;
 
     @Autowired private CourseServiceApi courseServiceApi;
     @Autowired private SubjectServiceApi subjectServiceApi;
