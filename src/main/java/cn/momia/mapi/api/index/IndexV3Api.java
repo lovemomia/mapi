@@ -83,17 +83,23 @@ public class IndexV3Api extends AbstractIndexApi {
                 if (subjectCourseType == HOT_COURSE) subjectCourseType = NEW_COURSE;
                 else subjectCourseType = HOT_COURSE;
             }
+
             int currentSubjectCourseType = subjectCourseType;
-            if (currentSubjectCourseType == HOT_COURSE) sortCoursesByJoined(subjects);
-            else sortCoursesByAddTime(subjects);
-            JSONArray subjectsJson = (JSONArray) JSON.toJSON(subjects);
-            for (int i = 0; i < subjectsJson.size(); i++) {
-                JSONObject subjectJson = subjectsJson.getJSONObject(i);
-                if (currentSubjectCourseType == HOT_COURSE) subjectJson.put("coursesTitle", "本周热门课程");
+            JSONArray subjectsJson = new JSONArray();
+            for (Subject subject : subjects) {
+                currentSubjectCourseType = currentSubjectCourseType % 2 + 1;
+                if (currentSubjectCourseType == HOT_COURSE) sortCoursesByJoined(subject);
+                else sortCoursesByAddTime(subject);
+
+                JSONObject subjectJson = (JSONObject) JSON.toJSON(subject);
+                subjectsJson.add(subjectJson);
+
+                subjectJson.put("subjectCourseType", currentSubjectCourseType);
+
+                if (currentSubjectCourseType == HOT_COURSE)  subjectJson.put("coursesTitle", "本周热门课程");
                 else subjectJson.put("coursesTitle", "本周新开课程");
             }
             indexJson.put("subjects", subjectsJson);
-            indexJson.put("subjectCourseType", currentSubjectCourseType);
 
             List<DiscussTopic> topics = discussServiceApi.listTopics(cityId, 0, 3).getList();
             if (!topics.isEmpty()) topics = topics.subList(0, 1);
@@ -117,33 +123,29 @@ public class IndexV3Api extends AbstractIndexApi {
         return subjects;
     }
 
-    private void sortCoursesByJoined(List<Subject> subjects) {
-        for (Subject subject : subjects) {
-            List<Course> courses = subject.getCourses();
-            if (!courses.isEmpty()) {
-                Collections.sort(courses, new Comparator<Course>() {
-                    @Override
-                    public int compare(Course c1, Course c2) {
-                        return c2.getJoined() - c1.getJoined();
-                    }
-                });
-                subject.setCourses(courses.subList(0, Math.min(courses.size(), 3)));
-            }
+    private void sortCoursesByJoined(Subject subject) {
+        List<Course> courses = subject.getCourses();
+        if (!courses.isEmpty()) {
+            Collections.sort(courses, new Comparator<Course>() {
+                @Override
+                public int compare(Course c1, Course c2) {
+                    return c2.getJoined() - c1.getJoined();
+                }
+            });
+            subject.setCourses(courses.subList(0, Math.min(courses.size(), 3)));
         }
     }
 
-    private void sortCoursesByAddTime(List<Subject> subjects) {
-        for (Subject subject : subjects) {
-            List<Course> courses = subject.getCourses();
-            if (!courses.isEmpty()) {
-                Collections.sort(courses, new Comparator<Course>() {
-                    @Override
-                    public int compare(Course c1, Course c2) {
-                        return (int) (c2.getAddTime().getTime() - c1.getAddTime().getTime());
-                    }
-                });
-                subject.setCourses(courses.subList(0, Math.min(courses.size(), 3)));
-            }
+    private void sortCoursesByAddTime(Subject subject) {
+        List<Course> courses = subject.getCourses();
+        if (!courses.isEmpty()) {
+            Collections.sort(courses, new Comparator<Course>() {
+                @Override
+                public int compare(Course c1, Course c2) {
+                    return (int) (c2.getAddTime().getTime() - c1.getAddTime().getTime());
+                }
+            });
+            subject.setCourses(courses.subList(0, Math.min(courses.size(), 3)));
         }
     }
 
