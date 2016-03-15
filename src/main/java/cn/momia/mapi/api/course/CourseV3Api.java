@@ -39,7 +39,8 @@ public class CourseV3Api extends AbstractApi {
     @RequestMapping(method = RequestMethod.GET)
     public MomiaHttpResponse get(@RequestParam(required = false, defaultValue = "") String utoken,
                                  @RequestParam long id,
-                                 @RequestParam(required = false, defaultValue = "") String pos) {
+                                 @RequestParam(required = false, defaultValue = "") String pos,
+                                 @RequestParam(required = false, defaultValue = "0") int recommend) {
         if (id <= 0) return MomiaHttpResponse.FAILED("无效的课程ID");
 
         Course course = completeLargeImg(courseServiceApi.get(id, pos));
@@ -59,10 +60,20 @@ public class CourseV3Api extends AbstractApi {
             if (subjectSku.getCourseId() > 0) continue;
             if (cheapestSubjectSku == null || subjectSku.getPrice().compareTo(cheapestSubjectSku.getPrice()) < 0) cheapestSubjectSku = subjectSku;
         }
+
         if (cheapestSubjectSku != null) {
             courseJson.put("cheapestSkuPrice", cheapestSubjectSku.getPrice());
             courseJson.put("cheapestSkuTimeUnit", TimeUtil.toUnitString(cheapestSubjectSku.getTimeUnit()));
             courseJson.put("cheapestSkuDesc", "任选" + MomiaUtil.CHINESE_NUMBER_CHARACTER[cheapestSubjectSku.getCourseCount()] + "次");
+        }
+
+        if (recommend == 1) {
+            JSONArray subjectNoticeJson = new JSONArray();
+            JSONObject noticeJson = new JSONObject();
+            noticeJson.put("title", "购买须知");
+            noticeJson.put("content", course.getNotice());
+            subjectNoticeJson.add(noticeJson);
+            courseJson.put("subjectNotice", subjectNoticeJson);
         }
 
         try {
