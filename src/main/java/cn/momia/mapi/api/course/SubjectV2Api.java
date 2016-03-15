@@ -16,6 +16,7 @@ import cn.momia.common.core.util.MomiaUtil;
 import cn.momia.common.core.util.TimeUtil;
 import cn.momia.common.webapp.config.Configuration;
 import cn.momia.mapi.api.FeedRelatedApi;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -75,17 +76,18 @@ public class SubjectV2Api extends FeedRelatedApi {
         PagedList<UserCourseComment> comments = subjectServiceApi.queryCommentsBySubject(id, 0, Configuration.getInt("PageSize.CourseComment"));
         completeCourseCommentsImgs(comments.getList());
 
+        JSONObject subjectJson = (JSONObject) JSON.toJSON(subject);
+        SubjectSku cheapestSku = subject.getCheapestSku();
+        if (cheapestSku == null) return MomiaHttpResponse.FAILED("无效的课程体系");
+        subjectJson.put("cheapestSkuPrice", cheapestSku.getPrice());
+        subjectJson.put("cheapestSkuTimeUnit", TimeUtil.toUnitString(cheapestSku.getTimeUnit()));
+        subjectJson.put("cheapestSkuDesc", "任选" + MomiaUtil.CHINESE_NUMBER_CHARACTER[cheapestSku.getCourseCount()] + "次");
+
         JSONObject responseJson = new JSONObject();
         responseJson.put("subject", subject);
         responseJson.put("courses", courses);
         responseJson.put("feeds", buildPagedUserFeeds(userId, feeds));
         responseJson.put("comments", comments);
-
-        SubjectSku cheapestSku = subject.getCheapestSku();
-        if (cheapestSku == null) return MomiaHttpResponse.FAILED("无效的课程体系");
-        responseJson.put("cheapestSkuPrice", cheapestSku.getPrice());
-        responseJson.put("cheapestSkuTimeUnit", TimeUtil.toUnitString(cheapestSku.getTimeUnit()));
-        responseJson.put("cheapestSkuDesc", "任选" + MomiaUtil.CHINESE_NUMBER_CHARACTER[cheapestSku.getCourseCount()] + "次");
 
         return MomiaHttpResponse.SUCCESS(responseJson);
     }
