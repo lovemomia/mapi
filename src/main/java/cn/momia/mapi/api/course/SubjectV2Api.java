@@ -84,7 +84,7 @@ public class SubjectV2Api extends FeedRelatedApi {
         subjectJson.put("cheapestSkuDesc", "任选" + MomiaUtil.CHINESE_NUMBER_CHARACTER[cheapestSku.getCourseCount()] + "次");
 
         JSONObject responseJson = new JSONObject();
-        responseJson.put("subject", subject);
+        responseJson.put("subject", subjectJson);
         responseJson.put("courses", courses);
         responseJson.put("feeds", buildPagedUserFeeds(userId, feeds));
         responseJson.put("comments", comments);
