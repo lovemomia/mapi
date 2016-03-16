@@ -46,4 +46,10 @@ public class CouponV1Api extends AbstractApi {
         couponServiceApi.invite(mobile, inviteCode);
         return MomiaHttpResponse.SUCCESS;
     }
+
+    @RequestMapping(value = "/code", method = RequestMethod.GET)
+    public MomiaHttpResponse couponCode(@RequestParam String code) {
+        if (StringUtils.isBlank(code)) return MomiaHttpResponse.FAILED("无效的优惠码");
+        return MomiaHttpResponse.SUCCESS(couponServiceApi.couponCode(code));
+    }
 }
