@@ -2,8 +2,8 @@ package cn.momia.mapi.api;
 
 import cn.momia.api.feed.FeedServiceApi;
 import cn.momia.api.feed.dto.Feed;
+import cn.momia.api.user.ChildServiceApi;
 import cn.momia.api.user.UserServiceApi;
-import cn.momia.api.user.dto.Child;
 import cn.momia.api.user.dto.User;
 import cn.momia.common.core.dto.PagedList;
 import cn.momia.common.core.exception.MomiaErrorException;
@@ -23,6 +23,7 @@ import java.util.Set;
 public class FeedRelatedApi extends AbstractApi {
     @Autowired private FeedServiceApi feedServiceApi;
     @Autowired private UserServiceApi userServiceApi;
+    @Autowired private ChildServiceApi childServiceApi;
 
     protected PagedList<JSONObject> buildPagedUserFeeds(long userId, PagedList<Feed> pagedFeeds) {
         PagedList<JSONObject> pagedUserFeeds = new PagedList<JSONObject>();
@@ -40,7 +41,7 @@ public class FeedRelatedApi extends AbstractApi {
             for (Feed feed : feeds) {
                 feedIds.add(feed.getId());
             }
-            staredFeedIds.addAll(feedServiceApi.queryStaredFeedIds(userId, feedIds));
+            staredFeedIds.addAll(feedServiceApi.filterNotStaredFeedIds(userId, feedIds));
         }
 
         Set<Long> userIds = new HashSet<Long>();
@@ -76,38 +77,14 @@ public class FeedRelatedApi extends AbstractApi {
         userFeed.put("avatar", completeSmallImg(user.getAvatar()));
         userFeed.put("nickName", user.getNickName());
 
-        List<JSONObject> childrenDetail = formatChildrenDetail(user.getChildren());
-        List<String> children = formatChildren(childrenDetail);
+        List<JSONObject> childrenDetail = childServiceApi.formatChildrenDetail(user.getChildren());
+        List<String> children = childServiceApi.formatChildren(childrenDetail);
         userFeed.put("childrenDetail", childrenDetail);
         userFeed.put("children", children);
 
         userFeed.put("stared", stared);
 
         return userFeed;
-    }
-
-    private List<JSONObject> formatChildrenDetail(List<Child> children) {
-        List<JSONObject> feedChildren = new ArrayList<JSONObject>();
-        for (int i = 0; i < Math.min(2, children.size()); i++) {
-            Child child = children.get(i);
-            JSONObject feedChild = new JSONObject();
-            feedChild.put("sex", child.getSex());
-            feedChild.put("name", child.getName());
-            feedChild.put("age", TimeUtil.formatAge(child.getBirthday()));
-
-            feedChildren.add(feedChild);
-        }
-
-        return feedChildren;
-    }
-
-    private List<String> formatChildren(List<JSONObject> childrenDetail) {
-        List<String> formatedChildren = new ArrayList<String>();
-        for (JSONObject child : childrenDetail) {
-            formatedChildren.add(child.getString("sex") + "孩" + child.getString("age"));
-        }
-
-        return formatedChildren;
     }
 
     protected JSONObject buildUserFeed(long userId, Feed feed) {

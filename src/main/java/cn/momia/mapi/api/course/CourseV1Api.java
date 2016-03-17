@@ -43,14 +43,10 @@ public class CourseV1Api extends AbstractApi {
     public MomiaHttpResponse get(@RequestParam(required = false, defaultValue = "") String utoken,
                                  @RequestParam long id,
                                  @RequestParam(required = false, defaultValue = "") String pos) {
-        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (id <= 0) return MomiaHttpResponse.FAILED("无效的课程ID");
 
         Course course = completeLargeImg(courseServiceApi.get(id, pos));
         JSONObject courseJson = (JSONObject) JSON.toJSON(course);
-        if (!StringUtils.isBlank(utoken)) {
-            User user = userServiceApi.get(utoken);
-            courseJson.put("favored", courseServiceApi.isFavored(user.getId(), id));
-        }
 
         PagedList<Integer> pagedTeacherIds = courseServiceApi.teacherIds(id, 0, Configuration.getInt("PageSize.CourseTeacher"));
         List<Teacher> teachers = completeTeachersImgs(teacherServiceApi.list(pagedTeacherIds.getList()));
@@ -61,13 +57,14 @@ public class CourseV1Api extends AbstractApi {
 
     @RequestMapping(value = "/detail", method = RequestMethod.GET)
     public MomiaHttpResponse detail(@RequestParam long id) {
-        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (id <= 0) return MomiaHttpResponse.FAILED("无效的课程ID");
         return MomiaHttpResponse.SUCCESS(courseServiceApi.detail(id));
     }
 
     @RequestMapping(value = "/book", method = RequestMethod.GET)
     public MomiaHttpResponse book(@RequestParam long id, @RequestParam int start) {
-        if (id <= 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (id <= 0) return MomiaHttpResponse.FAILED("无效的课程ID");
+        if (start < 0) return MomiaHttpResponse.FAILED("无效的分页参数，start必须为非负整数");
 
         PagedList<String> book = courseServiceApi.book(id, start, Configuration.getInt("PageSize.BookImg"));
         book.setList(completeLargeImgs(book.getList()));
@@ -77,7 +74,8 @@ public class CourseV1Api extends AbstractApi {
 
     @RequestMapping(value = "/teacher", method = RequestMethod.GET)
     public MomiaHttpResponse teacher(@RequestParam long id, @RequestParam int start) {
-        if (id <= 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (id <= 0) return MomiaHttpResponse.FAILED("无效的课程ID");
+        if (start < 0) return MomiaHttpResponse.FAILED("无效的分页参数，start必须为非负整数");
 
         PagedList<Integer> pagedTeacherIds = courseServiceApi.teacherIds(id, start, Configuration.getInt("PageSize.Teacher"));
         List<Teacher> teachers = completeTeachersImgs(teacherServiceApi.list(pagedTeacherIds.getList()));
@@ -92,12 +90,10 @@ public class CourseV1Api extends AbstractApi {
 
     @RequestMapping(value = "/institution", method = RequestMethod.GET)
     public MomiaHttpResponse institution(@RequestParam long id) {
-        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (id <= 0) return MomiaHttpResponse.FAILED("无效的课程ID");
 
         int institutionId = courseServiceApi.getInstitutionId(id);
         Institution institution = poiServiceApi.getInstitution(institutionId);
-        if (!institution.exists()) return MomiaHttpResponse.FAILED("机构信息不存在");
-
         institution.setCover(completeLargeImg(institution.getCover()));
 
         return MomiaHttpResponse.SUCCESS(institution);
@@ -105,7 +101,7 @@ public class CourseV1Api extends AbstractApi {
 
     @RequestMapping(value = "/sku/week", method = RequestMethod.GET)
     public MomiaHttpResponse listWeekSkus(@RequestParam long id) {
-        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (id <= 0) return MomiaHttpResponse.FAILED("无效的课程ID");
         return MomiaHttpResponse.SUCCESS(filterClosedSkus(courseServiceApi.listWeekSkus(id)));
     }
 
@@ -129,25 +125,27 @@ public class CourseV1Api extends AbstractApi {
 
     @RequestMapping(value = "/sku/month", method = RequestMethod.GET)
     public MomiaHttpResponse listMonthSkus(@RequestParam long id, @RequestParam int month) {
-        if (id <= 0 || month <= 0 || month > 12) return MomiaHttpResponse.BAD_REQUEST;
+        if (id <= 0) return MomiaHttpResponse.FAILED("无效的课程ID");
+        if (month <= 0 || month > 12) return MomiaHttpResponse.FAILED("无效的月份");
         return MomiaHttpResponse.SUCCESS(filterClosedSkus(courseServiceApi.listMonthSkus(id, month)));
     }
 
     @RequestMapping(value = "/sku/week/notend", method = RequestMethod.GET)
     public MomiaHttpResponse listNotEndWeekSkus(@RequestParam long id) {
-        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (id <= 0) return MomiaHttpResponse.FAILED("无效的课程ID");
         return MomiaHttpResponse.SUCCESS(courseServiceApi.listWeekSkus(id));
     }
 
     @RequestMapping(value = "/sku/month/notend", method = RequestMethod.GET)
     public MomiaHttpResponse lisNotEndtMonthSkus(@RequestParam long id, @RequestParam int month) {
-        if (id <= 0 || month <= 0 || month > 12) return MomiaHttpResponse.BAD_REQUEST;
+        if (id <= 0) return MomiaHttpResponse.FAILED("无效的课程ID");
+        if (month <= 0 || month > 12) return MomiaHttpResponse.FAILED("无效的月份");
         return MomiaHttpResponse.SUCCESS(courseServiceApi.listMonthSkus(id, month));
     }
 
     @RequestMapping(value = "/sku/week/bookable", method = RequestMethod.GET)
     public MomiaHttpResponse listBookableWeekSkus(@RequestParam long id) {
-        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (id <= 0) return MomiaHttpResponse.FAILED("无效的课程ID");
         return MomiaHttpResponse.SUCCESS(filterUnbookableSkus(courseServiceApi.listWeekSkus(id)));
     }
 
@@ -172,7 +170,8 @@ public class CourseV1Api extends AbstractApi {
 
     @RequestMapping(value = "/sku/month/bookable", method = RequestMethod.GET)
     public MomiaHttpResponse listBookableMonthSkus(@RequestParam long id, @RequestParam int month) {
-        if (id <= 0 || month <= 0 || month > 12) return MomiaHttpResponse.BAD_REQUEST;
+        if (id <= 0) return MomiaHttpResponse.FAILED("无效的课程ID");
+        if (month <= 0 || month > 12) return MomiaHttpResponse.FAILED("无效的月份");
         return MomiaHttpResponse.SUCCESS(filterUnbookableSkus(courseServiceApi.listMonthSkus(id, month)));
     }
 
@@ -182,7 +181,8 @@ public class CourseV1Api extends AbstractApi {
                                      @RequestParam(value = "pid") long packageId,
                                      @RequestParam(value = "sid") long skuId) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (packageId <= 0 || skuId <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (packageId <= 0) return MomiaHttpResponse.FAILED("无效的课程包ID");
+        if (skuId <= 0) return MomiaHttpResponse.FAILED("无效的场次ID");
 
         User user = userServiceApi.get(utoken);
         BookedCourse bookedCourse = courseServiceApi.booking(utoken, childId, packageId, skuId);
@@ -198,7 +198,7 @@ public class CourseV1Api extends AbstractApi {
     @RequestMapping(value = "/cancel", method = RequestMethod.POST)
     public MomiaHttpResponse cancel(@RequestParam String utoken, @RequestParam(value = "bid") long bookingId) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (bookingId <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (bookingId <= 0) return MomiaHttpResponse.FAILED("无效的预约ID");
 
         User user = userServiceApi.get(utoken);
         BookedCourse bookedCourse = courseServiceApi.cancel(utoken, bookingId);
@@ -214,7 +214,7 @@ public class CourseV1Api extends AbstractApi {
     @RequestMapping(value = "/comment", method = RequestMethod.POST)
     public MomiaHttpResponse comment(String utoken, String comment) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (StringUtils.isBlank(comment)) return MomiaHttpResponse.BAD_REQUEST;
+        if (StringUtils.isBlank(comment)) return MomiaHttpResponse.FAILED("评论内容不能为空");
 
         User user = userServiceApi.get(utoken);
         JSONObject commentJson = JSON.parseObject(comment);
@@ -225,30 +225,11 @@ public class CourseV1Api extends AbstractApi {
     }
     @RequestMapping(value = "/comment/list", method = RequestMethod.GET)
     public MomiaHttpResponse listComment(@RequestParam long id, @RequestParam int start) {
-        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (id <= 0) return MomiaHttpResponse.FAILED("无效的课程ID");
+        
         PagedList<UserCourseComment> pagedComments = courseServiceApi.queryCommentsByCourse(id, start, Configuration.getInt("PageSize.CourseComment"));
         completeCourseCommentsImgs(pagedComments.getList());
 
         return MomiaHttpResponse.SUCCESS(pagedComments);
-    }
-
-    @RequestMapping(value = "/favor", method = RequestMethod.POST)
-    public MomiaHttpResponse favor(@RequestParam String utoken, @RequestParam long id) {
-        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
-
-        User user = userServiceApi.get(utoken);
-        if (!courseServiceApi.favor(user.getId(), id)) return MomiaHttpResponse.FAILED("添加收藏失败");
-        return MomiaHttpResponse.SUCCESS;
-    }
-
-    @RequestMapping(value = "/unfavor", method = RequestMethod.POST)
-    public MomiaHttpResponse unfavor(@RequestParam String utoken, @RequestParam long id) {
-        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
-
-        User user = userServiceApi.get(utoken);
-        if (!courseServiceApi.unfavor(user.getId(), id)) return MomiaHttpResponse.FAILED("取消收藏失败");
-        return MomiaHttpResponse.SUCCESS;
     }
 }

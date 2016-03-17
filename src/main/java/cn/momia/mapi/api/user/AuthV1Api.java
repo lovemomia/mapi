@@ -9,7 +9,7 @@ import cn.momia.api.user.UserServiceApi;
 import cn.momia.api.user.dto.Child;
 import cn.momia.api.user.dto.User;
 import cn.momia.common.core.http.MomiaHttpResponse;
-import cn.momia.common.core.util.MobileUtil;
+import cn.momia.common.core.util.MomiaUtil;
 import cn.momia.mapi.api.AbstractApi;
 import com.alibaba.fastjson.JSON;
 import org.apache.commons.lang3.StringUtils;
@@ -34,12 +34,12 @@ public class AuthV1Api extends AbstractApi {
     @Autowired private AuthServiceApi authServiceApi;
     @Autowired private CouponServiceApi couponServiceApi;
     @Autowired private ImServiceApi imServiceApi;
-    @Autowired private ChildServiceApi childServiceApi;
     @Autowired private UserServiceApi userServiceApi;
+    @Autowired private ChildServiceApi childServiceApi;
 
     @RequestMapping(value = "/send", method = RequestMethod.POST)
     public MomiaHttpResponse send(@RequestParam String mobile)  {
-        if (MobileUtil.isInvalid(mobile)) return MomiaHttpResponse.FAILED("无效的手机号码");
+        if (MomiaUtil.isInvalidMobile(mobile)) return MomiaHttpResponse.FAILED("无效的手机号码");
         if (!smsServiceApi.send(mobile)) return MomiaHttpResponse.FAILED("发送短信验证码失败");
 
         return MomiaHttpResponse.SUCCESS;
@@ -51,7 +51,8 @@ public class AuthV1Api extends AbstractApi {
                                       @RequestParam String password,
                                       @RequestParam String code) {
         if (StringUtils.isBlank(nickName)) return MomiaHttpResponse.FAILED("昵称不能为空");
-        if (MobileUtil.isInvalid(mobile)) return MomiaHttpResponse.FAILED("无效的手机号码");
+        if (nickName.contains("官方")) return MomiaHttpResponse.FAILED("用户昵称不能包含“官方”");
+        if (MomiaUtil.isInvalidMobile(mobile)) return MomiaHttpResponse.FAILED("无效的手机号码");
         if (StringUtils.isBlank(password)) return MomiaHttpResponse.FAILED("密码不能为空");
         if (StringUtils.isBlank(code)) return MomiaHttpResponse.FAILED("验证码不能为空");
 
@@ -60,7 +61,7 @@ public class AuthV1Api extends AbstractApi {
         generateImToken(user, user.getNickName(), user.getAvatar());
         addDefaultChild(user);
 
-        return MomiaHttpResponse.SUCCESS(user);
+        return MomiaHttpResponse.SUCCESS(completeUserImgs(userServiceApi.get(user.getToken())));
     }
 
     private void distributeInviteCoupon(long userId, String mobile) {
@@ -99,7 +100,7 @@ public class AuthV1Api extends AbstractApi {
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public MomiaHttpResponse login(@RequestParam String mobile, @RequestParam String password) {
-        if (MobileUtil.isInvalid(mobile)) return MomiaHttpResponse.FAILED("无效的手机号码");
+        if (MomiaUtil.isInvalidMobile(mobile)) return MomiaHttpResponse.FAILED("无效的手机号码");
         if (StringUtils.isBlank(password)) return MomiaHttpResponse.FAILED("密码不能为空");
 
         return MomiaHttpResponse.SUCCESS(completeUserImgs(authServiceApi.login(mobile, password)));
@@ -107,7 +108,7 @@ public class AuthV1Api extends AbstractApi {
 
     @RequestMapping(value = "/password", method = RequestMethod.POST)
     public MomiaHttpResponse updatePassword(@RequestParam String mobile, @RequestParam String password, @RequestParam String code) {
-        if (MobileUtil.isInvalid(mobile)) return MomiaHttpResponse.FAILED("无效的手机号码");
+        if (MomiaUtil.isInvalidMobile(mobile)) return MomiaHttpResponse.FAILED("无效的手机号码");
         if (StringUtils.isBlank(password)) return MomiaHttpResponse.FAILED("密码不能为空");
         if (StringUtils.isBlank(code)) return MomiaHttpResponse.FAILED("验证码不能为空");
 

@@ -36,7 +36,7 @@ public class IndexV1Api extends AbstractIndexApi {
 
             indexJson.put("banners", getBanners(cityId, platform, version));
             indexJson.put("icons", getIcons(cityId, platform, version));
-            indexJson.put("events", getEvents(cityId, platform, version));
+            indexJson.put("events", getEvents(cityId, platform, version, 0));
         }
         indexJson.put("subjects", getTrialSubjects(cityId, start));
 

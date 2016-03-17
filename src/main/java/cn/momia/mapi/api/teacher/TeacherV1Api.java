@@ -67,7 +67,7 @@ public class TeacherV1Api extends AbstractApi {
     @RequestMapping(value = "/signup", method = RequestMethod.POST)
     public MomiaHttpResponse signup(@RequestParam String utoken, @RequestParam String teacher) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (StringUtils.isBlank(teacher)) return MomiaHttpResponse.BAD_REQUEST;
+        if (StringUtils.isBlank(teacher)) return MomiaHttpResponse.FAILED("申请人信息不能为空");
 
         return MomiaHttpResponse.SUCCESS(teacherServiceApi.add(utoken, teacher));
     }
@@ -75,7 +75,7 @@ public class TeacherV1Api extends AbstractApi {
     @RequestMapping(value = "/experience", method = RequestMethod.POST)
     public MomiaHttpResponse addExperience(@RequestParam String utoken, @RequestParam String experience) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (StringUtils.isBlank(experience)) return MomiaHttpResponse.BAD_REQUEST;
+        if (StringUtils.isBlank(experience)) return MomiaHttpResponse.FAILED("工作经历不能为空");
 
         return MomiaHttpResponse.SUCCESS(teacherServiceApi.addExperience(utoken, experience));
     }
@@ -83,7 +83,7 @@ public class TeacherV1Api extends AbstractApi {
     @RequestMapping(value = "/experience", method = RequestMethod.GET)
     public MomiaHttpResponse getExperience(@RequestParam String utoken, @RequestParam int id) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (id <= 0) return MomiaHttpResponse.FAILED("无效的工作经历ID");
 
         return MomiaHttpResponse.SUCCESS(teacherServiceApi.getExperience(utoken, id));
     }
@@ -91,7 +91,7 @@ public class TeacherV1Api extends AbstractApi {
     @RequestMapping(value = "/experience/delete", method = RequestMethod.POST)
     public MomiaHttpResponse addExperience(@RequestParam String utoken, @RequestParam int id) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (id <= 0) return MomiaHttpResponse.FAILED("无效的工作经历ID");
 
         return MomiaHttpResponse.SUCCESS(teacherServiceApi.deleteExperience(utoken, id));
     }
@@ -99,7 +99,7 @@ public class TeacherV1Api extends AbstractApi {
     @RequestMapping(value = "/education", method = RequestMethod.POST)
     public MomiaHttpResponse addEducation(@RequestParam String utoken, @RequestParam String education) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (StringUtils.isBlank(education)) return MomiaHttpResponse.BAD_REQUEST;
+        if (StringUtils.isBlank(education)) return MomiaHttpResponse.FAILED("教育背景不能为空");
 
         return MomiaHttpResponse.SUCCESS(teacherServiceApi.addEducation(utoken, education));
     }
@@ -107,7 +107,7 @@ public class TeacherV1Api extends AbstractApi {
     @RequestMapping(value = "/education", method = RequestMethod.GET)
     public MomiaHttpResponse getEducation(@RequestParam String utoken, @RequestParam int id) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (id <= 0) return MomiaHttpResponse.FAILED("无效的教育背景ID");
 
         return MomiaHttpResponse.SUCCESS(teacherServiceApi.getEducation(utoken, id));
     }
@@ -115,7 +115,7 @@ public class TeacherV1Api extends AbstractApi {
     @RequestMapping(value = "/education/delete", method = RequestMethod.POST)
     public MomiaHttpResponse addEducation(@RequestParam String utoken, @RequestParam int id) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (id <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (id <= 0) return MomiaHttpResponse.FAILED("无效的教育背景ID");
 
         return MomiaHttpResponse.SUCCESS(teacherServiceApi.deleteEducation(utoken, id));
     }
@@ -123,7 +123,7 @@ public class TeacherV1Api extends AbstractApi {
     @RequestMapping(value = "/material", method = RequestMethod.GET)
     public MomiaHttpResponse getMaterial(@RequestParam String utoken, @RequestParam(value = "mid") int materialId) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (materialId <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (materialId <= 0) return MomiaHttpResponse.FAILED("无效的教材ID");
 
         return MomiaHttpResponse.SUCCESS(completeMaterialImgs(courseServiceApi.getMaterial(utoken, materialId)));
     }
@@ -136,7 +136,7 @@ public class TeacherV1Api extends AbstractApi {
     @RequestMapping(value = "/material/list", method = RequestMethod.GET)
     public MomiaHttpResponse listMaterials(@RequestParam String utoken, @RequestParam int start) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (start < 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (start < 0) return MomiaHttpResponse.FAILED("无效的分页参数，start必须为非负整数");
 
         PagedList<CourseMaterial> pagedMaterials = courseServiceApi.listMaterials(utoken, start, Configuration.getInt("PageSize.Material"));
         completeMaterialsImgs(pagedMaterials.getList());
@@ -173,7 +173,7 @@ public class TeacherV1Api extends AbstractApi {
     @RequestMapping(value = "/course/notfinished", method = RequestMethod.GET)
     public MomiaHttpResponse notfinished(@RequestParam String utoken, @RequestParam int start) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (start < 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (start < 0) return MomiaHttpResponse.FAILED("无效的分页参数，start必须为非负整数");
 
         User user = userServiceApi.get(utoken);
         PagedList<TeacherCourse> courses = courseServiceApi.queryNotFinishedByTeacher(user.getId(), start, Configuration.getInt("PageSize.Course"));
@@ -197,7 +197,10 @@ public class TeacherV1Api extends AbstractApi {
                                      @RequestParam(value = "coid") long courseId,
                                      @RequestParam(value = "sid") long courseSkuId) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (userId <= 0 || packageId <= 0 || courseId <= 0 || courseSkuId <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (userId <= 0) return MomiaHttpResponse.FAILED("无效的用户ID");
+        if (packageId <= 0) return MomiaHttpResponse.FAILED("无效的课程包ID");
+        if (courseId <= 0) return MomiaHttpResponse.FAILED("无效的课程ID");
+        if (courseSkuId <= 0) return MomiaHttpResponse.FAILED("无效的场次ID");
 
         return MomiaHttpResponse.SUCCESS(courseServiceApi.checkin(utoken, userId, packageId, courseId, courseSkuId));
     }
@@ -207,7 +210,8 @@ public class TeacherV1Api extends AbstractApi {
                                                  @RequestParam(value = "coid") long courseId,
                                                  @RequestParam(value = "sid") long courseSkuId) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (courseId <= 0 || courseSkuId <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (courseId <= 0) return MomiaHttpResponse.FAILED("无效的课程ID");
+        if (courseSkuId <= 0) return MomiaHttpResponse.FAILED("无效的场次ID");
 
         List<Student> students = courseServiceApi.notfinishedStudents(utoken, courseId, courseSkuId);
         completeStudentsImgs(students);
@@ -231,7 +235,7 @@ public class TeacherV1Api extends AbstractApi {
     @RequestMapping(value = "/course/finished", method = RequestMethod.GET)
     public MomiaHttpResponse finished(@RequestParam String utoken, @RequestParam int start) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (start < 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (start < 0) return MomiaHttpResponse.FAILED("无效的分页参数，start必须为非负整数");
 
         User user = userServiceApi.get(utoken);
         PagedList<TeacherCourse> courses = courseServiceApi.queryFinishedByTeacher(user.getId(), start, Configuration.getInt("PageSize.Course"));
@@ -245,7 +249,8 @@ public class TeacherV1Api extends AbstractApi {
                                               @RequestParam(value = "coid") long courseId,
                                               @RequestParam(value = "sid") long courseSkuId) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (courseId <= 0 || courseSkuId <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (courseId <= 0) return MomiaHttpResponse.FAILED("无效的课程ID");
+        if (courseSkuId <= 0) return MomiaHttpResponse.FAILED("无效的场次ID");
 
         List<Student> students = courseServiceApi.finishedStudents(utoken, courseId, courseSkuId);
         completeStudentsImgs(students);
@@ -256,7 +261,8 @@ public class TeacherV1Api extends AbstractApi {
     @RequestMapping(value = "/student", method = RequestMethod.GET)
     public MomiaHttpResponse student(@RequestParam String utoken, @RequestParam(value = "cid") long childId, @RequestParam int start) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (childId <= 0 || start < 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (childId <= 0) return MomiaHttpResponse.FAILED("无效的孩子ID");
+        if (start < 0) return MomiaHttpResponse.FAILED("无效的分页参数，start必须为非负整数");
 
         JSONObject studentJson = new JSONObject();
 
@@ -343,7 +349,9 @@ public class TeacherV1Api extends AbstractApi {
                                     @RequestParam(value = "coid") long courseId,
                                     @RequestParam(value = "sid") long courseSkuId) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (courseId <= 0 || courseSkuId <= 0 || childId <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (courseId <= 0) return MomiaHttpResponse.FAILED("无效的课程ID");
+        if (courseSkuId <= 0) return MomiaHttpResponse.FAILED("无效的场次ID");
+        if (childId <= 0) return MomiaHttpResponse.FAILED("无效的孩子ID");
 
         Child child = childServiceApi.get(utoken, childId);
         if (!child.exists()) return MomiaHttpResponse.FAILED("孩子信息不存在");
@@ -371,7 +379,10 @@ public class TeacherV1Api extends AbstractApi {
                                     @RequestParam(value = "sid") long courseSkuId,
                                     @RequestParam String record) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (courseId <= 0 || courseSkuId <= 0 || childId <= 0 || StringUtils.isBlank(record)) return MomiaHttpResponse.BAD_REQUEST;
+        if (courseId <= 0) return MomiaHttpResponse.FAILED("无效的课程ID");
+        if (courseSkuId <= 0) return MomiaHttpResponse.FAILED("无效的场次ID");
+        if (childId <= 0) return MomiaHttpResponse.FAILED("无效的孩子ID");
+        if (StringUtils.isBlank(record)) return MomiaHttpResponse.FAILED("记录内容不能为空");
 
         return MomiaHttpResponse.SUCCESS(childServiceApi.record(utoken, childId, courseId, courseSkuId, record));
     }
@@ -383,7 +394,10 @@ public class TeacherV1Api extends AbstractApi {
                                      @RequestParam(value = "sid") long courseSkuId,
                                      @RequestParam String comment) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (courseId <= 0 || courseSkuId <= 0 || childId <= 0 || StringUtils.isBlank(comment)) return MomiaHttpResponse.BAD_REQUEST;
+        if (courseId <= 0) return MomiaHttpResponse.FAILED("无效的课程ID");
+        if (courseSkuId <= 0) return MomiaHttpResponse.FAILED("无效的场次ID");
+        if (childId <= 0) return MomiaHttpResponse.FAILED("无效的孩子ID");
+        if (StringUtils.isBlank(comment)) return MomiaHttpResponse.FAILED("评语内容不能为空");
 
         return MomiaHttpResponse.SUCCESS(childServiceApi.comment(utoken, childId, courseId, courseSkuId, comment));
     }

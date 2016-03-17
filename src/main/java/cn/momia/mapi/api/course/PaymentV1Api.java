@@ -2,7 +2,7 @@ package cn.momia.mapi.api.course;
 
 import cn.momia.api.course.PaymentServiceApi;
 import cn.momia.common.core.http.MomiaHttpResponse;
-import cn.momia.common.core.util.XmlUtil;
+import cn.momia.common.core.util.MomiaUtil;
 import cn.momia.mapi.api.AbstractApi;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -30,7 +30,8 @@ public class PaymentV1Api extends AbstractApi {
                                           @RequestParam(defaultValue = "app") String type,
                                           @RequestParam(value = "coupon", required = false, defaultValue = "0") long userCouponId) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (orderId <= 0 || StringUtils.isBlank(type)) return MomiaHttpResponse.BAD_REQUEST;
+        if (orderId <= 0) return MomiaHttpResponse.FAILED("无效的订单ID");
+        if (StringUtils.isBlank(type)) return MomiaHttpResponse.FAILED("无效的类型");
 
         return MomiaHttpResponse.SUCCESS(paymentServiceApi.prepayAlipay(utoken, orderId, type, userCouponId));
     }
@@ -42,7 +43,8 @@ public class PaymentV1Api extends AbstractApi {
                                           @RequestParam(required = false) String code,
                                           @RequestParam(value = "coupon", required = false, defaultValue = "0") long userCouponId) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (orderId <= 0 || StringUtils.isBlank(type)) return MomiaHttpResponse.BAD_REQUEST;
+        if (orderId <= 0) return MomiaHttpResponse.FAILED("无效的订单ID");
+        if (StringUtils.isBlank(type)) return MomiaHttpResponse.FAILED("无效的类型");
 
         return MomiaHttpResponse.SUCCESS(paymentServiceApi.prepayWeixin(utoken, orderId, type, code, userCouponId));
     }
@@ -64,7 +66,7 @@ public class PaymentV1Api extends AbstractApi {
     @RequestMapping(value = "/callback/weixin", method = RequestMethod.POST, produces = "application/xml")
     public String callbackWeixin(HttpServletRequest request) {
         try {
-            Map<String, String> params = XmlUtil.xmlToMap(IOUtils.toString(request.getInputStream()));
+            Map<String, String> params = MomiaUtil.xmlToMap(IOUtils.toString(request.getInputStream()));
             if (paymentServiceApi.callbackWeixin(params)) return WechatpayResponse.SUCCESS;
         } catch (Exception e) {
             LOGGER.error("wechat pay callback error", e);
@@ -96,7 +98,7 @@ public class PaymentV1Api extends AbstractApi {
     @RequestMapping(value = "/check", method = RequestMethod.POST)
     public MomiaHttpResponse check(@RequestParam String utoken, @RequestParam(value = "oid") long orderId) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (orderId <= 0) return MomiaHttpResponse.BAD_REQUEST;
+        if (orderId <= 0) return MomiaHttpResponse.FAILED("无效的订单ID");
 
         return MomiaHttpResponse.SUCCESS(paymentServiceApi.checkPayment(utoken, orderId));
     }
