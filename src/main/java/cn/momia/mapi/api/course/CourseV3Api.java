@@ -96,6 +96,7 @@ public class CourseV3Api extends AbstractApi {
 
         if (recommend != 1 && trial != 1) {
             courseJson.put("buyable", false);
+            courseJson.put("status", 1);
         }
 
         return MomiaHttpResponse.SUCCESS(courseJson);
