@@ -40,7 +40,8 @@ public class CourseV3Api extends AbstractApi {
     public MomiaHttpResponse get(@RequestParam(required = false, defaultValue = "") String utoken,
                                  @RequestParam long id,
                                  @RequestParam(required = false, defaultValue = "") String pos,
-                                 @RequestParam(required = false, defaultValue = "0") int recommend) {
+                                 @RequestParam(required = false, defaultValue = "0") int recommend,
+                                 @RequestParam(required = false, defaultValue = "0") int trial) {
         if (id <= 0) return MomiaHttpResponse.FAILED("无效的课程ID");
 
         Course course = completeLargeImg(courseServiceApi.get(id, pos));
@@ -91,6 +92,10 @@ public class CourseV3Api extends AbstractApi {
             courseJson.put("detail", detailJson);
         } catch (Exception e) {
             LOGGER.warn("invalid course detail: {}", id);
+        }
+
+        if (recommend != 1 && trial != 1) {
+            courseJson.put("buyable", false);
         }
 
         return MomiaHttpResponse.SUCCESS(courseJson);
