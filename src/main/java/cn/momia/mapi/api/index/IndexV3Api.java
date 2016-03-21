@@ -117,6 +117,8 @@ public class IndexV3Api extends AbstractIndexApi {
     private List<Subject> getSubjects(int cityId) {
         List<Subject> subjects = subjectServiceApi.list(cityId);
         for (Subject subject : subjects) {
+            PagedList<Course> courses = courseServiceApi.query(subject.getId(), 0, Configuration.getInt("PageSize.Course"));
+            subject.setCourses(courses.getList());
             completeLargeImg(subject);
         }
 
