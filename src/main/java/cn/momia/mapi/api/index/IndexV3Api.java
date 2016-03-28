@@ -82,6 +82,8 @@ public class IndexV3Api extends AbstractIndexApi {
             if (now.getTime() - lastChangeTime.getTime() >= 3 * 24 * 60 * 60 * 1000) { // 3天一轮换
                 if (subjectCourseType == HOT_COURSE) subjectCourseType = NEW_COURSE;
                 else subjectCourseType = HOT_COURSE;
+
+                lastChangeTime = new Date();
             }
 
             int currentSubjectCourseType = subjectCourseType;
