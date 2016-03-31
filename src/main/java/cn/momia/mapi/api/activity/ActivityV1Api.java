@@ -24,6 +24,17 @@ public class ActivityV1Api extends AbstractApi {
 
     @Autowired private ActivityServiceApi activityServiceApi;
 
+    @RequestMapping(value = "/join", method = RequestMethod.POST)
+    public MomiaHttpResponse join(@RequestParam(value = "aid") int activityId,
+                                  @RequestParam String mobile,
+                                  @RequestParam(value = "cname") String childName) {
+        if (activityId <= 0) return MomiaHttpResponse.FAILED("无效的活动");
+        if (MomiaUtil.isInvalidMobile(mobile)) return MomiaHttpResponse.FAILED("无效的手机号码");
+        if (StringUtils.isBlank(childName)) return MomiaHttpResponse.FAILED("孩子姓名不能为空");
+
+        return MomiaHttpResponse.SUCCESS(activityServiceApi.join(activityId, mobile, childName));
+    }
+
     @RequestMapping(value = "/prepay/alipay", method = RequestMethod.POST)
     public MomiaHttpResponse prepayAlipay(@RequestParam(value = "eid") long entryId, @RequestParam(defaultValue = "app") String type) {
         if (entryId <= 0) return MomiaHttpResponse.FAILED("无效的报名ID");
