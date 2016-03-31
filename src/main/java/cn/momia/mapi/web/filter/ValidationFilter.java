@@ -76,7 +76,7 @@ public class ValidationFilter implements Filter {
 
     private boolean isNormalAppRequest(HttpServletRequest httpRequest) {
         String uri = httpRequest.getRequestURI();
-        return !(uri.startsWith("/payment/callback/") || uri.startsWith("/m/") || uri.startsWith("/admin/"));
+        return !(uri.startsWith("/payment/callback/") || uri.startsWith("/activity/callback/") || uri.startsWith("/m/") || uri.startsWith("/admin/"));
     }
 
     private boolean isParamMissing(HttpServletRequest httpRequest) {
