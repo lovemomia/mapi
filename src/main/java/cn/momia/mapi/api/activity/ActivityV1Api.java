@@ -1,6 +1,7 @@
 package cn.momia.mapi.api.activity;
 
 import cn.momia.api.course.ActivityServiceApi;
+import cn.momia.api.course.activity.Activity;
 import cn.momia.common.core.http.MomiaHttpResponse;
 import cn.momia.common.core.util.MomiaUtil;
 import cn.momia.mapi.api.AbstractApi;
@@ -23,6 +24,16 @@ public class ActivityV1Api extends AbstractApi {
     private static final Logger LOGGER = LoggerFactory.getLogger(ActivityV1Api.class);
 
     @Autowired private ActivityServiceApi activityServiceApi;
+
+    @RequestMapping(method = RequestMethod.GET)
+    public MomiaHttpResponse get(@RequestParam int id) {
+        if (id <= 0) return MomiaHttpResponse.FAILED("无效的活动ID");
+
+        Activity activity = activityServiceApi.get(id);
+        activity.setCover(completeSmallImg(activity.getCover()));
+
+        return MomiaHttpResponse.SUCCESS(activity);
+    }
 
     @RequestMapping(value = "/join", method = RequestMethod.POST)
     public MomiaHttpResponse join(@RequestParam(value = "aid") int activityId,
