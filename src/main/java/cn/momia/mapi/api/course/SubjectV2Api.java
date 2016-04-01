@@ -81,7 +81,7 @@ public class SubjectV2Api extends FeedRelatedApi {
         if (cheapestSku == null) return MomiaHttpResponse.FAILED("无效的课程体系");
         subjectJson.put("cheapestSkuPrice", cheapestSku.getPrice());
         subjectJson.put("cheapestSkuTimeUnit", TimeUtil.toUnitString(cheapestSku.getTimeUnit()));
-        subjectJson.put("cheapestSkuDesc", "任选" + MomiaUtil.CHINESE_NUMBER_CHARACTER[cheapestSku.getCourseCount()] + "次");
+        subjectJson.put("cheapestSkuDesc", "任选" + MomiaUtil.CHINESE_NUMBER_CHARACTER[cheapestSku.getCourseCount()] + "门");
 
         JSONObject responseJson = new JSONObject();
         responseJson.put("subject", subjectJson);

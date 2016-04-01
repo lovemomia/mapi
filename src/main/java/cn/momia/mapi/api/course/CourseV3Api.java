@@ -65,7 +65,7 @@ public class CourseV3Api extends AbstractApi {
         if (cheapestSubjectSku != null) {
             courseJson.put("cheapestSkuPrice", cheapestSubjectSku.getPrice());
             courseJson.put("cheapestSkuTimeUnit", TimeUtil.toUnitString(cheapestSubjectSku.getTimeUnit()));
-            courseJson.put("cheapestSkuDesc", "任选" + MomiaUtil.CHINESE_NUMBER_CHARACTER[cheapestSubjectSku.getCourseCount()] + "次");
+            courseJson.put("cheapestSkuDesc", "任选" + MomiaUtil.CHINESE_NUMBER_CHARACTER[cheapestSubjectSku.getCourseCount()] + "门");
         }
 
         if (recommend == 1) {
