@@ -78,14 +78,6 @@ public class ActivityV1Api extends AbstractApi {
     @RequestMapping(value = "/check", method = RequestMethod.POST)
     public MomiaHttpResponse check(@RequestParam(value = "eid") long entryId) {
         if (entryId <= 0) return MomiaHttpResponse.FAILED("无效的报名ID");
-
-        try {
-            ActivityEntry activityEntry = activityServiceApi.getEntry(entryId);
-            if (activityEntry.exists()) notify(activityEntry.getActivityId(), activityEntry.getMobile());
-        } catch (Exception e) {
-            LOGGER.error("fail to notify for activity entry: {}", entryId, e);
-        }
-
         return MomiaHttpResponse.SUCCESS(activityServiceApi.checkPayment(entryId));
     }
 }
