@@ -1,5 +1,6 @@
 package cn.momia.mapi.api.course;
 
+import cn.momia.api.course.ActivityServiceApi;
 import cn.momia.api.course.PaymentServiceApi;
 import cn.momia.common.core.http.MomiaHttpResponse;
 import cn.momia.common.core.util.MomiaUtil;
@@ -22,6 +23,7 @@ import java.util.Map;
 public class PaymentV1Api extends AbstractApi {
     private static final Logger LOGGER = LoggerFactory.getLogger(PaymentV1Api.class);
 
+    @Autowired private ActivityServiceApi activityServiceApi;
     @Autowired private PaymentServiceApi paymentServiceApi;
 
     @RequestMapping(value = "/prepay/alipay", method = RequestMethod.POST)
@@ -53,7 +55,14 @@ public class PaymentV1Api extends AbstractApi {
     public String callbackAlipay(HttpServletRequest request) {
         try {
             Map<String, String> params = extractParams(request);
-            if (paymentServiceApi.callbackAlipay(params)) return "success";
+            String outTradeNo = params.get("out_trade_no");
+            if (!StringUtils.isBlank(outTradeNo)) {
+                if (outTradeNo.startsWith("act")) {
+                    if (activityServiceApi.callbackAlipay(params)) return "success";
+                } else {
+                    if (paymentServiceApi.callbackAlipay(params)) return "success";
+                }
+            }
         } catch (Exception e) {
             LOGGER.error("ali pay callback error", e);
         }
@@ -67,7 +76,14 @@ public class PaymentV1Api extends AbstractApi {
     public String callbackWeixin(HttpServletRequest request) {
         try {
             Map<String, String> params = MomiaUtil.xmlToMap(IOUtils.toString(request.getInputStream()));
-            if (paymentServiceApi.callbackWeixin(params)) return WechatpayResponse.SUCCESS;
+            String outTradeNo = params.get("out_trade_no");
+            if (!StringUtils.isBlank(outTradeNo)) {
+                if (outTradeNo.startsWith("act")) {
+                    if (activityServiceApi.callbackWeixin(params)) return WechatpayResponse.SUCCESS;
+                } else {
+                    if (paymentServiceApi.callbackWeixin(params)) return WechatpayResponse.SUCCESS;
+                }
+            }
         } catch (Exception e) {
             LOGGER.error("wechat pay callback error", e);
         }
