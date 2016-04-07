@@ -105,8 +105,7 @@ public class IndexV3Api extends AbstractIndexApi {
             }
             indexJson.put("subjects", subjectsJson);
 
-            List<DiscussTopic> topics = discussServiceApi.listTopics(cityId, 0, 3).getList();
-            if (!topics.isEmpty()) topics = topics.subList(0, 1);
+            List<DiscussTopic> topics = discussServiceApi.listTopics(cityId, 0, subjectsJson.size()).getList();
             for (DiscussTopic topic : topics) {
                 topic.setCover(completeLargeImg(topic.getCover()));
             }
