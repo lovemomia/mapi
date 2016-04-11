@@ -11,7 +11,7 @@ import cn.momia.common.core.http.MomiaHttpResponse;
 import cn.momia.common.core.util.MomiaUtil;
 import cn.momia.common.core.util.TimeUtil;
 import cn.momia.common.webapp.config.Configuration;
-import cn.momia.mapi.api.FeedRelatedApi;
+import cn.momia.mapi.api.AbstractApi;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +24,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/v3/subject")
-public class SubjectV3Api extends FeedRelatedApi {
+public class SubjectV3Api extends AbstractApi {
     @Autowired private SubjectServiceApi subjectServiceApi;
     @Autowired private CourseServiceApi courseServiceApi;
 

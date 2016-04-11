@@ -6,8 +6,6 @@ import cn.momia.api.course.dto.course.Course;
 import cn.momia.api.course.dto.subject.Subject;
 import cn.momia.api.course.dto.subject.SubjectSku;
 import cn.momia.api.course.dto.comment.UserCourseComment;
-import cn.momia.api.feed.FeedServiceApi;
-import cn.momia.api.feed.dto.Feed;
 import cn.momia.api.user.UserServiceApi;
 import cn.momia.api.user.dto.Contact;
 import cn.momia.common.core.dto.PagedList;
@@ -15,7 +13,7 @@ import cn.momia.common.core.http.MomiaHttpResponse;
 import cn.momia.common.core.util.MomiaUtil;
 import cn.momia.common.core.util.TimeUtil;
 import cn.momia.common.webapp.config.Configuration;
-import cn.momia.mapi.api.FeedRelatedApi;
+import cn.momia.mapi.api.AbstractApi;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
@@ -32,12 +30,11 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/v2/subject")
-public class SubjectV2Api extends FeedRelatedApi {
+public class SubjectV2Api extends AbstractApi {
     private static final Logger LOGGER = LoggerFactory.getLogger(SubjectV2Api.class);
 
     @Autowired private SubjectServiceApi subjectServiceApi;
     @Autowired private CourseServiceApi courseServiceApi;
-    @Autowired private FeedServiceApi feedServiceApi;
     @Autowired private UserServiceApi userServiceApi;
 
     @RequestMapping(value = "/trial", method = RequestMethod.GET)
@@ -60,7 +57,7 @@ public class SubjectV2Api extends FeedRelatedApi {
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public MomiaHttpResponse get(@RequestParam(required = false, defaultValue = "") String utoken, @RequestParam long id) {
+    public MomiaHttpResponse get(@RequestParam long id) {
         if (id <= 0) return MomiaHttpResponse.FAILED("无效的课程体系ID");
 
         Subject subject = subjectServiceApi.get(id);
@@ -69,9 +66,6 @@ public class SubjectV2Api extends FeedRelatedApi {
 
         PagedList<Course> courses = courseServiceApi.query(id, 0, Configuration.getInt("PageSize.Course"));
         completeLargeCoursesImgs(courses.getList());
-
-        long userId = StringUtils.isBlank(utoken) ? 0 : userServiceApi.get(utoken).getId();
-        PagedList<Feed> feeds = feedServiceApi.queryBySubject(id, 0, Configuration.getInt("PageSize.Feed"));
 
         PagedList<UserCourseComment> comments = subjectServiceApi.queryCommentsBySubject(id, 0, Configuration.getInt("PageSize.CourseComment"));
         completeCourseCommentsImgs(comments.getList());
@@ -86,7 +80,7 @@ public class SubjectV2Api extends FeedRelatedApi {
         JSONObject responseJson = new JSONObject();
         responseJson.put("subject", subjectJson);
         responseJson.put("courses", courses);
-        responseJson.put("feeds", buildPagedUserFeeds(userId, feeds));
+        responseJson.put("feeds", PagedList.EMPTY);
         responseJson.put("comments", comments);
 
         return MomiaHttpResponse.SUCCESS(responseJson);
