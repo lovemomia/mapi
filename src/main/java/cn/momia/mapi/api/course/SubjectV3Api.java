@@ -68,7 +68,7 @@ public class SubjectV3Api extends FeedRelatedApi {
 
         JSONObject responseJson = new JSONObject();
         responseJson.put("subject", subjectJson);
-        responseJson.put("courses", courses);
+        responseJson.put("courses", pagedCourses);
         responseJson.put("comments", comments);
 
         return MomiaHttpResponse.SUCCESS(responseJson);
