@@ -89,7 +89,7 @@ public class IndexV3Api extends AbstractIndexApi {
             int currentSubjectCourseType = subjectCourseType;
             JSONArray subjectsJson = new JSONArray();
             for (Subject subject : subjects) {
-                if (subject.getCourses() == null || subject.getCourses().isEmpty()) continue;
+                if (subject.getId() == 14 || subject.getCourses() == null || subject.getCourses().isEmpty()) continue;
 
                 currentSubjectCourseType = currentSubjectCourseType % 2 + 1;
                 if (currentSubjectCourseType == HOT_COURSE) sortCoursesByJoined(subject);
