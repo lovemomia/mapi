@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -37,16 +36,11 @@ public class SubjectV3Api extends FeedRelatedApi {
         subject.setCourses(null); // 后面通过course的接口单独取
         completeLargeImg(subject);
 
-        List<Course> courses = new ArrayList<Course>();
-        for (Course course : courseServiceApi.listBySubject(id)) {
-            if (course.getParentId() <= 0) courses.add(course);
-        }
-        completeLargeCoursesImgs(courses);
+        List<Course> newCourses = courseServiceApi.listRecentCoursesBySubject(id);
+        completeMiddleCoursesImgs(newCourses);
 
-        PagedList<Course> pagedCourses = new PagedList<Course>();
-        pagedCourses.setTotalCount(courses.size());
-        pagedCourses.setNextIndex(null);
-        pagedCourses.setList(courses);
+        List<Course> courses = courseServiceApi.listBySubject(id);
+        completeLargeCoursesImgs(courses);
 
         PagedList<UserCourseComment> comments = subjectServiceApi.queryCommentsBySubject(id, 0, Configuration.getInt("PageSize.CourseComment"));
         completeCourseCommentsImgs(comments.getList());
@@ -60,7 +54,8 @@ public class SubjectV3Api extends FeedRelatedApi {
 
         JSONObject responseJson = new JSONObject();
         responseJson.put("subject", subjectJson);
-        responseJson.put("courses", pagedCourses);
+        responseJson.put("newCourses", newCourses);
+        responseJson.put("courses", courses);
         responseJson.put("comments", comments);
 
         return MomiaHttpResponse.SUCCESS(responseJson);
