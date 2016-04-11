@@ -61,7 +61,6 @@ public class SubjectV2Api extends AbstractApi {
         if (id <= 0) return MomiaHttpResponse.FAILED("无效的课程体系ID");
 
         Subject subject = subjectServiceApi.get(id);
-        subject.setCourses(null); // 后面通过course的接口单独取
         completeLargeImg(subject);
 
         PagedList<Course> courses = courseServiceApi.query(id, 0, Configuration.getInt("PageSize.Course"));

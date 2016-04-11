@@ -24,7 +24,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -78,7 +77,6 @@ public class IndexV3Api extends AbstractIndexApi {
                 indexJson.put("events", getEvents(cityId, platform, version, 2));
             }
 
-            List<Subject> subjects = getSubjects(cityId);
             Date now = new Date();
             if (now.getTime() - lastChangeTime.getTime() >= 3 * 24 * 60 * 60 * 1000) { // 3天一轮换
                 if (subjectCourseType == HOT_COURSE) subjectCourseType = NEW_COURSE;
@@ -87,16 +85,22 @@ public class IndexV3Api extends AbstractIndexApi {
                 lastChangeTime = new Date();
             }
 
+            List<Subject> subjects = subjectServiceApi.list(cityId);
+
             int currentSubjectCourseType = subjectCourseType;
             JSONArray subjectsJson = new JSONArray();
             for (Subject subject : subjects) {
-                if (subject.getId() == 14 || subject.getCourses() == null || subject.getCourses().isEmpty()) continue;
+                if (subject.getId() == 14) continue;
+
+                List<Course> courses = courseServiceApi.listBySubject(subject.getId());
+                if (courses == null || courses.isEmpty()) continue;
 
                 currentSubjectCourseType = currentSubjectCourseType % 2 + 1;
-                if (currentSubjectCourseType == HOT_COURSE) sortCoursesByJoined(subject);
-                else sortCoursesByAddTime(subject);
+                if (currentSubjectCourseType == HOT_COURSE) sortCoursesByJoined(courses);
+                else sortCoursesByAddTime(courses);
 
                 JSONObject subjectJson = (JSONObject) JSON.toJSON(subject);
+                subjectJson.put("courses", courses.subList(0, Math.min(courses.size(), 3)));
                 subjectsJson.add(subjectJson);
 
                 subjectJson.put("subjectCourseType", currentSubjectCourseType);
@@ -118,45 +122,24 @@ public class IndexV3Api extends AbstractIndexApi {
         return MomiaHttpResponse.SUCCESS(indexJson);
     }
 
-    private List<Subject> getSubjects(int cityId) {
-        List<Subject> subjects = subjectServiceApi.list(cityId);
-        for (Subject subject : subjects) {
-            List<Course> courses = new ArrayList<Course>();
-            for (Course course : courseServiceApi.listBySubject(subject.getId())) {
-                if (course.getParentId() <= 0) courses.add(course);
+    private void sortCoursesByJoined(List<Course> courses) {
+        if (courses.isEmpty()) return;
+        Collections.sort(courses, new Comparator<Course>() {
+            @Override
+            public int compare(Course c1, Course c2) {
+                return c2.getJoined() - c1.getJoined();
             }
-
-            subject.setCourses(courses);
-            completeLargeImg(subject);
-        }
-
-        return subjects;
+        });
     }
 
-    private void sortCoursesByJoined(Subject subject) {
-        List<Course> courses = subject.getCourses();
-        if (!courses.isEmpty()) {
-            Collections.sort(courses, new Comparator<Course>() {
-                @Override
-                public int compare(Course c1, Course c2) {
-                    return c2.getJoined() - c1.getJoined();
-                }
-            });
-            subject.setCourses(courses.subList(0, Math.min(courses.size(), 3)));
-        }
-    }
-
-    private void sortCoursesByAddTime(Subject subject) {
-        List<Course> courses = subject.getCourses();
-        if (!courses.isEmpty()) {
-            Collections.sort(courses, new Comparator<Course>() {
-                @Override
-                public int compare(Course c1, Course c2) {
-                    return (int) (c2.getAddTime().getTime() - c1.getAddTime().getTime());
-                }
-            });
-            subject.setCourses(courses.subList(0, Math.min(courses.size(), 3)));
-        }
+    private void sortCoursesByAddTime(List<Course> courses) {
+        if (courses.isEmpty()) return;
+        Collections.sort(courses, new Comparator<Course>() {
+            @Override
+            public int compare(Course c1, Course c2) {
+                return (int) (c2.getAddTime().getTime() - c1.getAddTime().getTime());
+            }
+        });
     }
 
     private PagedList<Course> getRecommendCourses(int cityId, int start) {
