@@ -8,7 +8,6 @@ import cn.momia.api.course.dto.course.DatedCourseSkus;
 import cn.momia.api.course.dto.comment.UserCourseComment;
 import cn.momia.api.im.ImServiceApi;
 import cn.momia.api.poi.PoiServiceApi;
-import cn.momia.api.poi.dto.Institution;
 import cn.momia.api.user.TeacherServiceApi;
 import cn.momia.api.user.UserServiceApi;
 import cn.momia.api.user.dto.Teacher;
@@ -86,17 +85,6 @@ public class CourseV1Api extends AbstractApi {
         pagedTeachers.setList(teachers);
 
         return MomiaHttpResponse.SUCCESS(pagedTeachers);
-    }
-
-    @RequestMapping(value = "/institution", method = RequestMethod.GET)
-    public MomiaHttpResponse institution(@RequestParam long id) {
-        if (id <= 0) return MomiaHttpResponse.FAILED("无效的课程ID");
-
-        int institutionId = courseServiceApi.getInstitutionId(id);
-        Institution institution = poiServiceApi.getInstitution(institutionId);
-        institution.setCover(completeLargeImg(institution.getCover()));
-
-        return MomiaHttpResponse.SUCCESS(institution);
     }
 
     @RequestMapping(value = "/sku/week", method = RequestMethod.GET)
