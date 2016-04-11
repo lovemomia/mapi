@@ -95,6 +95,9 @@ public class IndexV3Api extends AbstractIndexApi {
                 List<Course> courses = courseServiceApi.listBySubject(subject.getId());
                 if (courses == null || courses.isEmpty()) continue;
 
+                completeLargeImg(subject);
+                completeMiddleCoursesImgs(courses);
+
                 currentSubjectCourseType = currentSubjectCourseType % 2 + 1;
                 if (currentSubjectCourseType == HOT_COURSE) sortCoursesByJoined(courses);
                 else sortCoursesByAddTime(courses);
