@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -120,8 +121,12 @@ public class IndexV3Api extends AbstractIndexApi {
     private List<Subject> getSubjects(int cityId) {
         List<Subject> subjects = subjectServiceApi.list(cityId);
         for (Subject subject : subjects) {
-            PagedList<Course> courses = courseServiceApi.query(subject.getId(), 0, Configuration.getInt("PageSize.Course"));
-            subject.setCourses(courses.getList());
+            List<Course> courses = new ArrayList<Course>();
+            for (Course course : courseServiceApi.listBySubject(subject.getId())) {
+                if (course.getParentId() <= 0) courses.add(course);
+            }
+
+            subject.setCourses(courses);
             completeLargeImg(subject);
         }
 

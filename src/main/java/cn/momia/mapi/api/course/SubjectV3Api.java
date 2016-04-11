@@ -6,8 +6,6 @@ import cn.momia.api.course.dto.comment.UserCourseComment;
 import cn.momia.api.course.dto.course.Course;
 import cn.momia.api.course.dto.subject.Subject;
 import cn.momia.api.course.dto.subject.SubjectSku;
-import cn.momia.api.feed.FeedServiceApi;
-import cn.momia.api.user.UserServiceApi;
 import cn.momia.common.core.dto.PagedList;
 import cn.momia.common.core.http.MomiaHttpResponse;
 import cn.momia.common.core.util.MomiaUtil;
@@ -16,8 +14,6 @@ import cn.momia.common.webapp.config.Configuration;
 import cn.momia.mapi.api.FeedRelatedApi;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -30,12 +26,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/v3/subject")
 public class SubjectV3Api extends FeedRelatedApi {
-    private static final Logger LOGGER = LoggerFactory.getLogger(SubjectV3Api.class);
-
     @Autowired private SubjectServiceApi subjectServiceApi;
     @Autowired private CourseServiceApi courseServiceApi;
-    @Autowired private FeedServiceApi feedServiceApi;
-    @Autowired private UserServiceApi userServiceApi;
 
     @RequestMapping(method = RequestMethod.GET)
     public MomiaHttpResponse get(@RequestParam long id) {
