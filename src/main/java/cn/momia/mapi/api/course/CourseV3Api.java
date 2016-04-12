@@ -17,6 +17,7 @@ import cn.momia.mapi.api.AbstractApi;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +42,8 @@ public class CourseV3Api extends AbstractApi {
                                  @RequestParam long id,
                                  @RequestParam(required = false, defaultValue = "") String pos,
                                  @RequestParam(required = false, defaultValue = "0") int recommend,
-                                 @RequestParam(required = false, defaultValue = "0") int trial) {
+                                 @RequestParam(required = false, defaultValue = "0") int trial,
+                                 @RequestParam(value = "sid", required = false, defaultValue = "0") long courseSkuId) {
         if (id <= 0) return MomiaHttpResponse.FAILED("无效的课程ID");
 
         Course course = completeLargeImg(courseServiceApi.get(id, pos));
@@ -98,6 +100,8 @@ public class CourseV3Api extends AbstractApi {
             courseJson.put("buyable", false);
             courseJson.put("status", 1);
         }
+
+        courseJson.put("bookable", !StringUtils.isBlank(utoken) && courseSkuId > 0 && courseServiceApi.bookable(utoken, id));
 
         return MomiaHttpResponse.SUCCESS(courseJson);
     }
