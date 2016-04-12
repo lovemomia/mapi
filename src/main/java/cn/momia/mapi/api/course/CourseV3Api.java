@@ -6,7 +6,11 @@ import cn.momia.api.course.SubjectServiceApi;
 import cn.momia.api.course.dto.comment.UserCourseComment;
 import cn.momia.api.course.dto.course.Course;
 import cn.momia.api.course.dto.course.CourseDetail;
+import cn.momia.api.course.dto.course.CourseSku;
+import cn.momia.api.course.dto.course.CourseSkuPlace;
 import cn.momia.api.course.dto.subject.SubjectSku;
+import cn.momia.api.poi.PoiServiceApi;
+import cn.momia.api.poi.dto.Place;
 import cn.momia.api.user.TeacherServiceApi;
 import cn.momia.api.user.dto.Teacher;
 import cn.momia.common.core.dto.PagedList;
@@ -37,6 +41,7 @@ public class CourseV3Api extends AbstractApi {
     @Autowired private CourseServiceApi courseServiceApi;
     @Autowired private SubjectServiceApi subjectServiceApi;
     @Autowired private OrderServiceApi orderServiceApi;
+    @Autowired private PoiServiceApi poiServiceApi;
     @Autowired private TeacherServiceApi teacherServiceApi;
 
     @RequestMapping(method = RequestMethod.GET)
@@ -101,6 +106,21 @@ public class CourseV3Api extends AbstractApi {
         if (recommend != 1 && trial != 1) {
             courseJson.put("buyable", false);
             courseJson.put("status", 1);
+        }
+
+        if (courseSkuId > 0) {
+            CourseSku sku = courseServiceApi.getSku(id, courseSkuId);
+            Place place = poiServiceApi.getPlace(sku.getPlaceId());
+            CourseSkuPlace skuPlace = new CourseSkuPlace();
+            skuPlace.setId(place.getId());
+            skuPlace.setCityId(place.getCityId());
+            skuPlace.setRegionId(place.getRegionId());
+            skuPlace.setName(place.getName());
+            skuPlace.setLng(place.getLng());
+            skuPlace.setLat(place.getLat());
+            skuPlace.setRoute(sku.getRoute());
+            skuPlace.setScheduler(sku.getScheduler());
+            courseJson.put("place", skuPlace);
         }
 
         if (!StringUtils.isBlank(utoken)) {
