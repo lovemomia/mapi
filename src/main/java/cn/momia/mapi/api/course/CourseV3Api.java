@@ -1,6 +1,7 @@
 package cn.momia.mapi.api.course;
 
 import cn.momia.api.course.CourseServiceApi;
+import cn.momia.api.course.OrderServiceApi;
 import cn.momia.api.course.SubjectServiceApi;
 import cn.momia.api.course.dto.comment.UserCourseComment;
 import cn.momia.api.course.dto.course.Course;
@@ -35,6 +36,7 @@ public class CourseV3Api extends AbstractApi {
 
     @Autowired private CourseServiceApi courseServiceApi;
     @Autowired private SubjectServiceApi subjectServiceApi;
+    @Autowired private OrderServiceApi orderServiceApi;
     @Autowired private TeacherServiceApi teacherServiceApi;
 
     @RequestMapping(method = RequestMethod.GET)
@@ -101,7 +103,11 @@ public class CourseV3Api extends AbstractApi {
             courseJson.put("status", 1);
         }
 
-        courseJson.put("bookable", !StringUtils.isBlank(utoken) && courseSkuId > 0 && courseServiceApi.bookable(utoken, id));
+        if (!StringUtils.isBlank(utoken)) {
+            courseJson.put("packageId", orderServiceApi.bookablePackageId(utoken, id));
+        } else {
+            courseJson.put("packageId", 0);
+        }
 
         return MomiaHttpResponse.SUCCESS(courseJson);
     }
