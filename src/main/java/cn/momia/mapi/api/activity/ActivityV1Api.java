@@ -38,12 +38,13 @@ public class ActivityV1Api extends AbstractApi {
     public MomiaHttpResponse join(@RequestParam(value = "aid") int activityId,
                                   @RequestParam String mobile,
                                   @RequestParam(value = "cname") String childName,
-                                  @RequestParam(required = false, defaultValue = "") String relation) {
+                                  @RequestParam(required = false, defaultValue = "") String relation,
+                                  @RequestParam(required = false, defaultValue = "") String extra) {
         if (activityId <= 0) return MomiaHttpResponse.FAILED("无效的活动");
         if (MomiaUtil.isInvalidMobile(mobile)) return MomiaHttpResponse.FAILED("无效的手机号码");
         if (StringUtils.isBlank(childName)) return MomiaHttpResponse.FAILED("孩子姓名不能为空");
 
-        return MomiaHttpResponse.SUCCESS(activityServiceApi.join(activityId, mobile, childName, relation));
+        return MomiaHttpResponse.SUCCESS(activityServiceApi.join(activityId, mobile, childName, relation, extra));
     }
 
     @RequestMapping(value = "/notify", method = RequestMethod.POST)
