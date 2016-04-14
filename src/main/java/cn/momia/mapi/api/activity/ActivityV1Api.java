@@ -2,6 +2,7 @@ package cn.momia.mapi.api.activity;
 
 import cn.momia.api.course.ActivityServiceApi;
 import cn.momia.api.course.activity.Activity;
+import cn.momia.api.course.activity.ActivityEntry;
 import cn.momia.api.user.SmsServiceApi;
 import cn.momia.common.core.http.MomiaHttpResponse;
 import cn.momia.common.core.util.MomiaUtil;
@@ -47,14 +48,22 @@ public class ActivityV1Api extends AbstractApi {
 
     @RequestMapping(value = "/notify", method = RequestMethod.POST)
     public MomiaHttpResponse notify(@RequestParam(value = "aid") int activityId,
-                                    @RequestParam String mobile) {
+                                    @RequestParam String mobile,
+                                    @RequestParam(value = "cname", required = false, defaultValue = "") String childName) {
         if (activityId <= 0) return MomiaHttpResponse.FAILED("无效的活动");
         if (MomiaUtil.isInvalidMobile(mobile)) return MomiaHttpResponse.FAILED("无效的手机号码");
 
         Activity activity = activityServiceApi.get(activityId);
         if (!activity.exists()) return MomiaHttpResponse.FAILED("无效的活动");
 
-        return MomiaHttpResponse.SUCCESS(smsServiceApi.notify(mobile, activity.getMessage()));
+        if (!StringUtils.isBlank(childName)) {
+            ActivityEntry activityEntry = activityServiceApi.getEntry(activityId, mobile, childName);
+            if (!activityEntry.exists()) return MomiaHttpResponse.FAILED("您还没有报名成功");
+
+            return MomiaHttpResponse.SUCCESS(smsServiceApi.notify(mobile, activity.getMessage() + activityEntry.getExtraMessage()));
+        } else {
+            return MomiaHttpResponse.SUCCESS(smsServiceApi.notify(mobile, activity.getMessage()));
+        }
     }
 
     @RequestMapping(value = "/prepay/alipay", method = RequestMethod.POST)
