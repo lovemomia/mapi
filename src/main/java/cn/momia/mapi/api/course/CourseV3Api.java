@@ -115,6 +115,7 @@ public class CourseV3Api extends AbstractApi {
             skuPlace.setId(place.getId());
             skuPlace.setCityId(place.getCityId());
             skuPlace.setRegionId(place.getRegionId());
+            skuPlace.setAddress(place.getAddress());
             skuPlace.setName(place.getName());
             skuPlace.setLng(place.getLng());
             skuPlace.setLat(place.getLat());
