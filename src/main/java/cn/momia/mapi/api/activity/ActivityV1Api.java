@@ -90,4 +90,11 @@ public class ActivityV1Api extends AbstractApi {
         if (entryId <= 0) return MomiaHttpResponse.FAILED("无效的报名ID");
         return MomiaHttpResponse.SUCCESS(activityServiceApi.checkPayment(entryId));
     }
+
+    @RequestMapping(value = "/coupon", method = RequestMethod.POST)
+    public MomiaHttpResponse getCoupon(@RequestParam String utoken, @RequestParam(value = "coupon") int couponId) {
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        if (couponId <= 0) return MomiaHttpResponse.FAILED("无效的红包id");
+        return MomiaHttpResponse.SUCCESS(activityServiceApi.getCoupon(utoken, couponId));
+    }
 }
