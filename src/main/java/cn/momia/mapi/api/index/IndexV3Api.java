@@ -110,6 +110,8 @@ public class IndexV3Api extends AbstractIndexApi {
 
                 if (currentSubjectCourseType == HOT_COURSE)  subjectJson.put("coursesTitle", "本周热门课程");
                 else subjectJson.put("coursesTitle", "本周新开课程");
+
+                subjectJson.put("age", "");
             }
             indexJson.put("subjects", subjectsJson);
 
