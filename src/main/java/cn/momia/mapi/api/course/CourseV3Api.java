@@ -1,11 +1,16 @@
 package cn.momia.mapi.api.course;
 
 import cn.momia.api.course.CourseServiceApi;
+import cn.momia.api.course.OrderServiceApi;
 import cn.momia.api.course.SubjectServiceApi;
 import cn.momia.api.course.dto.comment.UserCourseComment;
 import cn.momia.api.course.dto.course.Course;
 import cn.momia.api.course.dto.course.CourseDetail;
+import cn.momia.api.course.dto.course.CourseSku;
+import cn.momia.api.course.dto.course.CourseSkuPlace;
 import cn.momia.api.course.dto.subject.SubjectSku;
+import cn.momia.api.poi.PoiServiceApi;
+import cn.momia.api.poi.dto.Place;
 import cn.momia.api.user.TeacherServiceApi;
 import cn.momia.api.user.dto.Teacher;
 import cn.momia.common.core.dto.PagedList;
@@ -17,6 +22,7 @@ import cn.momia.mapi.api.AbstractApi;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +40,8 @@ public class CourseV3Api extends AbstractApi {
 
     @Autowired private CourseServiceApi courseServiceApi;
     @Autowired private SubjectServiceApi subjectServiceApi;
+    @Autowired private OrderServiceApi orderServiceApi;
+    @Autowired private PoiServiceApi poiServiceApi;
     @Autowired private TeacherServiceApi teacherServiceApi;
 
     @RequestMapping(method = RequestMethod.GET)
@@ -41,7 +49,8 @@ public class CourseV3Api extends AbstractApi {
                                  @RequestParam long id,
                                  @RequestParam(required = false, defaultValue = "") String pos,
                                  @RequestParam(required = false, defaultValue = "0") int recommend,
-                                 @RequestParam(required = false, defaultValue = "0") int trial) {
+                                 @RequestParam(required = false, defaultValue = "0") int trial,
+                                 @RequestParam(value = "sid", required = false, defaultValue = "0") long courseSkuId) {
         if (id <= 0) return MomiaHttpResponse.FAILED("无效的课程ID");
 
         Course course = completeLargeImg(courseServiceApi.get(id, pos));
@@ -97,6 +106,28 @@ public class CourseV3Api extends AbstractApi {
         if (recommend != 1 && trial != 1) {
             courseJson.put("buyable", false);
             courseJson.put("status", 1);
+        }
+
+        if (courseSkuId > 0) {
+            CourseSku sku = courseServiceApi.getSku(id, courseSkuId);
+            Place place = poiServiceApi.getPlace(sku.getPlaceId());
+            CourseSkuPlace skuPlace = new CourseSkuPlace();
+            skuPlace.setId(place.getId());
+            skuPlace.setCityId(place.getCityId());
+            skuPlace.setRegionId(place.getRegionId());
+            skuPlace.setAddress(place.getAddress());
+            skuPlace.setName(place.getName());
+            skuPlace.setLng(place.getLng());
+            skuPlace.setLat(place.getLat());
+            skuPlace.setRoute(sku.getRoute());
+            skuPlace.setScheduler(sku.getScheduler());
+            courseJson.put("place", skuPlace);
+        }
+
+        if (!StringUtils.isBlank(utoken)) {
+            courseJson.put("packageId", orderServiceApi.bookablePackageId(utoken, id));
+        } else {
+            courseJson.put("packageId", 0);
         }
 
         return MomiaHttpResponse.SUCCESS(courseJson);

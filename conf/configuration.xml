@@ -24,7 +24,6 @@
     <Service>
         <Course>http://localhost:7070</Course>
         <Discuss>http://localhost:7070</Discuss>
-        <Feed>http://localhost:7070</Feed>
         <IM>http://localhost:7070</IM>
         <Poi>http://localhost:7070</Poi>
         <User>http://localhost:7070</User>
@@ -58,11 +57,6 @@
         <Order>20</Order>
         <Subject>20</Subject>
         <UserCoupon>20</UserCoupon>
-        <Feed>20</Feed>
-        <FeedComment>20</FeedComment>
-        <FeedDetailStar>20</FeedDetailStar>
-        <FeedDetailComment>20</FeedDetailComment>
-        <FeedTag>10</FeedTag>
         <Timeline>20</Timeline>
         <Material>20</Material>
         <ChildComment>20</ChildComment>

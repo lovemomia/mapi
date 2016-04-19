@@ -1,6 +1,7 @@
 package cn.momia.mapi.api.course;
 
 import cn.momia.api.course.CouponServiceApi;
+import cn.momia.api.course.dto.coupon.Coupon;
 import cn.momia.api.user.UserServiceApi;
 import cn.momia.api.user.dto.User;
 import cn.momia.common.core.http.MomiaHttpResponse;
@@ -15,11 +16,20 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.math.BigDecimal;
+
 @RestController
 @RequestMapping("/v1/coupon")
 public class CouponV1Api extends AbstractApi {
     @Autowired private CouponServiceApi couponServiceApi;
     @Autowired private UserServiceApi userServiceApi;
+
+    @RequestMapping(method = RequestMethod.GET)
+    public MomiaHttpResponse getCoupon(@RequestParam int id) {
+        Coupon coupon = couponServiceApi.get(id);
+        if (!coupon.exists()) return MomiaHttpResponse.FAILED("无效的红包");
+        return MomiaHttpResponse.SUCCESS(coupon);
+    }
 
     @RequestMapping(value = "/share", method = RequestMethod.GET)
     public MomiaHttpResponse shareCoupon(@RequestParam String utoken) {

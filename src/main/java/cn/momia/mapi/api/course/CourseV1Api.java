@@ -8,7 +8,6 @@ import cn.momia.api.course.dto.course.DatedCourseSkus;
 import cn.momia.api.course.dto.comment.UserCourseComment;
 import cn.momia.api.im.ImServiceApi;
 import cn.momia.api.poi.PoiServiceApi;
-import cn.momia.api.poi.dto.Institution;
 import cn.momia.api.user.TeacherServiceApi;
 import cn.momia.api.user.UserServiceApi;
 import cn.momia.api.user.dto.Teacher;
@@ -88,17 +87,6 @@ public class CourseV1Api extends AbstractApi {
         return MomiaHttpResponse.SUCCESS(pagedTeachers);
     }
 
-    @RequestMapping(value = "/institution", method = RequestMethod.GET)
-    public MomiaHttpResponse institution(@RequestParam long id) {
-        if (id <= 0) return MomiaHttpResponse.FAILED("无效的课程ID");
-
-        int institutionId = courseServiceApi.getInstitutionId(id);
-        Institution institution = poiServiceApi.getInstitution(institutionId);
-        institution.setCover(completeLargeImg(institution.getCover()));
-
-        return MomiaHttpResponse.SUCCESS(institution);
-    }
-
     @RequestMapping(value = "/sku/week", method = RequestMethod.GET)
     public MomiaHttpResponse listWeekSkus(@RequestParam long id) {
         if (id <= 0) return MomiaHttpResponse.FAILED("无效的课程ID");
@@ -124,9 +112,9 @@ public class CourseV1Api extends AbstractApi {
     }
 
     @RequestMapping(value = "/sku/month", method = RequestMethod.GET)
-    public MomiaHttpResponse listMonthSkus(@RequestParam long id, @RequestParam int month) {
+    public MomiaHttpResponse listMonthSkus(@RequestParam long id, @RequestParam(required = false, defaultValue = "0") int month) {
         if (id <= 0) return MomiaHttpResponse.FAILED("无效的课程ID");
-        if (month <= 0 || month > 12) return MomiaHttpResponse.FAILED("无效的月份");
+        if (month <= 0 || month > 12) return MomiaHttpResponse.SUCCESS(filterClosedSkus(courseServiceApi.listSkus(id)));
         return MomiaHttpResponse.SUCCESS(filterClosedSkus(courseServiceApi.listMonthSkus(id, month)));
     }
 
@@ -137,9 +125,9 @@ public class CourseV1Api extends AbstractApi {
     }
 
     @RequestMapping(value = "/sku/month/notend", method = RequestMethod.GET)
-    public MomiaHttpResponse lisNotEndtMonthSkus(@RequestParam long id, @RequestParam int month) {
+    public MomiaHttpResponse lisNotEndtMonthSkus(@RequestParam long id, @RequestParam(required = false, defaultValue = "0") int month) {
         if (id <= 0) return MomiaHttpResponse.FAILED("无效的课程ID");
-        if (month <= 0 || month > 12) return MomiaHttpResponse.FAILED("无效的月份");
+        if (month <= 0 || month > 12) return MomiaHttpResponse.SUCCESS(courseServiceApi.listSkus(id));
         return MomiaHttpResponse.SUCCESS(courseServiceApi.listMonthSkus(id, month));
     }
 
@@ -169,9 +157,9 @@ public class CourseV1Api extends AbstractApi {
     }
 
     @RequestMapping(value = "/sku/month/bookable", method = RequestMethod.GET)
-    public MomiaHttpResponse listBookableMonthSkus(@RequestParam long id, @RequestParam int month) {
+    public MomiaHttpResponse listBookableMonthSkus(@RequestParam long id, @RequestParam(required = false, defaultValue = "0") int month) {
         if (id <= 0) return MomiaHttpResponse.FAILED("无效的课程ID");
-        if (month <= 0 || month > 12) return MomiaHttpResponse.FAILED("无效的月份");
+        if (month <= 0 || month > 12) return MomiaHttpResponse.SUCCESS(filterUnbookableSkus(courseServiceApi.listSkus(id)));
         return MomiaHttpResponse.SUCCESS(filterUnbookableSkus(courseServiceApi.listMonthSkus(id, month)));
     }
 
