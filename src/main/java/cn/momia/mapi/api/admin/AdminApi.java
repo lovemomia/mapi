@@ -171,4 +171,10 @@ public class AdminApi extends AbstractApi {
         if (StringUtils.isBlank(message)) return MomiaHttpResponse.FAILED("通知内容不能为空");
         return MomiaHttpResponse.SUCCESS(smsServiceApi.notify(mobile, message));
     }
+
+    @RequestMapping(value = "/refund/check", method = RequestMethod.POST)
+    public MomiaHttpResponse checkRefund(@RequestParam(value = "oid") long orderId) {
+        if (orderId <= 0) return MomiaHttpResponse.FAILED("无效的订单ID");
+        return MomiaHttpResponse.SUCCESS(orderServiceApi.checkRefundOrder(orderId));
+    }
 }
