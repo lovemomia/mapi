@@ -194,11 +194,14 @@ public class SubjectV1Api extends AbstractApi {
     }
 
     @RequestMapping(value = "/order/refund", method = RequestMethod.POST)
-    public MomiaHttpResponse refund(@RequestParam String utoken, @RequestParam(value = "oid") long orderId) {
+    public MomiaHttpResponse refund(@RequestParam String utoken,
+                                    @RequestParam(value = "oid") long orderId,
+                                    @RequestParam(required = false, defaultValue = "") String message) {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (orderId <= 0) return MomiaHttpResponse.FAILED("无效的订单ID");
 
-        if (!orderServiceApi.refundOrder(utoken, orderId)) return MomiaHttpResponse.FAILED("申请退款失败");
+        // TODO
+        if (!orderServiceApi.applyRefundOrder(utoken, orderId, message)) return MomiaHttpResponse.FAILED("申请退款失败");
         return MomiaHttpResponse.SUCCESS;
     }
 
