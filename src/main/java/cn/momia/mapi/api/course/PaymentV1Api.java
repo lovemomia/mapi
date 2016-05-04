@@ -72,6 +72,20 @@ public class PaymentV1Api extends AbstractApi {
         return "fail";
     }
 
+    @RequestMapping(value = "/callback/alipay/refund", method = RequestMethod.POST, produces = "text/plain")
+    public String callbackAlipayRefund(HttpServletRequest request) {
+        try {
+            Map<String, String> params = extractParams(request);
+            if (paymentServiceApi.callbackAlipayRefund(params)) return "success";
+        } catch (Exception e) {
+            LOGGER.error("ali pay callback error", e);
+        }
+
+        LOGGER.error("ali pay callback failure");
+
+        return "fail";
+    }
+
     @RequestMapping(value = "/callback/weixin", method = RequestMethod.POST, produces = "application/xml")
     public String callbackWeixin(HttpServletRequest request) {
         try {
