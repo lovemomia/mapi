@@ -8,8 +8,6 @@ import cn.momia.common.core.http.MomiaHttpResponse;
 import cn.momia.common.core.util.MomiaUtil;
 import cn.momia.mapi.api.AbstractApi;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -19,8 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/v1/activity")
 public class ActivityV1Api extends AbstractApi {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ActivityV1Api.class);
-
     @Autowired private ActivityServiceApi activityServiceApi;
     @Autowired private SmsServiceApi smsServiceApi;
 
@@ -96,5 +92,11 @@ public class ActivityV1Api extends AbstractApi {
         if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
         if (couponId <= 0) return MomiaHttpResponse.FAILED("无效的红包id");
         return MomiaHttpResponse.SUCCESS(activityServiceApi.getCoupon(utoken, couponId));
+    }
+
+    @RequestMapping(value = "/coupons", method = RequestMethod.POST)
+    public MomiaHttpResponse getCoupons(@RequestParam String utoken) {
+        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
+        return MomiaHttpResponse.SUCCESS(activityServiceApi.getCoupons(utoken));
     }
 }

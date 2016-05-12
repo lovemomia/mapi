@@ -228,33 +228,4 @@ public class SubjectV1Api extends AbstractApi {
 
         return MomiaHttpResponse.SUCCESS(order);
     }
-
-    @RequestMapping(value = "/order/gift/send", method = RequestMethod.POST)
-    public MomiaHttpResponse sendGift(@RequestParam String utoken, @RequestParam(value = "oid") long orderId) {
-        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (orderId <= 0) return MomiaHttpResponse.FAILED("无效的订单ID");
-
-        return MomiaHttpResponse.SUCCESS(orderServiceApi.sendGift(utoken, orderId));
-    }
-
-    @RequestMapping(value = "/order/gift/status", method = RequestMethod.GET)
-    public MomiaHttpResponse giftStatus(@RequestParam String utoken, @RequestParam(value = "oid") long orderId) {
-        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (orderId <= 0) return MomiaHttpResponse.FAILED("无效的订单ID");
-
-        return MomiaHttpResponse.SUCCESS(orderServiceApi.giftStatus(utoken, orderId));
-    }
-
-    @RequestMapping(value = "/order/gift/receive", method = RequestMethod.POST)
-    public MomiaHttpResponse receiveGift(@RequestParam String utoken,
-                                         @RequestParam(value = "oid") long orderId,
-                                         @RequestParam long expired,
-                                         @RequestParam String giftsign) {
-        if (StringUtils.isBlank(utoken)) return MomiaHttpResponse.TOKEN_EXPIRED;
-        if (orderId <= 0) return MomiaHttpResponse.FAILED("无效的订单ID");
-        if (expired <= 0) return MomiaHttpResponse.FAILED("无效的过期时间");
-        if (StringUtils.isBlank(giftsign)) return MomiaHttpResponse.FAILED("无效的签名");
-
-        return MomiaHttpResponse.SUCCESS(orderServiceApi.receiveGift(utoken, orderId, expired, giftsign));
-    }
 }
