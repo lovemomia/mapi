@@ -117,6 +117,25 @@ public class SubjectV1Api extends AbstractApi {
         return sortTypes;
     }
 
+    @RequestMapping(value = "/course/bookable", method = RequestMethod.GET)
+    public MomiaHttpResponse listBookableCourses(@RequestParam(value = "pid") long packageId, @RequestParam int start) {
+        if (packageId <= 0) return MomiaHttpResponse.FAILED("无效的课程包ID");
+        if (start < 0) return MomiaHttpResponse.FAILED("无效的分页参数，start必须为非负整数");
+
+        // FIXME Magic Number
+        PagedList<Course> courses = courseServiceApi.queryBookable(packageId, start, Configuration.getInt("PageSize.Course"));
+        completeMiddleCoursesImgs(courses.getList());
+
+        JSONObject responseJson = new JSONObject();
+        responseJson.put("ages", buildAgeRanges());
+        responseJson.put("sorts", buildSortTypes());
+        responseJson.put("currentAge", 0);
+        responseJson.put("currentSort", 0);
+        responseJson.put("courses", courses);
+
+        return MomiaHttpResponse.SUCCESS(responseJson);
+    }
+
     @RequestMapping(value = "/comment/list", method = RequestMethod.GET)
     public MomiaHttpResponse listComments(@RequestParam long id, @RequestParam int start) {
         if (id <= 0) return MomiaHttpResponse.FAILED("无效的课程体系ID");
