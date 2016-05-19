@@ -118,7 +118,7 @@ public class SubjectV1Api extends AbstractApi {
     }
 
     @RequestMapping(value = "/course/bookable", method = RequestMethod.GET)
-    public MomiaHttpResponse listBookableCourses(@RequestParam(value = "pid") long packageId, @RequestParam int start) {
+    public MomiaHttpResponse listBookableCourses(@RequestParam(value = "pid", required = false, defaultValue = "0") long packageId, @RequestParam int start) {
         if (packageId <= 0) return MomiaHttpResponse.FAILED("无效的课程包ID");
         if (start < 0) return MomiaHttpResponse.FAILED("无效的分页参数，start必须为非负整数");
 
