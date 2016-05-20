@@ -118,6 +118,8 @@ public class IndexV3Api extends AbstractIndexApi {
                 topic.setCover(completeLargeImg(topic.getCover()));
             }
             indexJson.put("topics", topics);
+
+            indexJson.put("recommends", getRecommends(cityId, platform, version));
         }
 
         indexJson.put("courses", getRecommendCourses(cityId, start));

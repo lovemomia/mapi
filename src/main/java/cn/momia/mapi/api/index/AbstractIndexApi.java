@@ -56,4 +56,18 @@ public class AbstractIndexApi extends AbstractApi {
 
         return filteredEvents;
     }
+
+    protected List<Config.Recommend> getRecommends(int cityId, int platform, String clientVersion) {
+        List<Config.Recommend> recommends = configService.listRecommends(cityId);
+        List<Config.Recommend> filteredRecommends = new ArrayList<Config.Recommend>();
+        for (Config.Recommend recommend : recommends) {
+            if (recommend.isInvalid(platform, clientVersion)) continue;
+            recommend.setCover(completeLargeImg(recommend.getCover()));
+            recommend.setAction(buildAction(recommend.getAction(), platform));
+            filteredRecommends.add(recommend);
+        }
+
+        int maxCount= Configuration.getInt("PageSize.Recommend");
+        return filteredRecommends.size() > maxCount ? filteredRecommends.subList(0, maxCount) : filteredRecommends;
+    }
 }

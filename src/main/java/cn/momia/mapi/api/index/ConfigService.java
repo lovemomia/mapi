@@ -19,4 +19,9 @@ public class ConfigService extends AbstractService {
         String sql = "SELECT `Type`, Title, Img, `Desc`, Action, Platform, Version FROM SG_Event WHERE (CityId=? OR CityId=0) AND Status=1 ORDER BY Weight DESC, AddTime DESC";
         return queryObjectList(sql, new Object[] { cityId }, Config.Event.class);
     }
+
+    public List<Config.Recommend> listRecommends(int cityId) {
+        String sql = "SELECT Cover, Title, `Desc`, Action, Platform, Version FROM SG_Recommend WHERE (CityId=? OR CityId=0) AND Status=1 ORDER BY Weight DESC, AddTime DESC";
+        return queryObjectList(sql, new Object[] { cityId }, Config.Recommend.class);
+    }
 }
