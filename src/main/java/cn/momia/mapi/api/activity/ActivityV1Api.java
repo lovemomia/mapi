@@ -25,7 +25,8 @@ public class ActivityV1Api extends AbstractApi {
         if (id <= 0) return MomiaHttpResponse.FAILED("无效的活动ID");
 
         Activity activity = activityServiceApi.get(id);
-        activity.setCover(completeSmallImg(activity.getCover()));
+        activity.setIcon(completeSmallImg(activity.getIcon()));
+        activity.setCover(completeLargeImg(activity.getCover()));
 
         return MomiaHttpResponse.SUCCESS(activity);
     }
