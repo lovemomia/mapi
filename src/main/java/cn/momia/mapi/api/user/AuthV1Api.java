@@ -106,6 +106,14 @@ public class AuthV1Api extends AbstractApi {
         return MomiaHttpResponse.SUCCESS(completeUserImgs(authServiceApi.login(mobile, password)));
     }
 
+    @RequestMapping(value = "/login/code", method = RequestMethod.POST)
+    public MomiaHttpResponse loginByCode(@RequestParam String mobile, @RequestParam String code) {
+        if (MomiaUtil.isInvalidMobile(mobile)) return MomiaHttpResponse.FAILED("无效的手机号码");
+        if (StringUtils.isBlank(code)) return MomiaHttpResponse.FAILED("验证码不能为空");
+
+        return MomiaHttpResponse.SUCCESS(completeUserImgs(authServiceApi.loginByCode(mobile, code)));
+    }
+
     @RequestMapping(value = "/password", method = RequestMethod.POST)
     public MomiaHttpResponse updatePassword(@RequestParam String mobile, @RequestParam String password, @RequestParam String code) {
         if (MomiaUtil.isInvalidMobile(mobile)) return MomiaHttpResponse.FAILED("无效的手机号码");
