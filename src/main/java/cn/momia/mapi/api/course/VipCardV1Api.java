@@ -2,6 +2,7 @@ package cn.momia.mapi.api.course;
 
 import cn.momia.api.course.CourseServiceApi;
 import cn.momia.api.user.UserServiceApi;
+import cn.momia.api.user.dto.Contact;
 import cn.momia.api.user.dto.User;
 import cn.momia.common.core.http.MomiaHttpResponse;
 import cn.momia.mapi.api.AbstractApi;
@@ -25,7 +26,8 @@ public class VipCardV1Api extends AbstractApi {
         if (StringUtils.isBlank(password)) return MomiaHttpResponse.FAILED("卡密码不能为空");
 
         User user = userServiceApi.get(utoken);
-        if (!courseServiceApi.registerVipCard(user.getId(), card, password)) return MomiaHttpResponse.FAILED("无效的卡号或密码");
+        Contact contact = userServiceApi.getContact(utoken);
+        if (!courseServiceApi.registerVipCard(user.getId(), contact.getName(), contact.getMobile(), card, password)) return MomiaHttpResponse.FAILED("无效的卡号或密码");
         return MomiaHttpResponse.SUCCESS;
     }
 }
