@@ -1,6 +1,7 @@
 package cn.momia.mapi.api.course;
 
 import cn.momia.api.course.ActivityServiceApi;
+import cn.momia.api.course.ExpertServiceApi;
 import cn.momia.api.course.PaymentServiceApi;
 import cn.momia.common.core.http.MomiaHttpResponse;
 import cn.momia.common.core.util.MomiaUtil;
@@ -24,6 +25,7 @@ public class PaymentV1Api extends AbstractApi {
     private static final Logger LOGGER = LoggerFactory.getLogger(PaymentV1Api.class);
 
     @Autowired private ActivityServiceApi activityServiceApi;
+    @Autowired private ExpertServiceApi expertServiceApi;
     @Autowired private PaymentServiceApi paymentServiceApi;
 
     @RequestMapping(value = "/prepay/alipay", method = RequestMethod.POST)
@@ -56,9 +58,12 @@ public class PaymentV1Api extends AbstractApi {
         try {
             Map<String, String> params = extractParams(request);
             String outTradeNo = params.get("out_trade_no");
+            LOGGER.info("alipay>>>>>>>>"+outTradeNo);
             if (!StringUtils.isBlank(outTradeNo)) {
                 if (outTradeNo.startsWith("act")) {
                     if (activityServiceApi.callbackAlipay(params)) return "success";
+                } else if(outTradeNo.startsWith("exp")) {
+                    if (expertServiceApi.callbackAlipay(params)) return "success";
                 } else {
                     if (paymentServiceApi.callbackAlipay(params)) return "success";
                 }
@@ -89,12 +94,16 @@ public class PaymentV1Api extends AbstractApi {
     @RequestMapping(value = "/callback/weixin", method = RequestMethod.POST, produces = "application/xml")
     public String callbackWeixin(HttpServletRequest request) {
         try {
+
             Map<String, String> params = MomiaUtil.xmlToMap(IOUtils.toString(request.getInputStream()));
             String outTradeNo = params.get("out_trade_no");
+            LOGGER.info("weixin>>>>>>>>"+outTradeNo);
             if (!StringUtils.isBlank(outTradeNo)) {
                 if (outTradeNo.startsWith("act")) {
                     if (activityServiceApi.callbackWeixin(params)) return WechatpayResponse.SUCCESS;
-                } else {
+                } else if(outTradeNo.startsWith("exp")) {
+                    if (expertServiceApi.callbackWeixin(params)) return WechatpayResponse.SUCCESS;
+                }else{
                     if (paymentServiceApi.callbackWeixin(params)) return WechatpayResponse.SUCCESS;
                 }
             }

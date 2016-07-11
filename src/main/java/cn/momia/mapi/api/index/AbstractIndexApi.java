@@ -1,5 +1,6 @@
 package cn.momia.mapi.api.index;
 
+import beans.ConfigService;
 import cn.momia.common.webapp.config.Configuration;
 import cn.momia.mapi.api.AbstractApi;
 import org.springframework.beans.factory.annotation.Autowired;

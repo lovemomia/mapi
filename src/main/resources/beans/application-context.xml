@@ -35,6 +35,6 @@
         <property name="transactionTemplate" ref="transactionTemplate" />
     </bean>
 
-    <bean class="cn.momia.mapi.api.index.ConfigService" parent="dbAccessService" />
+    <bean class="beans.ConfigService" parent="dbAccessService" />
     <bean class="cn.momia.mapi.api.feedback.FeedbackService" parent="dbAccessService" />
 </beans>

@@ -1,6 +1,7 @@
-package cn.momia.mapi.api.index;
+package beans;
 
 import cn.momia.common.service.AbstractService;
+import cn.momia.mapi.api.index.Config;
 
 import java.util.List;
 

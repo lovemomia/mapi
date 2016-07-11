@@ -12,6 +12,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -123,4 +124,37 @@ public class ValidationFilter implements Filter {
 
     @Override
     public void destroy() {}
+
+    public static void main(String args[]) {
+        System.out.println("Hello World!");
+        String key = "578890d82212ae548d883bc7a201cdf4";
+        List<String> kvs = new ArrayList<String>();
+//        kvs.add("city" + "=" + "1");
+//        kvs.add("start" + "=" + "0");
+        kvs.add("v" + "=" + "1.4.1");
+        kvs.add("terminal" + "=" + "iphone");
+        kvs.add("os" + "=" + "9.300000");
+        kvs.add("device" + "=" + "iPhone");
+        kvs.add("channel" + "=" + "appstore");
+        kvs.add("net" + "=" + "unknown");
+        kvs.add("utoken" + "=" + "63f0dc9fde7740e3e15f568b023cb562");
+//        kvs.add("utoken" + "=" + "1e8f1df251d8e37fc1825f2e86370e8b");
+//        kvs.add("qid" + "=" + "1");
+//        kvs.add("sign" + "=" + "0");
+        Collections.sort(kvs);
+
+        kvs.add("key=" + key);
+
+        String key_str = DigestUtils.md5Hex(StringUtils.join(kvs, ""));
+
+        System.out.print("key>>>>>>:"+key_str);
+
+        BigDecimal a = new BigDecimal(10.9);
+        BigDecimal b = new BigDecimal(5);
+
+        System.out.print("\n\r"+a.add(b).doubleValue()+"\n\r");
+
+        System.out.print(a.subtract(b).doubleValue());
+
+    }
 }
