@@ -64,6 +64,22 @@ public class AuthV1Api extends AbstractApi {
         return MomiaHttpResponse.SUCCESS(completeUserImgs(userServiceApi.get(user.getToken())));
     }
 
+    @RequestMapping(value = "/register/sale", method = RequestMethod.POST)
+    public MomiaHttpResponse registerBySale(@RequestParam String mobile,
+                                            @RequestParam String code,
+                                            @RequestParam String saleCode) {
+        if (MomiaUtil.isInvalidMobile(mobile)) return MomiaHttpResponse.FAILED("无效的手机号码");
+        if (StringUtils.isBlank(saleCode)) return MomiaHttpResponse.FAILED("标识符不能为空");
+        if (StringUtils.isBlank(code)) return MomiaHttpResponse.FAILED("验证码不能为空");
+
+        User user = completeUserImgs(authServiceApi.registerBySale(mobile, saleCode, code));
+        distributeInviteCoupon(user.getId(), mobile);
+        generateImToken(user, user.getNickName(), user.getAvatar());
+        addDefaultChild(user);
+
+        return MomiaHttpResponse.SUCCESS(completeUserImgs(userServiceApi.get(user.getToken())));
+    }
+
     private void distributeInviteCoupon(long userId, String mobile) {
         try {
             couponServiceApi.distributeInviteCoupon(userId, mobile);
